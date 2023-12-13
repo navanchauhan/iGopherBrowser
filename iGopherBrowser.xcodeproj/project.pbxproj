@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 56;
+	objectVersion = 60;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -12,6 +12,8 @@
 		3E1BCC5A2B297E9B00A4CB69 /* Item.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E1BCC592B297E9B00A4CB69 /* Item.swift */; };
 		3E1BCC5C2B297E9C00A4CB69 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3E1BCC5B2B297E9C00A4CB69 /* Assets.xcassets */; };
 		3E1BCC602B297E9C00A4CB69 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3E1BCC5F2B297E9C00A4CB69 /* Preview Assets.xcassets */; };
+		3E1BCC842B298A9B00A4CB69 /* SwiftGopherClient in Frameworks */ = {isa = PBXBuildFile; productRef = 3E1BCC832B298A9B00A4CB69 /* SwiftGopherClient */; };
+		3E1BCC862B299E9F00A4CB69 /* SidebarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E1BCC852B299E9F00A4CB69 /* SidebarView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -23,6 +25,7 @@
 		3E1BCC5D2B297E9C00A4CB69 /* iGopherBrowser.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = iGopherBrowser.entitlements; sourceTree = "<group>"; };
 		3E1BCC5F2B297E9C00A4CB69 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		3E1BCC612B297E9C00A4CB69 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		3E1BCC852B299E9F00A4CB69 /* SidebarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SidebarView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -30,6 +33,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3E1BCC842B298A9B00A4CB69 /* SwiftGopherClient in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -41,6 +45,7 @@
 			children = (
 				3E1BCC542B297E9B00A4CB69 /* iGopherBrowser */,
 				3E1BCC532B297E9B00A4CB69 /* Products */,
+				3E1BCC7A2B29885900A4CB69 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -62,6 +67,7 @@
 				3E1BCC5D2B297E9C00A4CB69 /* iGopherBrowser.entitlements */,
 				3E1BCC612B297E9C00A4CB69 /* Info.plist */,
 				3E1BCC5E2B297E9C00A4CB69 /* Preview Content */,
+				3E1BCC852B299E9F00A4CB69 /* SidebarView.swift */,
 			);
 			path = iGopherBrowser;
 			sourceTree = "<group>";
@@ -72,6 +78,13 @@
 				3E1BCC5F2B297E9C00A4CB69 /* Preview Assets.xcassets */,
 			);
 			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		3E1BCC7A2B29885900A4CB69 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -90,6 +103,9 @@
 			dependencies = (
 			);
 			name = iGopherBrowser;
+			packageProductDependencies = (
+				3E1BCC832B298A9B00A4CB69 /* SwiftGopherClient */,
+			);
 			productName = iGopherBrowser;
 			productReference = 3E1BCC522B297E9B00A4CB69 /* iGopherBrowser.app */;
 			productType = "com.apple.product-type.application";
@@ -118,6 +134,9 @@
 				Base,
 			);
 			mainGroup = 3E1BCC492B297E9B00A4CB69;
+			packageReferences = (
+				3E1BCC802B298A4700A4CB69 /* XCLocalSwiftPackageReference "../swift-gopher" */,
+			);
 			productRefGroup = 3E1BCC532B297E9B00A4CB69 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -145,6 +164,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				3E1BCC582B297E9B00A4CB69 /* ContentView.swift in Sources */,
+				3E1BCC862B299E9F00A4CB69 /* SidebarView.swift in Sources */,
 				3E1BCC5A2B297E9B00A4CB69 /* Item.swift in Sources */,
 				3E1BCC562B297E9B00A4CB69 /* iGopherBrowserApp.swift in Sources */,
 			);
@@ -367,6 +387,21 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		3E1BCC802B298A4700A4CB69 /* XCLocalSwiftPackageReference "../swift-gopher" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = "../swift-gopher";
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		3E1BCC832B298A9B00A4CB69 /* SwiftGopherClient */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3E1BCC802B298A4700A4CB69 /* XCLocalSwiftPackageReference "../swift-gopher" */;
+			productName = SwiftGopherClient;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 3E1BCC4A2B297E9B00A4CB69 /* Project object */;
 }
