@@ -28,5 +28,10 @@ struct iGopherBrowserApp: App {
             ContentView()
         }
         .modelContainer(sharedModelContainer)
+        .commands {
+            #if os(macOS)
+            SidebarCommands()
+            #endif
+        }
     }
 }
