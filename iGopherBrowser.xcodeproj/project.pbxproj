@@ -16,6 +16,8 @@
 		3E1BCC862B299E9F00A4CB69 /* SidebarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E1BCC852B299E9F00A4CB69 /* SidebarView.swift */; };
 		3EFB9C0D2B2E4F06005EAD7C /* SearchInputView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EFB9C0C2B2E4F06005EAD7C /* SearchInputView.swift */; };
 		3EFB9C0F2B2E6325005EAD7C /* FileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EFB9C0E2B2E6325005EAD7C /* FileView.swift */; };
+		3EFB9C112B2E869C005EAD7C /* BrowserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EFB9C102B2E869C005EAD7C /* BrowserView.swift */; };
+		3EFB9C132B2E872A005EAD7C /* Helpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EFB9C122B2E872A005EAD7C /* Helpers.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -30,6 +32,8 @@
 		3E1BCC852B299E9F00A4CB69 /* SidebarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SidebarView.swift; sourceTree = "<group>"; };
 		3EFB9C0C2B2E4F06005EAD7C /* SearchInputView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchInputView.swift; sourceTree = "<group>"; };
 		3EFB9C0E2B2E6325005EAD7C /* FileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileView.swift; sourceTree = "<group>"; };
+		3EFB9C102B2E869C005EAD7C /* BrowserView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserView.swift; sourceTree = "<group>"; };
+		3EFB9C122B2E872A005EAD7C /* Helpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Helpers.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -74,6 +78,8 @@
 				3E1BCC852B299E9F00A4CB69 /* SidebarView.swift */,
 				3EFB9C0C2B2E4F06005EAD7C /* SearchInputView.swift */,
 				3EFB9C0E2B2E6325005EAD7C /* FileView.swift */,
+				3EFB9C102B2E869C005EAD7C /* BrowserView.swift */,
+				3EFB9C122B2E872A005EAD7C /* Helpers.swift */,
 			);
 			path = iGopherBrowser;
 			sourceTree = "<group>";
@@ -171,6 +177,8 @@
 			files = (
 				3EFB9C0F2B2E6325005EAD7C /* FileView.swift in Sources */,
 				3E1BCC582B297E9B00A4CB69 /* ContentView.swift in Sources */,
+				3EFB9C112B2E869C005EAD7C /* BrowserView.swift in Sources */,
+				3EFB9C132B2E872A005EAD7C /* Helpers.swift in Sources */,
 				3E1BCC862B299E9F00A4CB69 /* SidebarView.swift in Sources */,
 				3E1BCC5A2B297E9B00A4CB69 /* Item.swift in Sources */,
 				3E1BCC562B297E9B00A4CB69 /* iGopherBrowserApp.swift in Sources */,

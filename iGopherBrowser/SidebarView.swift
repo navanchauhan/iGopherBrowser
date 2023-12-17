@@ -13,11 +13,14 @@ struct SidebarView: View {
     var onSelect: (GopherNode) -> Void
     
     var body: some View {
-        List(hosts, children: \.children) { node in
-            Text(node.message ?? node.host)
-                .onTapGesture {
-                    onSelect(node)
-                }
+        VStack {
+            List(hosts, children: \.children) { node in
+                Text(node.message ?? node.host)
+                    .onTapGesture {
+                        onSelect(node)
+                    }
             }
+        }
+        .navigationTitle("Your Gophertree")
     }
 }
