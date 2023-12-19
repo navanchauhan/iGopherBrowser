@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		3E1BCC562B297E9B00A4CB69 /* iGopherBrowserApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E1BCC552B297E9B00A4CB69 /* iGopherBrowserApp.swift */; };
 		3E1BCC582B297E9B00A4CB69 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E1BCC572B297E9B00A4CB69 /* ContentView.swift */; };
-		3E1BCC5A2B297E9B00A4CB69 /* Item.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E1BCC592B297E9B00A4CB69 /* Item.swift */; };
 		3E1BCC5C2B297E9C00A4CB69 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3E1BCC5B2B297E9C00A4CB69 /* Assets.xcassets */; };
 		3E1BCC602B297E9C00A4CB69 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3E1BCC5F2B297E9C00A4CB69 /* Preview Assets.xcassets */; };
 		3E1BCC862B299E9F00A4CB69 /* SidebarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E1BCC852B299E9F00A4CB69 /* SidebarView.swift */; };
@@ -24,7 +23,6 @@
 		3E1BCC522B297E9B00A4CB69 /* iGopherBrowser.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = iGopherBrowser.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		3E1BCC552B297E9B00A4CB69 /* iGopherBrowserApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iGopherBrowserApp.swift; sourceTree = "<group>"; };
 		3E1BCC572B297E9B00A4CB69 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
-		3E1BCC592B297E9B00A4CB69 /* Item.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Item.swift; sourceTree = "<group>"; };
 		3E1BCC5B2B297E9C00A4CB69 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		3E1BCC5D2B297E9C00A4CB69 /* iGopherBrowser.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = iGopherBrowser.entitlements; sourceTree = "<group>"; };
 		3E1BCC5F2B297E9C00A4CB69 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
@@ -70,7 +68,6 @@
 			children = (
 				3E1BCC552B297E9B00A4CB69 /* iGopherBrowserApp.swift */,
 				3E1BCC572B297E9B00A4CB69 /* ContentView.swift */,
-				3E1BCC592B297E9B00A4CB69 /* Item.swift */,
 				3E1BCC5B2B297E9C00A4CB69 /* Assets.xcassets */,
 				3E1BCC5D2B297E9C00A4CB69 /* iGopherBrowser.entitlements */,
 				3E1BCC612B297E9C00A4CB69 /* Info.plist */,
@@ -180,7 +177,6 @@
 				3EFB9C112B2E869C005EAD7C /* BrowserView.swift in Sources */,
 				3EFB9C132B2E872A005EAD7C /* Helpers.swift in Sources */,
 				3E1BCC862B299E9F00A4CB69 /* SidebarView.swift in Sources */,
-				3E1BCC5A2B297E9B00A4CB69 /* Item.swift in Sources */,
 				3E1BCC562B297E9B00A4CB69 /* iGopherBrowserApp.swift in Sources */,
 				3EFB9C0D2B2E4F06005EAD7C /* SearchInputView.swift in Sources */,
 			);
@@ -309,6 +305,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = iGopherBrowser/iGopherBrowser.entitlements;
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"iGopherBrowser/Preview Content\"";
@@ -349,6 +346,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = iGopherBrowser/iGopherBrowser.entitlements;
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"iGopherBrowser/Preview Content\"";
