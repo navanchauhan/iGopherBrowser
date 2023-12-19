@@ -29,75 +29,87 @@ struct BrowserView: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                List {
-                    ForEach(Array(gopherItems.enumerated()), id: \.offset) { idx, item in
-                        if item.parsedItemType == .info {
-                            Text(item.message)
-                                .font(.system(size: 12, design: .monospaced))
-                                .frame(height: 20)
-                                .listRowInsets(EdgeInsets())
-                                .listRowSeparator(.hidden)
-                        }  else if item.parsedItemType == .directory  {
-                            HStack {
-                                Text(Image(systemName: "folder"))
+                if (gopherItems.count >= 1) {
+                    List {
+                        ForEach(Array(gopherItems.enumerated()), id: \.offset) { idx, item in
+                            if item.parsedItemType == .info {
                                 Text(item.message)
-                                Spacer()
-                            }.onTapGesture {
-                                performGopherRequest(host: item.host, port: item.port, selector: item.selector)
-                            }
-                        } else if item.parsedItemType == .search {
-                            HStack {
-                                Text(Image(systemName: "magnifyingglass"))
-                                Text(item.message)
-                                Spacer()
-                            }.onTapGesture {
-                                self.selectedSearchItem = idx
-                                self.showSearchInput = true
-                            }
-                        } else if item.parsedItemType == .text {
-                            NavigationLink(destination: FileView(item: item)) {
+                                    .font(.system(size: 12, design: .monospaced))
+                                    .frame(height: 20)
+                                    .listRowInsets(EdgeInsets())
+                                    .listRowSeparator(.hidden)
+                            }  else if item.parsedItemType == .directory  {
                                 HStack {
-                                    Text(Image(systemName: "doc.plaintext"))
+                                    Text(Image(systemName: "folder"))
                                     Text(item.message)
                                     Spacer()
-                                }
-                            }
-                        } else if [.doc, .image, .gif, .movie, .sound, .bitmap].contains(item.parsedItemType) {
-                            NavigationLink(destination: FileView(item: item)) {
-                                HStack {
-                                    Text(Image(systemName: itemToImageType(item)))
-                                    Text(item.message)
-                                    Spacer()
-                                }
-                            }
-                        } else {
-                            Text(item.message)
-                                .onTapGesture {
+                                }.onTapGesture {
                                     performGopherRequest(host: item.host, port: item.port, selector: item.selector)
                                 }
+                            } else if item.parsedItemType == .search {
+                                HStack {
+                                    Text(Image(systemName: "magnifyingglass"))
+                                    Text(item.message)
+                                    Spacer()
+                                }.onTapGesture {
+                                    self.selectedSearchItem = idx
+                                    self.showSearchInput = true
+                                }
+                            } else if item.parsedItemType == .text {
+                                NavigationLink(destination: FileView(item: item)) {
+                                    HStack {
+                                        Text(Image(systemName: "doc.plaintext"))
+                                        Text(item.message)
+                                        Spacer()
+                                    }
+                                }
+                            } else if [.doc, .image, .gif, .movie, .sound, .bitmap].contains(item.parsedItemType) {
+                                NavigationLink(destination: FileView(item: item)) {
+                                    HStack {
+                                        Text(Image(systemName: itemToImageType(item)))
+                                        Text(item.message)
+                                        Spacer()
+                                    }
+                                }
+                            } else {
+                                Text(item.message)
+                                    .onTapGesture {
+                                        performGopherRequest(host: item.host, port: item.port, selector: item.selector)
+                                    }
+                                
+                            }
+                        }
+                    }
+                    .background(Color.white)
+                    .cornerRadius(10)
+                    .sheet(isPresented: $showSearchInput) {
+                        if let index = selectedSearchItem, gopherItems.indices.contains(index) {
+                            let searchItem = gopherItems[index]
+                            SearchInputView(
+                                host: searchItem.host,
+                                port: searchItem.port,
+                                selector: searchItem.selector,
+                                searchText: $searchText,
+                                onSearch: { query in
+                                    performGopherRequest(host: searchItem.host, port: searchItem.port, selector: "\(searchItem.selector)\t\(query)")
+                                    showSearchInput = false
+                                }
+                            )
+                        } else {
+                            
+                            VStack {
+                                Text("Weird bug. Please Dismiss -> Press Go -> Try Again")
+                                Button("Dismiss") {
+                                    self.showSearchInput = false
+                                }
+                            }
                             
                         }
                     }
-                }
-                .background(Color.white)
-                .cornerRadius(10)
-                .sheet(isPresented: $showSearchInput) {
-                    if let index = selectedSearchItem, gopherItems.indices.contains(index) {
-                        let searchItem = gopherItems[index]
-                        SearchInputView(
-                            host: searchItem.host,
-                            port: searchItem.port,
-                            selector: searchItem.selector,
-                            searchText: $searchText,
-                            onSearch: { query in
-                                performGopherRequest(host: searchItem.host, port: searchItem.port, selector: "\(searchItem.selector)\t\(query)")
-                                showSearchInput = false
-                            }
-                        )
-                    } else {
-                        
-                        Text("Weird bug. Please Dismiss -> Press Go -> Try Again")
-                    }
+                } else {
+                    Spacer()
+                    Text("Welcome to iGopher Browser")
+                    Spacer()
                 }
                 #if os(iOS)
                 VStack {
