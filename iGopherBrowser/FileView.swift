@@ -79,10 +79,8 @@ struct FileView: View {
     }
 
     private func readFile(_ item: gopherItem) {
-        // Execute the network request on a background thread
             self.client.sendRequest(to: item.host, port: item.port, message: "\(item.selector)\r\n") { result in
                 // Dispatch the result handling back to the main thread
-
                     switch result {
                     case .success(let resp):
                         if item.parsedItemType == .text {

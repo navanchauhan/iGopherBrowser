@@ -15,16 +15,26 @@ struct SearchInputView: View {
     @Binding var searchText: String
     var onSearch: (String) -> Void
     
+    @Environment(\.presentationMode) var presentationMode
+    
     var body: some View {
         VStack {
             Text("Enter your query")
             TextField("Search", text: $searchText)
                 .textFieldStyle(RoundedBorderTextFieldStyle())
                 .padding()
-            Button("Search") {
-                onSearch(searchText)
+            HStack {
+                
+                Button("Cancel") {
+                    presentationMode.wrappedValue.dismiss()
+                }
+                .padding()
+                
+                Button("Search") {
+                    onSearch(searchText)
+                }
+                .padding()
             }
-            .padding()
         }
         .padding()
     }
