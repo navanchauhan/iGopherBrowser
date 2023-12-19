@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 60;
+	objectVersion = 56;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -12,8 +12,8 @@
 		3E1BCC5A2B297E9B00A4CB69 /* Item.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E1BCC592B297E9B00A4CB69 /* Item.swift */; };
 		3E1BCC5C2B297E9C00A4CB69 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3E1BCC5B2B297E9C00A4CB69 /* Assets.xcassets */; };
 		3E1BCC602B297E9C00A4CB69 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3E1BCC5F2B297E9C00A4CB69 /* Preview Assets.xcassets */; };
-		3E1BCC842B298A9B00A4CB69 /* SwiftGopherClient in Frameworks */ = {isa = PBXBuildFile; productRef = 3E1BCC832B298A9B00A4CB69 /* SwiftGopherClient */; };
 		3E1BCC862B299E9F00A4CB69 /* SidebarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E1BCC852B299E9F00A4CB69 /* SidebarView.swift */; };
+		3EC1DF8D2B323A1900EDD707 /* SwiftGopherClient in Frameworks */ = {isa = PBXBuildFile; productRef = 3EC1DF8C2B323A1900EDD707 /* SwiftGopherClient */; };
 		3EFB9C0D2B2E4F06005EAD7C /* SearchInputView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EFB9C0C2B2E4F06005EAD7C /* SearchInputView.swift */; };
 		3EFB9C0F2B2E6325005EAD7C /* FileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EFB9C0E2B2E6325005EAD7C /* FileView.swift */; };
 		3EFB9C112B2E869C005EAD7C /* BrowserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EFB9C102B2E869C005EAD7C /* BrowserView.swift */; };
@@ -41,7 +41,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3E1BCC842B298A9B00A4CB69 /* SwiftGopherClient in Frameworks */,
+				3EC1DF8D2B323A1900EDD707 /* SwiftGopherClient in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -116,7 +116,7 @@
 			);
 			name = iGopherBrowser;
 			packageProductDependencies = (
-				3E1BCC832B298A9B00A4CB69 /* SwiftGopherClient */,
+				3EC1DF8C2B323A1900EDD707 /* SwiftGopherClient */,
 			);
 			productName = iGopherBrowser;
 			productReference = 3E1BCC522B297E9B00A4CB69 /* iGopherBrowser.app */;
@@ -147,7 +147,7 @@
 			);
 			mainGroup = 3E1BCC492B297E9B00A4CB69;
 			packageReferences = (
-				3E1BCC802B298A4700A4CB69 /* XCLocalSwiftPackageReference "../swift-gopher" */,
+				3EC1DF8B2B323A0600EDD707 /* XCRemoteSwiftPackageReference "swift-gopher" */,
 			);
 			productRefGroup = 3E1BCC532B297E9B00A4CB69 /* Products */;
 			projectDirPath = "";
@@ -335,10 +335,11 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.navanchauhan.iGopherBrowser;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = auto;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SUPPORTS_MACCATALYST = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = "1,2,7";
 			};
 			name = Debug;
 		};
@@ -374,10 +375,11 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.navanchauhan.iGopherBrowser;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = auto;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SUPPORTS_MACCATALYST = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = "1,2,7";
 			};
 			name = Release;
 		};
@@ -404,17 +406,21 @@
 		};
 /* End XCConfigurationList section */
 
-/* Begin XCLocalSwiftPackageReference section */
-		3E1BCC802B298A4700A4CB69 /* XCLocalSwiftPackageReference "../swift-gopher" */ = {
-			isa = XCLocalSwiftPackageReference;
-			relativePath = "../swift-gopher";
+/* Begin XCRemoteSwiftPackageReference section */
+		3EC1DF8B2B323A0600EDD707 /* XCRemoteSwiftPackageReference "swift-gopher" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/navanchauhan/swift-gopher";
+			requirement = {
+				branch = master;
+				kind = branch;
+			};
 		};
-/* End XCLocalSwiftPackageReference section */
+/* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		3E1BCC832B298A9B00A4CB69 /* SwiftGopherClient */ = {
+		3EC1DF8C2B323A1900EDD707 /* SwiftGopherClient */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 3E1BCC802B298A4700A4CB69 /* XCLocalSwiftPackageReference "../swift-gopher" */;
+			package = 3EC1DF8B2B323A0600EDD707 /* XCRemoteSwiftPackageReference "swift-gopher" */;
 			productName = SwiftGopherClient;
 		};
 /* End XCSwiftPackageProductDependency section */
