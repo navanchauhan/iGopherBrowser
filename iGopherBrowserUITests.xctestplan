@@ -1,0 +1,24 @@
+{
+  "configurations" : [
+    {
+      "id" : "C47F42D6-0DC7-4807-9A28-832707F0E1A0",
+      "name" : "Test Scheme Action",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+
+  },
+  "testTargets" : [
+    {
+      "target" : {
+        "containerPath" : "container:iGopherBrowser.xcodeproj",
+        "identifier" : "3E76CF822B36AC2900979E1A",
+        "name" : "iGopherBrowserUITests"
+      }
+    }
+  ],
+  "version" : 1
+}

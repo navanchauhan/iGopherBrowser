@@ -8,6 +8,7 @@ import Foundation
 import GopherHelpers
 import QuickLook
 import SwiftUI
+import TelemetryClient
 import swiftGopherClient
 
 func determineFileType(data: Data) -> String? {
@@ -45,23 +46,21 @@ struct FileView: View {
   @State private var fileURL: URL?
   @State private var QLURL: URL?
 
-  let fileSignatures: [String: [UInt8]] = [
-    "jpg": [0xFF, 0xD8, 0xFF],
-    "png": [0x89, 0x50, 0x4E, 0x47],
-    "gif": [0x47, 0x49, 0x46],
-    "pdf": [0x25, 0x50, 0x44, 0x46],
-  ]
-
   var body: some View {
     if item.parsedItemType == .text {
       GeometryReader { geometry in
         ScrollView {
           VStack {
             Text(fileContent)
+              .padding()
+              .multilineTextAlignment(.leading)
+              .lineLimit(nil)
+              .frame(maxWidth: .infinity)
+              .fixedSize(horizontal: false, vertical: true)
               .onAppear {
                 readFile(item)
               }
-              .frame(width: geometry.size.width, height: geometry.size.height)
+            //              .frame(width: geometry.size.width, height: geometry.size.height)
             Spacer()
           }
         }
@@ -108,6 +107,13 @@ struct FileView: View {
             let fileURL = tempDirURL.appendingPathComponent(
               UUID().uuidString + ".\(determineFileType(data: fileData) ?? "unkown")")
             print(fileURL)
+
+            if determineFileType(data: fileData) == nil {
+              TelemetryManager.send(
+                "applicationUnableToDetectFiletype",
+                with: ["gopherURL": "\(item.host):\(item.port)\(item.selector)"])
+            }
+
             try fileData.write(to: fileURL)
             self.fileURL = fileURL
           } catch {

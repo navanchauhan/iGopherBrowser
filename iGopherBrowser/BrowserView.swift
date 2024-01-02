@@ -7,9 +7,20 @@
 
 import GopherHelpers
 import SwiftUI
+import TelemetryClient
 import swiftGopherClient
 
+func openURL(url: URL) {
+  #if os(OSX)
+    NSWorkspace.shared.open(url)
+  #else
+    UIApplication.shared.open(url)
+  #endif
+}
+
 struct BrowserView: View {
+  @AppStorage("homeURL") var homeURL: URL = URL(string: "gopher://gopher.navan.dev:70/")!
+  @State var homeURLString = "gopher://gopher.navan.dev:70/"
 
   @State var url: String = ""
   @State private var gopherItems: [gopherItem] = []
@@ -24,6 +35,8 @@ struct BrowserView: View {
   @State private var showSearchInput = false
   @State var selectedSearchItem: Int?
 
+  @State private var showPreferences = false
+
   let client = GopherClient()
 
   var body: some View {
@@ -36,25 +49,31 @@ struct BrowserView: View {
                 Text(item.message)
                   .font(.system(size: 12, design: .monospaced))
                   .frame(height: 20)
-                  .listRowInsets(EdgeInsets())
                   .listRowSeparator(.hidden)
+                  .padding(.vertical, -8)
               } else if item.parsedItemType == .directory {
-                HStack {
-                  Text(Image(systemName: "folder"))
-                  Text(item.message)
-                  Spacer()
-                }.onTapGesture {
+                Button(action: {
                   performGopherRequest(host: item.host, port: item.port, selector: item.selector)
-                }
+                }) {
+                  HStack {
+                    Text(Image(systemName: "folder"))
+                    Text(item.message)
+                    Spacer()
+                  }
+                }.buttonStyle(PlainButtonStyle())
+
               } else if item.parsedItemType == .search {
-                HStack {
-                  Text(Image(systemName: "magnifyingglass"))
-                  Text(item.message)
-                  Spacer()
-                }.onTapGesture {
+                Button(action: {
                   self.selectedSearchItem = idx
                   self.showSearchInput = true
-                }
+                }) {
+                  HStack {
+                    Text(Image(systemName: "magnifyingglass"))
+                    Text(item.message)
+                    Spacer()
+                  }
+                }.buttonStyle(PlainButtonStyle())
+
               } else if item.parsedItemType == .text {
                 NavigationLink(destination: FileView(item: item)) {
                   HStack {
@@ -62,6 +81,19 @@ struct BrowserView: View {
                     Text(item.message)
                     Spacer()
                   }
+                }
+              } else if item.selector.hasPrefix("URL:") {
+                if let url = URL(string: item.selector.replacingOccurrences(of: "URL:", with: "")) {
+                  //UIApplication.shared.canOpenURL(url) {
+                  Button(action: {
+                    openURL(url: url)
+                  }) {
+                    HStack {
+                      Image(systemName: "link")
+                      Text(item.message)
+                      Spacer()
+                    }
+                  }.buttonStyle(PlainButtonStyle())
                 }
               } else if [.doc, .image, .gif, .movie, .sound, .bitmap].contains(item.parsedItemType)
               {
@@ -73,10 +105,18 @@ struct BrowserView: View {
                   }
                 }
               } else {
-                Text(item.message)
-                  .onTapGesture {
-                    performGopherRequest(host: item.host, port: item.port, selector: item.selector)
+                Button(action: {
+                  TelemetryManager.send(
+                    "applicationBrowsedUnknown",
+                    with: ["gopherURL": "\(item.host):\(item.port)\(item.selector)"])
+                  performGopherRequest(host: item.host, port: item.port, selector: item.selector)
+                }) {
+                  HStack {
+                    Text(Image(systemName: "questionmark.app.dashed"))
+                    Text(item.message)
+                    Spacer()
                   }
+                }.buttonStyle(PlainButtonStyle())
 
               }
             }
@@ -104,6 +144,9 @@ struct BrowserView: View {
                 Text("Weird bug. Please Dismiss -> Press Go -> Try Again")
                 Button("Dismiss") {
                   self.showSearchInput = false
+                }.onAppear {
+                  TelemetryManager.send(
+                    "applicationSearchError", with: ["gopherURL": "\(self.url)"])
                 }
               }
 
@@ -121,11 +164,11 @@ struct BrowserView: View {
                 Spacer()
 
                 TextField("Enter a URL", text: $url)
-                  #if !os(OSX)
-                    .keyboardType(.URL)
-                    .autocapitalization(.none)
-                  #endif
+                  .keyboardType(.URL)
+                  .autocapitalization(.none)
                   .padding(10)
+                  .background(Color.gray.opacity(0.2))
+                  .cornerRadius(10)
                 Spacer()
               }
               //.background(Color.white)
@@ -134,7 +177,9 @@ struct BrowserView: View {
               Button(
                 "Go",
                 action: {
+                  TelemetryManager.send("applicationClickedGo", with: ["gopherURL": "\(self.url)"])
                   performGopherRequest(clearForward: false)
+
                 }
               )
               .keyboardShortcut(.defaultAction)
@@ -143,10 +188,16 @@ struct BrowserView: View {
               }
               Spacer()
             }
+            .padding(.bottom, 10)
+            .padding(.top, 5)
             HStack {
               Spacer()
               Button {
-                performGopherRequest(host: "gopher.navan.dev", port: 70, selector: "/")
+                print(homeURL, "home")
+                TelemetryManager.send("applicationClickedHome", with: ["gopherURL": "\(self.url)"])
+                performGopherRequest(
+                  host: homeURL.host ?? "gopher.navan.dev", port: homeURL.port ?? 70,
+                  selector: homeURL.path)
               } label: {
                 Label("Home", systemImage: "house")
                   .labelStyle(.iconOnly)
@@ -156,6 +207,9 @@ struct BrowserView: View {
                 if let curNode = backwardStack.popLast() {
                   forwardStack.append(curNode)
                   if let prevNode = backwardStack.popLast() {
+                    TelemetryManager.send(
+                      "applicationClickedBack",
+                      with: ["gopherURL": "\(prevNode.host):\(prevNode.port)\(prevNode.selector)"])
                     performGopherRequest(
                       host: prevNode.host, port: prevNode.port, selector: prevNode.selector,
                       clearForward: false)
@@ -169,7 +223,9 @@ struct BrowserView: View {
               Spacer()
               Button {
                 if let nextNode = forwardStack.popLast() {
-                  //backwardStack.append(nextNode)
+                  TelemetryManager.send(
+                    "applicationClickedForward",
+                    with: ["gopherURL": "\(nextNode.host):\(nextNode.port)\(nextNode.selector)"])
                   performGopherRequest(
                     host: nextNode.host, port: nextNode.port, selector: nextNode.selector,
                     clearForward: false)
@@ -180,6 +236,13 @@ struct BrowserView: View {
               }
               .disabled(forwardStack.isEmpty)
               Spacer()
+              Button {
+                self.showPreferences = true
+              } label: {
+                Label("Settings", systemImage: "gear")
+                  .labelStyle(.iconOnly)
+              }
+              Spacer()
             }
           }
         #else
@@ -187,7 +250,10 @@ struct BrowserView: View {
             HStack {
               Spacer()
               Button {
-                performGopherRequest(host: "gopher.navan.dev", port: 70, selector: "/")
+                TelemetryManager.send("applicationClickedHome", with: ["gopherURL": "\(self.url)"])
+                performGopherRequest(
+                  host: homeURL.host ?? "gopher.navan.dev", port: homeURL.port ?? 70,
+                  selector: homeURL.path)
               } label: {
                 Label("Home", systemImage: "house")
                   .labelStyle(.iconOnly)
@@ -197,6 +263,9 @@ struct BrowserView: View {
                 if let curNode = backwardStack.popLast() {
                   forwardStack.append(curNode)
                   if let prevNode = backwardStack.popLast() {
+                    TelemetryManager.send(
+                      "applicationClickedBack",
+                      with: ["gopherURL": "\(prevNode.host):\(prevNode.port)\(prevNode.selector)"])
                     performGopherRequest(
                       host: prevNode.host, port: prevNode.port, selector: prevNode.selector,
                       clearForward: false)
@@ -210,7 +279,9 @@ struct BrowserView: View {
 
               Button {
                 if let nextNode = forwardStack.popLast() {
-                  //backwardStack.append(nextNode)
+                  TelemetryManager.send(
+                    "applicationClickedForward",
+                    with: ["gopherURL": "\(nextNode.host):\(nextNode.port)\(nextNode.selector)"])
                   performGopherRequest(
                     host: nextNode.host, port: nextNode.port, selector: nextNode.selector,
                     clearForward: false)
@@ -235,6 +306,7 @@ struct BrowserView: View {
             Button(
               "Go",
               action: {
+                TelemetryManager.send("applicationClickedGo", with: ["gopherURL": "\(self.url)"])
                 performGopherRequest(clearForward: false)
               }
             )
@@ -251,6 +323,21 @@ struct BrowserView: View {
       if let node = selectedNode {
         performGopherRequest(host: node.host, port: node.port, selector: node.selector)
       }
+    }
+    .sheet(
+      isPresented: $showPreferences,
+      onDismiss: {
+        print("badm", homeURL, homeURLString)
+        if let url = URL(string: homeURLString) {
+          self.homeURL = url
+        }
+      }
+    ) {
+      #if os(iOS)
+        SettingsView(homeURL: $homeURL, homeURLString: $homeURLString)
+      #else
+        SettingsView()
+      #endif
     }
   }
 
@@ -310,6 +397,8 @@ struct BrowserView: View {
         self.gopherItems = resp
 
       case .failure(let error):
+        TelemetryManager.send(
+          "applicationRequestError", with: ["gopherURL": "\(self.url)", "errorMessage": "\(error)"])
         print("Error \(error)")
         var item = gopherItem(rawLine: "Error \(error)")
         item.message = "Error \(error)"
