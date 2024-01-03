@@ -10,10 +10,10 @@ Lynx is an amazing gopher client for macOS, but when you are already using tryin
 
 ## Features
 
-- [ x ] Browse gopher sites
-- [ x ] Search gopher sites
-- [ x ] Preview Media using QuickLook
-- [ x ] Basic History 
+- [x] Browse gopher sites
+- [x] Search gopher sites
+- [x] Preview Media using QuickLook
+- [x] Basic History 
 - [ ] Bookmark gopher sites
 - [ ] Download files
 - [ ] ??? 
