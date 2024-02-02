@@ -67,7 +67,7 @@ struct FileView: View {
               }
             //              .frame(width: geometry.size.width, height: geometry.size.height)
             Spacer()
-          }
+          }.textSelection(.enabled)
         }
       }
     } else if [.doc, .image, .gif, .movie, .sound, .bitmap].contains(item.parsedItemType) {  // Preview Document: .pdf, .docx, e.t.c
