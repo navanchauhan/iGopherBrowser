@@ -20,6 +20,9 @@ func openURL(url: URL) {
 
 struct BrowserView: View {
   @AppStorage("homeURL") var homeURL: URL = URL(string: "gopher://gopher.navan.dev:70/")!
+  @AppStorage("accentColour", store: .standard) var accentColour: Color = Color(.blue)
+  @AppStorage("linkColour", store: .standard) var linkColour: Color = Color(.white)
+
   @State var homeURLString = "gopher://gopher.navan.dev:70/"
 
   @State var url: String = ""
@@ -64,7 +67,7 @@ struct BrowserView: View {
                       Text(Image(systemName: "folder"))
                       Text(item.message)
                       Spacer()
-                    }
+                    }.foregroundStyle(linkColour)
                   }.buttonStyle(PlainButtonStyle())
 
                 } else if item.parsedItemType == .search {
@@ -76,7 +79,7 @@ struct BrowserView: View {
                       Text(Image(systemName: "magnifyingglass"))
                       Text(item.message)
                       Spacer()
-                    }
+                    }.foregroundStyle(linkColour)
                   }.buttonStyle(PlainButtonStyle())
 
                 } else if item.parsedItemType == .text {
@@ -85,7 +88,7 @@ struct BrowserView: View {
                       Text(Image(systemName: "doc.plaintext"))
                       Text(item.message)
                       Spacer()
-                    }
+                    }.foregroundStyle(linkColour)
                   }
                 } else if item.selector.hasPrefix("URL:") {
                   if let url = URL(string: item.selector.replacingOccurrences(of: "URL:", with: ""))
@@ -98,7 +101,7 @@ struct BrowserView: View {
                         Image(systemName: "link")
                         Text(item.message)
                         Spacer()
-                      }
+                      }.foregroundStyle(linkColour)
                     }.buttonStyle(PlainButtonStyle())
                   }
                 } else if [.doc, .image, .gif, .movie, .sound, .bitmap].contains(
@@ -109,7 +112,7 @@ struct BrowserView: View {
                       Text(Image(systemName: itemToImageType(item)))
                       Text(item.message)
                       Spacer()
-                    }
+                    }.foregroundStyle(linkColour)
                   }
                 } else {
                   Button(action: {
@@ -122,7 +125,7 @@ struct BrowserView: View {
                       Text(Image(systemName: "questionmark.app.dashed"))
                       Text(item.message)
                       Spacer()
-                    }
+                    }.foregroundStyle(linkColour)
                   }.buttonStyle(PlainButtonStyle())
 
                 }
@@ -361,6 +364,7 @@ struct BrowserView: View {
         SettingsView()
       #endif
     }
+    .accentColor(accentColour)
   }
 
   private func performGopherRequest(

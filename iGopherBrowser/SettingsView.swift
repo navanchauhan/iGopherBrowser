@@ -7,7 +7,59 @@
 
 import SwiftUI
 
+extension Color: RawRepresentable {
+
+  public init?(rawValue: String) {
+
+    guard let data = Data(base64Encoded: rawValue) else {
+      self = .black
+      return
+    }
+
+    do {
+      #if os(macOS)
+        let color =
+          try NSKeyedUnarchiver.unarchiveTopLevelObjectWithData(data) as? NSColor ?? .black
+      #else
+        let color =
+          try NSKeyedUnarchiver.unarchiveTopLevelObjectWithData(data) as? UIColor ?? .black
+      #endif
+      self = Color(color)
+    } catch {
+      self = .black
+    }
+
+  }
+
+  public var rawValue: String {
+
+    do {
+      #if os(macOS)
+        let data =
+          try NSKeyedArchiver.archivedData(
+            withRootObject: NSColor(self), requiringSecureCoding: false) as Data
+      #else
+        let data =
+          try NSKeyedArchiver.archivedData(
+            withRootObject: UIColor(self), requiringSecureCoding: false) as Data
+      #endif
+      return data.base64EncodedString()
+
+    } catch {
+
+      return ""
+
+    }
+
+  }
+
+}
+
 struct SettingsView: View {
+
+  @AppStorage("accentColour", store: .standard) var accentColour: Color = Color(.blue)
+  @AppStorage("linkColour", store: .standard) var linkColour: Color = Color(.white)
+
   #if os(iOS)
     @Binding var homeURL: URL
     @Binding var homeURLString: String
@@ -18,7 +70,6 @@ struct SettingsView: View {
   #endif
   @State private var showAlert = false
   @State private var alertMessage: String = ""
-
   @Environment(\.dismiss) var dismiss
 
   var body: some View {
@@ -64,10 +115,18 @@ struct SettingsView: View {
           }
         }
       }
+      Section(header: Text("UI Settings")) {
+        ColorPicker("Link Colour", selection: $linkColour)
+        ColorPicker("Accent Colour", selection: $accentColour)
+        Button("Reset Colours") {
+          self.linkColour = Color(.white)
+          self.accentColour = Color(.blue)
+        }
+      }
     }
     #if os(OSX)
       .padding(20)
-      .frame(width: 350, height: 100)
+      .frame(width: 350, height: 350)
     #endif
     .alert(isPresented: $showAlert) {
       Alert(
