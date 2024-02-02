@@ -29,6 +29,11 @@ func determineFileType(data: Data) -> String? {
       // Add other file signatures as needed
   ]
 
+  // Debug file signatures
+  //    for byte in data.prefix(10) {
+  //        print(String(format: "%02x", byte), terminator: " ")
+  //    }
+
   // Check for each signature
   for (signature, fileType) in signatures {
     if data.starts(with: signature) {

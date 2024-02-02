@@ -37,92 +37,114 @@ struct BrowserView: View {
 
   @State private var showPreferences = false
 
+  @Namespace var topID
+  @State private var scrollToTop: Bool = false
+
   let client = GopherClient()
 
   var body: some View {
     NavigationStack {
       VStack(spacing: 0) {
         if gopherItems.count >= 1 {
-          List {
-            ForEach(Array(gopherItems.enumerated()), id: \.offset) { idx, item in
-              if item.parsedItemType == .info {
-                Text(item.message)
-                  .font(.system(size: 12, design: .monospaced))
-                  .frame(height: 20)
-                  .listRowSeparator(.hidden)
-                  .padding(.vertical, -8)
-              } else if item.parsedItemType == .directory {
-                Button(action: {
-                  performGopherRequest(host: item.host, port: item.port, selector: item.selector)
-                }) {
-                  HStack {
-                    Text(Image(systemName: "folder"))
-                    Text(item.message)
-                    Spacer()
-                  }
-                }.buttonStyle(PlainButtonStyle())
+          ScrollViewReader { proxy in
 
-              } else if item.parsedItemType == .search {
-                Button(action: {
-                  self.selectedSearchItem = idx
-                  self.showSearchInput = true
-                }) {
-                  HStack {
-                    Text(Image(systemName: "magnifyingglass"))
-                    Text(item.message)
-                    Spacer()
-                  }
-                }.buttonStyle(PlainButtonStyle())
-
-              } else if item.parsedItemType == .text {
-                NavigationLink(destination: FileView(item: item)) {
-                  HStack {
-                    Text(Image(systemName: "doc.plaintext"))
-                    Text(item.message)
-                    Spacer()
-                  }
-                }
-              } else if item.selector.hasPrefix("URL:") {
-                if let url = URL(string: item.selector.replacingOccurrences(of: "URL:", with: "")) {
-                  //UIApplication.shared.canOpenURL(url) {
+            List {
+              ForEach(Array(gopherItems.enumerated()), id: \.offset) { idx, item in
+                if item.parsedItemType == .info {
+                  Text(item.message)
+                    .font(.system(size: 12, design: .monospaced))
+                    .frame(height: 20)
+                    .listRowSeparator(.hidden)
+                    .padding(.vertical, -8)
+                } else if item.parsedItemType == .directory {
                   Button(action: {
-                    openURL(url: url)
+                    performGopherRequest(host: item.host, port: item.port, selector: item.selector)
                   }) {
                     HStack {
-                      Image(systemName: "link")
+                      Text(Image(systemName: "folder"))
                       Text(item.message)
                       Spacer()
                     }
                   }.buttonStyle(PlainButtonStyle())
-                }
-              } else if [.doc, .image, .gif, .movie, .sound, .bitmap].contains(item.parsedItemType)
-              {
-                NavigationLink(destination: FileView(item: item)) {
-                  HStack {
-                    Text(Image(systemName: itemToImageType(item)))
-                    Text(item.message)
-                    Spacer()
+
+                } else if item.parsedItemType == .search {
+                  Button(action: {
+                    self.selectedSearchItem = idx
+                    self.showSearchInput = true
+                  }) {
+                    HStack {
+                      Text(Image(systemName: "magnifyingglass"))
+                      Text(item.message)
+                      Spacer()
+                    }
+                  }.buttonStyle(PlainButtonStyle())
+
+                } else if item.parsedItemType == .text {
+                  NavigationLink(destination: FileView(item: item)) {
+                    HStack {
+                      Text(Image(systemName: "doc.plaintext"))
+                      Text(item.message)
+                      Spacer()
+                    }
                   }
-                }
-              } else {
-                Button(action: {
-                  TelemetryManager.send(
-                    "applicationBrowsedUnknown",
-                    with: ["gopherURL": "\(item.host):\(item.port)\(item.selector)"])
-                  performGopherRequest(host: item.host, port: item.port, selector: item.selector)
-                }) {
-                  HStack {
-                    Text(Image(systemName: "questionmark.app.dashed"))
-                    Text(item.message)
-                    Spacer()
+                } else if item.selector.hasPrefix("URL:") {
+                  if let url = URL(string: item.selector.replacingOccurrences(of: "URL:", with: ""))
+                  {
+                    //UIApplication.shared.canOpenURL(url) {
+                    Button(action: {
+                      openURL(url: url)
+                    }) {
+                      HStack {
+                        Image(systemName: "link")
+                        Text(item.message)
+                        Spacer()
+                      }
+                    }.buttonStyle(PlainButtonStyle())
                   }
-                }.buttonStyle(PlainButtonStyle())
+                } else if [.doc, .image, .gif, .movie, .sound, .bitmap].contains(
+                  item.parsedItemType)
+                {
+                  NavigationLink(destination: FileView(item: item)) {
+                    HStack {
+                      Text(Image(systemName: itemToImageType(item)))
+                      Text(item.message)
+                      Spacer()
+                    }
+                  }
+                } else {
+                  Button(action: {
+                    TelemetryManager.send(
+                      "applicationBrowsedUnknown",
+                      with: ["gopherURL": "\(item.host):\(item.port)\(item.selector)"])
+                    performGopherRequest(host: item.host, port: item.port, selector: item.selector)
+                  }) {
+                    HStack {
+                      Text(Image(systemName: "questionmark.app.dashed"))
+                      Text(item.message)
+                      Spacer()
+                    }
+                  }.buttonStyle(PlainButtonStyle())
+
+                }
 
               }
-            }
+            }.id(topID)
+
+              .background(Color.white)
+              .cornerRadius(10)
+              .onChange(of: scrollToTop) {
+                // TODO: Cleanup
+                withAnimation {
+                  // TODO: Fix for macOS
+                  #if os(macOS)
+                    proxy.scrollTo(topID, anchor: .top)
+                  #else
+                    proxy.scrollTo(0, anchor: .top)
+                  #endif
+
+                }
+              }
           }
-          .background(Color.white)
-          .cornerRadius(10)
           .sheet(isPresented: $showSearchInput) {
             if let index = selectedSearchItem, gopherItems.indices.contains(index) {
               let searchItem = gopherItems[index]
@@ -395,6 +417,8 @@ struct BrowserView: View {
           print("created new")
         }
         self.gopherItems = resp
+        scrollToTop = !scrollToTop
+        print("ScrollToTop \(scrollToTop), \(self.scrollToTop)")
 
       case .failure(let error):
         TelemetryManager.send(
