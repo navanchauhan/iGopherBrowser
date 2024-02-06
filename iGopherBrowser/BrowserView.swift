@@ -18,6 +18,15 @@ func openURL(url: URL) {
   #endif
 }
 
+#if canImport(UIKit)
+  extension View {
+    func hideKeyboard() {
+      UIApplication.shared.sendAction(
+        #selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+    }
+  }
+#endif
+
 struct BrowserView: View {
   @AppStorage("homeURL") var homeURL: URL = URL(string: "gopher://gopher.navan.dev:70/")!
   @AppStorage("accentColour", store: .standard) var accentColour: Color = Color(.blue)
@@ -62,6 +71,9 @@ struct BrowserView: View {
                 } else if item.parsedItemType == .directory {
                   Button(action: {
                     performGopherRequest(host: item.host, port: item.port, selector: item.selector)
+                    #if canImport(UIKit)
+                      hideKeyboard()
+                    #endif
                   }) {
                     HStack {
                       Text(Image(systemName: "folder"))
@@ -72,6 +84,9 @@ struct BrowserView: View {
 
                 } else if item.parsedItemType == .search {
                   Button(action: {
+                    #if canImport(UIKit)
+                      hideKeyboard()
+                    #endif
                     self.selectedSearchItem = idx
                     self.showSearchInput = true
                   }) {
@@ -140,7 +155,7 @@ struct BrowserView: View {
                 withAnimation {
                   // TODO: Fix for macOS
                   #if os(macOS)
-                    proxy.scrollTo(topID, anchor: .top)
+                    proxy.scrollTo(0, anchor: .top)
                   #else
                     proxy.scrollTo(0, anchor: .top)
                   #endif
@@ -284,6 +299,15 @@ struct BrowserView: View {
                   .labelStyle(.iconOnly)
               }
 
+              #if os(visionOS)
+                Button {
+                  self.showPreferences = true
+                } label: {
+                  Label("Settings", systemImage: "gear")
+                    .labelStyle(.iconOnly)
+                }
+              #endif
+
               Button {
                 if let curNode = backwardStack.popLast() {
                   forwardStack.append(curNode)
@@ -358,10 +382,10 @@ struct BrowserView: View {
         }
       }
     ) {
-      #if os(iOS)
-        SettingsView(homeURL: $homeURL, homeURLString: $homeURLString)
-      #else
+      #if os(macOS)
         SettingsView()
+      #else
+        SettingsView(homeURL: $homeURL, homeURLString: $homeURLString)
       #endif
     }
     .accentColor(accentColour)

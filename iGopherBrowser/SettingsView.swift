@@ -60,13 +60,12 @@ struct SettingsView: View {
   @AppStorage("accentColour", store: .standard) var accentColour: Color = Color(.blue)
   @AppStorage("linkColour", store: .standard) var linkColour: Color = Color(.white)
 
-  #if os(iOS)
-    @Binding var homeURL: URL
-    @Binding var homeURLString: String
-  #endif
   #if os(macOS)
     @AppStorage("homeURL") var homeURL: URL = URL(string: "gopher://gopher.navan.dev:70/")!
     @State var homeURLString: String = ""
+  #else
+    @Binding var homeURL: URL
+    @Binding var homeURLString: String
   #endif
   @State private var showAlert = false
   @State private var alertMessage: String = ""
@@ -123,6 +122,11 @@ struct SettingsView: View {
           self.accentColour = Color(.blue)
         }
       }
+      #if os(visionOS)
+        Button("Done") {
+          dismiss()
+        }
+      #endif
     }
     #if os(OSX)
       .padding(20)
