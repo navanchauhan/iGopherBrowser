@@ -277,27 +277,27 @@ struct BrowserView: View {
               }
               .disabled(forwardStack.isEmpty)
               Spacer()
-                if (shareThroughProxy) {
-                    ShareLink(item: URL(string: "https://gopher.navan.dev/\(url)")!) {
-                        Label("Share", systemImage: "square.and.arrow.up").labelStyle(.iconOnly)
-                    }
-                } else {
-                    ShareLink(item: URL(string: "gopher://\(url)")!) {
-                        Label("Share", systemImage: "square.and.arrow.up").labelStyle(.iconOnly)
-                    }
+              if shareThroughProxy {
+                ShareLink(item: URL(string: "https://gopher.navan.dev/\(url)")!) {
+                  Label("Share", systemImage: "square.and.arrow.up").labelStyle(.iconOnly)
                 }
-                Spacer()
-//                Button {
-//                    showBookmarks = true
-//                } label: {
-//                    Label("Bookmarks", systemImage: "book")
-//                        .labelStyle(.iconOnly)
-//                }.sheet(isPresented: $showBookmarks) {
-//                    BookmarksView()
-//                        .presentationDetents([.height(400), .medium, .large])
-//                        .presentationDragIndicator(.automatic)
-//                }
-//              Spacer()
+              } else {
+                ShareLink(item: URL(string: "gopher://\(url)")!) {
+                  Label("Share", systemImage: "square.and.arrow.up").labelStyle(.iconOnly)
+                }
+              }
+              Spacer()
+              //                Button {
+              //                    showBookmarks = true
+              //                } label: {
+              //                    Label("Bookmarks", systemImage: "book")
+              //                        .labelStyle(.iconOnly)
+              //                }.sheet(isPresented: $showBookmarks) {
+              //                    BookmarksView()
+              //                        .presentationDetents([.height(400), .medium, .large])
+              //                        .presentationDragIndicator(.automatic)
+              //                }
+              //              Spacer()
               Button {
                 self.showPreferences = true
               } label: {
@@ -372,15 +372,15 @@ struct BrowserView: View {
             }
             //.background(Color.white)
             .cornerRadius(30)
-              if (shareThroughProxy) {
-                  ShareLink(item: URL(string: "https://gopher.navan.dev/\(url)")!) {
-                      Label("Share", systemImage: "square.and.arrow.up").labelStyle(.iconOnly)
-                  }
-              } else {
-                  ShareLink(item: URL(string: "gopher://\(url)")!) {
-                      Label("Share", systemImage: "square.and.arrow.up").labelStyle(.iconOnly)
-                  }
+            if shareThroughProxy {
+              ShareLink(item: URL(string: "https://gopher.navan.dev/\(url)")!) {
+                Label("Share", systemImage: "square.and.arrow.up").labelStyle(.iconOnly)
               }
+            } else {
+              ShareLink(item: URL(string: "gopher://\(url)")!) {
+                Label("Share", systemImage: "square.and.arrow.up").labelStyle(.iconOnly)
+              }
+            }
             Button(
               "Go",
               action: {
@@ -403,8 +403,8 @@ struct BrowserView: View {
       }
     }
     .onOpenURL { gopherURL in
-        self.url = gopherURL.absoluteString
-        performGopherRequest()
+      self.url = gopherURL.absoluteString
+      performGopherRequest()
     }
     .sheet(
       isPresented: $showPreferences,

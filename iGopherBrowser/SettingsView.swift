@@ -21,7 +21,8 @@ extension Color: RawRepresentable {
         let color =
           try NSKeyedUnarchiver.unarchiveTopLevelObjectWithData(data) as? NSColor ?? .black
       #else
-        let color = try NSKeyedUnarchiver.unarchivedObject(ofClass: UIColor.self, from: data) ?? .black
+        let color =
+          try NSKeyedUnarchiver.unarchivedObject(ofClass: UIColor.self, from: data) ?? .black
       #endif
       self = Color(color)
     } catch {
@@ -58,7 +59,7 @@ struct SettingsView: View {
 
   @AppStorage("accentColour", store: .standard) var accentColour: Color = Color(.blue)
   @AppStorage("linkColour", store: .standard) var linkColour: Color = Color(.white)
-    @AppStorage("shareThroughProxy", store: .standard) var shareThroughProxy: Bool = true
+  @AppStorage("shareThroughProxy", store: .standard) var shareThroughProxy: Bool = true
 
   #if os(macOS)
     @AppStorage("homeURL") var homeURL: URL = URL(string: "gopher://gopher.navan.dev:70/")!
@@ -122,17 +123,19 @@ struct SettingsView: View {
           self.accentColour = Color(.blue)
         }
       }
-        
-        Section {
-            Toggle("Share links through HTTP(s) proxy", isOn: $shareThroughProxy)
-                .toggleStyle(.switch)
-        } header: {
-            Text("Share Settings")
-        } footer: {
-            Text("Enabling this option shares Gopher URLs through an HTTP proxy, allowing people to view the page without needing a Gopher client")
-                .font(.caption)
-                .foregroundColor(.gray)
-        }
+
+      Section {
+        Toggle("Share links through HTTP(s) proxy", isOn: $shareThroughProxy)
+          .toggleStyle(.switch)
+      } header: {
+        Text("Share Settings")
+      } footer: {
+        Text(
+          "Enabling this option shares Gopher URLs through an HTTP proxy, allowing people to view the page without needing a Gopher client"
+        )
+        .font(.caption)
+        .foregroundColor(.gray)
+      }
       #if os(visionOS)
         Button("Done") {
           dismiss()
