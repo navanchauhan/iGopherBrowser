@@ -31,6 +31,7 @@ struct BrowserView: View {
   @AppStorage("homeURL") var homeURL: URL = URL(string: "gopher://gopher.navan.dev:70/")!
   @AppStorage("accentColour", store: .standard) var accentColour: Color = Color(.blue)
   @AppStorage("linkColour", store: .standard) var linkColour: Color = Color(.white)
+  @AppStorage("shareThroughProxy", store: .standard) var shareThroughProxy: Bool = true
 
   @State var homeURLString = "gopher://gopher.navan.dev:70/"
 
@@ -48,6 +49,7 @@ struct BrowserView: View {
   @State var selectedSearchItem: Int?
 
   @State private var showPreferences = false
+  @State private var showBookmarks = false
 
   @Namespace var topID
   @State private var scrollToTop: Bool = false
@@ -147,7 +149,6 @@ struct BrowserView: View {
 
               }
             }.id(topID)
-
               .background(Color.white)
               .cornerRadius(10)
               .onChange(of: scrollToTop) {
@@ -276,6 +277,27 @@ struct BrowserView: View {
               }
               .disabled(forwardStack.isEmpty)
               Spacer()
+                if (shareThroughProxy) {
+                    ShareLink(item: URL(string: "https://gopher.navan.dev/\(url)")!) {
+                        Label("Share", systemImage: "square.and.arrow.up").labelStyle(.iconOnly)
+                    }
+                } else {
+                    ShareLink(item: URL(string: "gopher://\(url)")!) {
+                        Label("Share", systemImage: "square.and.arrow.up").labelStyle(.iconOnly)
+                    }
+                }
+                Spacer()
+//                Button {
+//                    showBookmarks = true
+//                } label: {
+//                    Label("Bookmarks", systemImage: "book")
+//                        .labelStyle(.iconOnly)
+//                }.sheet(isPresented: $showBookmarks) {
+//                    BookmarksView()
+//                        .presentationDetents([.height(400), .medium, .large])
+//                        .presentationDragIndicator(.automatic)
+//                }
+//              Spacer()
               Button {
                 self.showPreferences = true
               } label: {
