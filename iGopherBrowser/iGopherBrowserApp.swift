@@ -12,7 +12,7 @@ import TelemetryClient
 struct iGopherBrowserApp: App {
   var body: some Scene {
     WindowGroup {
-      ContentView()
+        ContentView()
     }
     .commands {
       #if os(macOS)

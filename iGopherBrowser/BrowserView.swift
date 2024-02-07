@@ -369,11 +369,18 @@ struct BrowserView: View {
                   .autocapitalization(.none)
                 #endif
                 .padding(10)
-              Spacer()
             }
             //.background(Color.white)
             .cornerRadius(30)
-
+              if (shareThroughProxy) {
+                  ShareLink(item: URL(string: "https://gopher.navan.dev/\(url)")!) {
+                      Label("Share", systemImage: "square.and.arrow.up").labelStyle(.iconOnly)
+                  }
+              } else {
+                  ShareLink(item: URL(string: "gopher://\(url)")!) {
+                      Label("Share", systemImage: "square.and.arrow.up").labelStyle(.iconOnly)
+                  }
+              }
             Button(
               "Go",
               action: {
@@ -394,6 +401,10 @@ struct BrowserView: View {
       if let node = selectedNode {
         performGopherRequest(host: node.host, port: node.port, selector: node.selector)
       }
+    }
+    .onOpenURL { gopherURL in
+        self.url = gopherURL.absoluteString
+        performGopherRequest()
     }
     .sheet(
       isPresented: $showPreferences,
