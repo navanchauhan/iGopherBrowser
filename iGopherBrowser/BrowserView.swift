@@ -149,7 +149,7 @@ struct BrowserView: View {
 
               }
             }.id(topID)
-              .background(Color.white)
+              //.background(Color.white)
               .cornerRadius(10)
               .onChange(of: scrollToTop) {
                 // TODO: Cleanup
