@@ -70,6 +70,7 @@ struct BrowserView: View {
                     .frame(height: 20)
                     .listRowSeparator(.hidden)
                     .padding(.vertical, -8)
+                    .id(idx)
                 } else if item.parsedItemType == .directory {
                   Button(action: {
                     performGopherRequest(host: item.host, port: item.port, selector: item.selector)
@@ -83,7 +84,7 @@ struct BrowserView: View {
                       Spacer()
                     }.foregroundStyle(linkColour)
                   }.buttonStyle(PlainButtonStyle())
-
+                    .id(idx)
                 } else if item.parsedItemType == .search {
                   Button(action: {
                     #if canImport(UIKit)
@@ -98,7 +99,7 @@ struct BrowserView: View {
                       Spacer()
                     }.foregroundStyle(linkColour)
                   }.buttonStyle(PlainButtonStyle())
-
+                    .id(idx)
                 } else if item.parsedItemType == .text {
                   NavigationLink(destination: FileView(item: item)) {
                     HStack {
@@ -107,6 +108,7 @@ struct BrowserView: View {
                       Spacer()
                     }.foregroundStyle(linkColour)
                   }
+                  .id(idx)
                 } else if item.selector.hasPrefix("URL:") {
                   if let url = URL(string: item.selector.replacingOccurrences(of: "URL:", with: ""))
                   {
@@ -120,6 +122,7 @@ struct BrowserView: View {
                         Spacer()
                       }.foregroundStyle(linkColour)
                     }.buttonStyle(PlainButtonStyle())
+                      .id(idx)
                   }
                 } else if [.doc, .image, .gif, .movie, .sound, .bitmap].contains(
                   item.parsedItemType)
@@ -130,6 +133,7 @@ struct BrowserView: View {
                       Text(item.message)
                       Spacer()
                     }.foregroundStyle(linkColour)
+                      .id(idx)
                   }
                 } else {
                   Button(action: {
@@ -144,25 +148,20 @@ struct BrowserView: View {
                       Spacer()
                     }.foregroundStyle(linkColour)
                   }.buttonStyle(PlainButtonStyle())
-
+                    .id(idx)
                 }
 
               }
-            }.id(topID)
-              //.background(Color.white)
-              .cornerRadius(10)
-              .onChange(of: scrollToTop) {
-                // TODO: Cleanup
-                withAnimation {
-                  // TODO: Fix for macOS
-                  #if os(macOS)
-                    proxy.scrollTo(0, anchor: .top)
-                  #else
-                    proxy.scrollTo(0, anchor: .top)
-                  #endif
+            }
+            //.background(Color.white)
+            .cornerRadius(10)
+            .onChange(of: scrollToTop) {
+              // TODO: Cleanup
+              withAnimation {
+                proxy.scrollTo(0, anchor: .top)
 
-                }
               }
+            }
           }
           .sheet(isPresented: $showSearchInput) {
             if let index = selectedSearchItem, gopherItems.indices.contains(index) {
