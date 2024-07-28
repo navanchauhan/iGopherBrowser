@@ -8,7 +8,7 @@
 import GopherHelpers
 import SwiftUI
 import TelemetryClient
-import swiftGopherClient
+import SwiftGopherClient
 
 func openURL(url: URL) {
   #if os(OSX)
@@ -53,6 +53,8 @@ struct BrowserView: View {
 
   @Namespace var topID
   @State private var scrollToTop: Bool = false
+    
+  @State var currentTask: Task<Void, Never>?
 
   let client = GopherClient()
 
@@ -444,51 +446,61 @@ struct BrowserView: View {
     }
 
     self.url = "\(res.host):\(res.port)\(res.selector)"
-
-    client.sendRequest(to: res.host, port: res.port, message: "\(res.selector)\r\n") { result in
-      switch result {
-      case .success(let resp):
-        //print(resp)
-        var newNode = GopherNode(
-          host: res.host, port: res.port, selector: selector, item: nil,
-          children: convertToHostNodes(resp))
-        backwardStack.append(newNode)
-        if clearForward {
-          forwardStack.removeAll()
-        }
-        print(newNode.selector)
-        if let index = self.hosts.firstIndex(where: { $0.host == res.host && $0.port == res.port })
-        {
-          // TODO: Handle case where first link visited is a subdirectory, should the sidebar auto fetch the rest?
-          print("parent already exists")
-          //hosts[index] = newNode
-          hosts[index].children = hosts[index].children?.map { child in
-            if child.selector == newNode.selector {
-              newNode.message = child.message
-              return newNode
-            } else {
-              return child
-            }
+      
+      currentTask?.cancel()
+      
+      let myHost = res.host
+      let myPort = res.port
+      let mySelector = res.selector
+      
+      currentTask = Task {
+          do {
+              try Task.checkCancellation()
+              let resp = try await client.sendRequest(to: myHost, port: myPort, message: "\(mySelector)\r\n")
+              
+              var newNode = GopherNode(host: myHost, port: myPort, selector: mySelector, item: nil, children: convertToHostNodes(resp))
+              
+              backwardStack.append(newNode)
+              if clearForward {
+                  forwardStack.removeAll()
+              }
+              
+              if let index = self.hosts.firstIndex(where: { $0.host == myHost && $0.port == myPort }) {
+                  // TODO: Handle case where first link visited is a subdirectory, should the sidebar auto fetch the rest?
+                  hosts[index].children = hosts[index].children?.map { child in
+                      if child.selector == newNode.selector {
+                          newNode.message = child.message
+                          return newNode
+                      } else {
+                          return child
+                      }
+                  }
+              } else {
+                  newNode.selector = "/"
+                  hosts.append(newNode)
+              }
+              //TODO: Fix this stupid bodge
+              if self.url != "\(myHost):\(myPort)\(mySelector)" {
+                  print("Different URL being processed right now... Cancelling")
+              } else {
+                  self.gopherItems = resp
+              }
+              
+          } catch is CancellationError {
+              print("Request was cancelled")
+          } catch {
+              TelemetryManager.send(
+                "applicationRequestError", with: ["gopherURL": "\(self.url)", "errorMessage": "\(error)"])
+              print("Error \(error)")
+              var item = gopherItem(rawLine: "Error \(error)")
+              item.message = "Error \(error)"
+              if self.url != "\(myHost):\(myPort)\(mySelector)" {
+                  print("Different URL being processed right now... Cancelling")
+              } else {
+                  self.gopherItems = [item]
+              }
           }
-
-        } else {
-          newNode.selector = "/"
-          hosts.append(newNode)
-          print("created new")
-        }
-        self.gopherItems = resp
-        scrollToTop = !scrollToTop
-        print("ScrollToTop \(scrollToTop), \(self.scrollToTop)")
-
-      case .failure(let error):
-        TelemetryManager.send(
-          "applicationRequestError", with: ["gopherURL": "\(self.url)", "errorMessage": "\(error)"])
-        print("Error \(error)")
-        var item = gopherItem(rawLine: "Error \(error)")
-        item.message = "Error \(error)"
-        self.gopherItems = [item]
       }
-    }
   }
 
   private func convertToHostNodes(_ responseItems: [gopherItem]) -> [GopherNode] {
