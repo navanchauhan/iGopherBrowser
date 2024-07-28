@@ -9,18 +9,18 @@ import Foundation
 import SwiftUI
 
 struct SidebarView: View {
-  let hosts: [GopherNode]
-  var onSelect: (GopherNode) -> Void
+    let hosts: [GopherNode]
+    var onSelect: (GopherNode) -> Void
 
-  var body: some View {
-    VStack {
-      List(hosts, children: \.children) { node in
-        Text(node.message ?? node.host)
-          .onTapGesture {
-            onSelect(node)
-          }
-      }
+    var body: some View {
+        VStack {
+            List(hosts, children: \.children) { node in
+                Text(node.message ?? node.host)
+                    .onTapGesture {
+                        onSelect(node)
+                    }
+            }
+        }
+        .navigationTitle("Your Gophertree")
     }
-    .navigationTitle("Your Gophertree")
-  }
 }
