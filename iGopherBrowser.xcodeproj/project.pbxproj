@@ -16,7 +16,7 @@
 		3E6584872B7409740078C282 /* BookmarksView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E6584862B7409740078C282 /* BookmarksView.swift */; };
 		3E76CF862B36AC2900979E1A /* iGopherBrowserUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E76CF852B36AC2900979E1A /* iGopherBrowserUITests.swift */; };
 		3E76CF882B36AC2900979E1A /* iGopherBrowserUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E76CF872B36AC2900979E1A /* iGopherBrowserUITestsLaunchTests.swift */; };
-		3EC1DF8D2B323A1900EDD707 /* SwiftGopherClient in Frameworks */ = {isa = PBXBuildFile; productRef = 3EC1DF8C2B323A1900EDD707 /* SwiftGopherClient */; };
+		3ECC94072C56F1BC0028D64D /* SwiftGopherClient in Frameworks */ = {isa = PBXBuildFile; productRef = 3ECC94062C56F1BC0028D64D /* SwiftGopherClient */; };
 		3ECFE7432B4493F300AEBAE0 /* TelemetryClient in Frameworks */ = {isa = PBXBuildFile; productRef = 3ECFE7422B4493F300AEBAE0 /* TelemetryClient */; };
 		3EFB9C0D2B2E4F06005EAD7C /* SearchInputView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EFB9C0C2B2E4F06005EAD7C /* SearchInputView.swift */; };
 		3EFB9C0F2B2E6325005EAD7C /* FileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EFB9C0E2B2E6325005EAD7C /* FileView.swift */; };
@@ -60,7 +60,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3EC1DF8D2B323A1900EDD707 /* SwiftGopherClient in Frameworks */,
+				3ECC94072C56F1BC0028D64D /* SwiftGopherClient in Frameworks */,
 				3ECFE7432B4493F300AEBAE0 /* TelemetryClient in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -156,8 +156,8 @@
 			);
 			name = iGopherBrowser;
 			packageProductDependencies = (
-				3EC1DF8C2B323A1900EDD707 /* SwiftGopherClient */,
 				3ECFE7422B4493F300AEBAE0 /* TelemetryClient */,
+				3ECC94062C56F1BC0028D64D /* SwiftGopherClient */,
 			);
 			productName = iGopherBrowser;
 			productReference = 3E1BCC522B297E9B00A4CB69 /* iGopherBrowser.app */;
@@ -189,7 +189,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1500;
-				LastUpgradeCheck = 1500;
+				LastUpgradeCheck = 1530;
 				TargetAttributes = {
 					3E1BCC512B297E9B00A4CB69 = {
 						CreatedOnToolsVersion = 15.0;
@@ -210,8 +210,8 @@
 			);
 			mainGroup = 3E1BCC492B297E9B00A4CB69;
 			packageReferences = (
-				3EC1DF8B2B323A0600EDD707 /* XCRemoteSwiftPackageReference "swift-gopher" */,
 				3ECFE7412B4493F300AEBAE0 /* XCRemoteSwiftPackageReference "SwiftClient" */,
+				3ECC94052C56F1BC0028D64D /* XCRemoteSwiftPackageReference "swift-gopher" */,
 			);
 			productRefGroup = 3E1BCC532B297E9B00A4CB69 /* Products */;
 			projectDirPath = "";
@@ -313,6 +313,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
@@ -374,6 +375,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -403,6 +405,7 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 10;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"iGopherBrowser/Preview Content\"";
 				DEVELOPMENT_TEAM = 6BS49F3GLW;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -446,6 +449,7 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 10;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"iGopherBrowser/Preview Content\"";
 				DEVELOPMENT_TEAM = 6BS49F3GLW;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -484,6 +488,7 @@
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = 6BS49F3GLW;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
@@ -505,6 +510,7 @@
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = 6BS49F3GLW;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
@@ -554,9 +560,9 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		3EC1DF8B2B323A0600EDD707 /* XCRemoteSwiftPackageReference "swift-gopher" */ = {
+		3ECC94052C56F1BC0028D64D /* XCRemoteSwiftPackageReference "swift-gopher" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/navanchauhan/swift-gopher";
+			repositoryURL = "https://github.com/navanchauhan/swift-gopher.git";
 			requirement = {
 				branch = master;
 				kind = branch;
@@ -573,9 +579,9 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		3EC1DF8C2B323A1900EDD707 /* SwiftGopherClient */ = {
+		3ECC94062C56F1BC0028D64D /* SwiftGopherClient */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 3EC1DF8B2B323A0600EDD707 /* XCRemoteSwiftPackageReference "swift-gopher" */;
+			package = 3ECC94052C56F1BC0028D64D /* XCRemoteSwiftPackageReference "swift-gopher" */;
 			productName = SwiftGopherClient;
 		};
 		3ECFE7422B4493F300AEBAE0 /* TelemetryClient */ = {
