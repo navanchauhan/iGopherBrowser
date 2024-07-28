@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import swiftGopherClient
+import SwiftGopherClient
 
 public func getHostAndPort(
   from urlString: String, defaultPort: Int = 70, defaultHost: String = "gopher.navan.dev"

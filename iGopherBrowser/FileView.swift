@@ -9,7 +9,7 @@ import GopherHelpers
 import QuickLook
 import SwiftUI
 import TelemetryClient
-import swiftGopherClient
+import SwiftGopherClient
 
 func determineFileType(data: Data) -> String? {
   let signatures: [Data: String] = [

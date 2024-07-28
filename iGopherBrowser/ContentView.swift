@@ -7,7 +7,7 @@
 
 import GopherHelpers
 import SwiftUI
-import swiftGopherClient
+import SwiftGopherClient
 
 struct GopherNode: Identifiable, Equatable {
   static func == (lhs: GopherNode, rhs: GopherNode) -> Bool {
