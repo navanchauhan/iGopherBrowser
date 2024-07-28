@@ -47,28 +47,29 @@ func determineFileType(data: Data) -> String? {
 struct FileView: View {
   var item: gopherItem
   let client = GopherClient()
-  @State private var fileContent: String = "Loading..."
+  @State private var fileContent: [String] = []
   @State private var fileURL: URL?
   @State private var QLURL: URL?
 
   var body: some View {
     if item.parsedItemType == .text {
       GeometryReader { geometry in
-        ScrollView {
-          VStack {
-            Text(fileContent)
-              .padding()
-              .multilineTextAlignment(.leading)
-              .lineLimit(nil)
-              .frame(maxWidth: .infinity)
-              .fixedSize(horizontal: false, vertical: true)
-              .onAppear {
-                readFile(item)
+          ScrollView {
+              LazyVStack(alignment: .leading, spacing: 0) {
+                  ForEach(fileContent.indices, id: \.self) { index in
+                        Text(fileContent[index])
+                          .font(.system(.body, design: .monospaced))
+                          .textSelection(.enabled)
+                          .padding(.vertical, 2)
+                  }
               }
-            //              .frame(width: geometry.size.width, height: geometry.size.height)
-            Spacer()
-          }.textSelection(.enabled)
-        }
+          }
+          .frame(maxWidth: .infinity, alignment: .leading)
+          .padding()
+          .task {
+              readFile(item)
+          }
+          .listStyle(PlainListStyle())
       }
     } else if [.doc, .image, .gif, .movie, .sound, .bitmap].contains(item.parsedItemType) {  // Preview Document: .pdf, .docx, e.t.c
       // Quicklook
@@ -103,9 +104,18 @@ struct FileView: View {
                 fileData.append(contentsOf: bytes)
               }
             }
+              print("Read entire file")
             if item.parsedItemType == .text {
+                print("parsing string file")
               if let string = String(data: fileData, encoding: .utf8) {
-                self.fileContent = string
+                  print("updating state")
+                  let lines = string.components(separatedBy: .newlines)
+                  let chunkSize = 100
+                  self.fileContent = stride(from: 0, to: lines.count, by: chunkSize).map {
+                                  lines[$0..<min($0 + chunkSize, lines.count)].joined(separator: "\n")
+                              }
+              } else {
+                  print("Could not get file")
               }
               return
             }
@@ -126,7 +136,7 @@ struct FileView: View {
           }
         }
       case .failure(_):
-        self.fileContent = "Unable to fetch file due to network error."
+        self.fileContent = ["Unable to fetch file due to network error."]
       }
     }
 
