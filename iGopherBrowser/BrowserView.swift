@@ -95,7 +95,6 @@ struct BrowserView: View {
                                             hideKeyboard()
                                         #endif
                                         self.selectedSearchItem = idx
-                                        self.showSearchInput = true
                                     }) {
                                         HStack {
                                             Text(Image(systemName: "magnifyingglass"))
@@ -172,6 +171,9 @@ struct BrowserView: View {
                                 proxy.scrollTo(0, anchor: .top)
 
                             }
+                        }
+                        .onChange(of: selectedSearchItem) {
+                            self.showSearchInput = true
                         }
                     }
                     .sheet(isPresented: $showSearchInput) {
