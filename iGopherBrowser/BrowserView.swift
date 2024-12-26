@@ -56,6 +56,8 @@ struct BrowserView: View {
 
     @State var currentTask: Task<Void, Never>?
     
+    @FocusState private var isURLFocused: Bool
+    
     let client = GopherClient()
 
     var body: some View {
@@ -261,6 +263,7 @@ struct BrowserView: View {
                                 Label("Home", systemImage: "house")
                                     .labelStyle(.iconOnly)
                             }
+                            .keyboardShortcut("r", modifiers: [.command])
                             Spacer()
                             Button {
                                 goBack();
@@ -269,6 +272,7 @@ struct BrowserView: View {
                                 Label("Back", systemImage: "chevron.left")
                                     .labelStyle(.iconOnly)
                             }
+                            .keyboardShortcut("[", modifiers: [.command])
                             .disabled(backwardStack.count < 2)
                             Spacer()
                             Button {
@@ -277,6 +281,7 @@ struct BrowserView: View {
                                 Label("Forward", systemImage: "chevron.right")
                                     .labelStyle(.iconOnly)
                             }
+                            .keyboardShortcut("]", modifiers: [.command])
                             .disabled(forwardStack.isEmpty)
                             Spacer()
                             if shareThroughProxy {
@@ -326,6 +331,7 @@ struct BrowserView: View {
                                 Label("Home", systemImage: "house")
                                     .labelStyle(.iconOnly)
                             }
+                            .keyboardShortcut("r", modifiers: [.command])
 
                             #if os(visionOS)
                                 Button {
@@ -342,6 +348,7 @@ struct BrowserView: View {
                                 Label("Back", systemImage: "chevron.left")
                                     .labelStyle(.iconOnly)
                             }
+                            .keyboardShortcut("[", modifiers: [.command])
                             .disabled(backwardStack.count < 2)
 
                             Button {
@@ -350,6 +357,7 @@ struct BrowserView: View {
                                 Label("Forward", systemImage: "chevron.right")
                                     .labelStyle(.iconOnly)
                             }
+                           .keyboardShortcut("]", modifiers: [.command])
                             .disabled(forwardStack.isEmpty)
 
                             TextField("Enter a URL", text: $url)
@@ -357,8 +365,9 @@ struct BrowserView: View {
                                     .keyboardType(.URL)
                                     .autocapitalization(.none)
                                 #endif
+                                    .focused($isURLFocused)
                                 .padding(10)
-                        }
+                       }
                         //.background(Color.white)
                         .cornerRadius(30)
                         if shareThroughProxy {
