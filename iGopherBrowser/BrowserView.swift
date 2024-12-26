@@ -55,7 +55,7 @@ struct BrowserView: View {
     @State private var scrollToTop: Bool = false
 
     @State var currentTask: Task<Void, Never>?
-
+    
     let client = GopherClient()
 
     var body: some View {
@@ -173,7 +173,9 @@ struct BrowserView: View {
                             }
                         }
                         .onChange(of: selectedSearchItem) {
-                            self.showSearchInput = true
+                            if let selectedSearchItem = selectedSearchItem {
+                                self.showSearchInput = true
+                            }
                         }
                     }
                     .sheet(isPresented: $showSearchInput) {
@@ -261,21 +263,8 @@ struct BrowserView: View {
                             }
                             Spacer()
                             Button {
-                                if let curNode = backwardStack.popLast() {
-                                    forwardStack.append(curNode)
-                                    if let prevNode = backwardStack.popLast() {
-                                        TelemetryManager.send(
-                                            "applicationClickedBack",
-                                            with: [
-                                                "gopherURL":
-                                                    "\(prevNode.host):\(prevNode.port)\(prevNode.selector)"
-                                            ])
-                                        performGopherRequest(
-                                            host: prevNode.host, port: prevNode.port,
-                                            selector: prevNode.selector,
-                                            clearForward: false)
-                                    }
-                                }
+                                goBack();
+
                             } label: {
                                 Label("Back", systemImage: "chevron.left")
                                     .labelStyle(.iconOnly)
@@ -283,18 +272,7 @@ struct BrowserView: View {
                             .disabled(backwardStack.count < 2)
                             Spacer()
                             Button {
-                                if let nextNode = forwardStack.popLast() {
-                                    TelemetryManager.send(
-                                        "applicationClickedForward",
-                                        with: [
-                                            "gopherURL":
-                                                "\(nextNode.host):\(nextNode.port)\(nextNode.selector)"
-                                        ])
-                                    performGopherRequest(
-                                        host: nextNode.host, port: nextNode.port,
-                                        selector: nextNode.selector,
-                                        clearForward: false)
-                                }
+                                goForward()
                             } label: {
                                 Label("Forward", systemImage: "chevron.right")
                                     .labelStyle(.iconOnly)
@@ -359,21 +337,7 @@ struct BrowserView: View {
                             #endif
 
                             Button {
-                                if let curNode = backwardStack.popLast() {
-                                    forwardStack.append(curNode)
-                                    if let prevNode = backwardStack.popLast() {
-                                        TelemetryManager.send(
-                                            "applicationClickedBack",
-                                            with: [
-                                                "gopherURL":
-                                                    "\(prevNode.host):\(prevNode.port)\(prevNode.selector)"
-                                            ])
-                                        performGopherRequest(
-                                            host: prevNode.host, port: prevNode.port,
-                                            selector: prevNode.selector,
-                                            clearForward: false)
-                                    }
-                                }
+                                goBack()
                             } label: {
                                 Label("Back", systemImage: "chevron.left")
                                     .labelStyle(.iconOnly)
@@ -381,19 +345,8 @@ struct BrowserView: View {
                             .disabled(backwardStack.count < 2)
 
                             Button {
-                                if let nextNode = forwardStack.popLast() {
-                                    TelemetryManager.send(
-                                        "applicationClickedForward",
-                                        with: [
-                                            "gopherURL":
-                                                "\(nextNode.host):\(nextNode.port)\(nextNode.selector)"
-                                        ])
-                                    performGopherRequest(
-                                        host: nextNode.host, port: nextNode.port,
-                                        selector: nextNode.selector,
-                                        clearForward: false)
-                                }
-                            } label: {
+                                goForward();
+                           } label: {
                                 Label("Forward", systemImage: "chevron.right")
                                     .labelStyle(.iconOnly)
                             }
@@ -461,6 +414,42 @@ struct BrowserView: View {
             #endif
         }
         .accentColor(accentColour)
+    }
+    
+    private func goBack() {
+        if let curNode = backwardStack.popLast() {
+            forwardStack.append(curNode)
+            if let prevNode = backwardStack.popLast() {
+                TelemetryManager.send(
+                    "applicationClickedBack",
+                    with: [
+                        "gopherURL":
+                            "\(prevNode.host):\(prevNode.port)\(prevNode.selector)"
+                    ])
+                performGopherRequest(
+                    host: prevNode.host, port: prevNode.port,
+                    selector: prevNode.selector,
+                    clearForward: false)
+            }
+        }
+    }
+    
+    private func goForward() {
+        if let curNode = backwardStack.popLast() {
+            forwardStack.append(curNode)
+            if let prevNode = backwardStack.popLast() {
+                TelemetryManager.send(
+                    "applicationClickedBack",
+                    with: [
+                        "gopherURL":
+                            "\(prevNode.host):\(prevNode.port)\(prevNode.selector)"
+                    ])
+                performGopherRequest(
+                    host: prevNode.host, port: prevNode.port,
+                    selector: prevNode.selector,
+                    clearForward: false)
+            }
+        }
     }
 
     private func performGopherRequest(
@@ -546,7 +535,7 @@ struct BrowserView: View {
             }
         }
     }
-
+    
     private func convertToHostNodes(_ responseItems: [gopherItem]) -> [GopherNode] {
         var returnItems: [GopherNode] = []
         responseItems.forEach { item in
