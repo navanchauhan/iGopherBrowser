@@ -423,6 +423,21 @@ struct BrowserView: View {
             #endif
         }
         .accentColor(accentColour)
+        
+        .onAppear {
+            #if os(OSX)
+            NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
+                if event.modifierFlags.contains([.option, .command]) && event.charactersIgnoringModifiers == "f" {
+                    isURLFocused = true
+                    return nil
+                } else if event.keyCode == 53 {
+                    isURLFocused = false
+                    return nil
+                }
+                return event
+            }
+            #endif
+        }
     }
     
     private func goBack() {
