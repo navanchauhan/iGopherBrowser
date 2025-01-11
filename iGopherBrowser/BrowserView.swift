@@ -65,7 +65,6 @@ struct BrowserView: View {
             VStack(spacing: 0) {
                 if gopherItems.count >= 1 {
                     ScrollViewReader { proxy in
-
                         List {
                             ForEach(Array(gopherItems.enumerated()), id: \.offset) { idx, item in
                                 if item.parsedItemType == .info {
@@ -169,10 +168,7 @@ struct BrowserView: View {
                         .cornerRadius(10)
                         .onChange(of: scrollToTop) {
                             // TODO: Cleanup
-                            withAnimation {
-                                proxy.scrollTo(0, anchor: .top)
-
-                            }
+                            proxy.scrollTo(0, anchor: .top)
                         }
                         .onChange(of: selectedSearchItem) {
                             if let selectedSearchItem = selectedSearchItem {
@@ -540,6 +536,7 @@ struct BrowserView: View {
                     print("Different URL being processed right now... Cancelling")
                 } else {
                     self.gopherItems = resp
+                    scrollToTop.toggle()
                 }
 
             } catch is CancellationError {
