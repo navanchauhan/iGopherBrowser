@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import AppIntents
 import TelemetryDeck
 
 @main
@@ -27,7 +28,7 @@ struct iGopherBrowserApp: App {
     }
 
     init() {
-        let configuration = TelemetryManagerConfiguration(
+        let configuration = TelemetryDeck.Config(
             appID: "400187ED-ADA9-4AB4-91F8-8825AD8FC67C")
         TelemetryDeck.initialize(config: configuration)
 

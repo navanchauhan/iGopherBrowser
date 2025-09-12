@@ -126,9 +126,9 @@ struct FileView: View {
                         print(fileURL)
 
                         if determineFileType(data: fileData) == nil {
-                            TelemetryManager.send(
+                            TelemetryDeck.signal(
                                 "applicationUnableToDetectFiletype",
-                                with: ["gopherURL": "\(item.host):\(item.port)\(item.selector)"])
+                                parameters: ["gopherURL": "\(item.host):\(item.port)\(item.selector)"])
                         }
 
                         try fileData.write(to: fileURL)

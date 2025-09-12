@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-extension Color: RawRepresentable {
+extension Color: @retroactive RawRepresentable {
 
     public init?(rawValue: String) {
 
@@ -19,7 +19,7 @@ extension Color: RawRepresentable {
         do {
             #if os(macOS)
                 let color =
-                    try NSKeyedUnarchiver.unarchiveTopLevelObjectWithData(data) as? NSColor
+                    (try? NSKeyedUnarchiver.unarchivedObject(ofClass: NSColor.self, from: data))
                     ?? .black
             #else
                 let color =
