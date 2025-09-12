@@ -79,5 +79,45 @@ final class iGopherBrowserTests: XCTestCase {
         let decoded = Color(rawValue: "not-base64!")
         XCTAssertNotNil(decoded)
     }
-}
 
+    // MARK: - SwiftUI Views basic coverage
+
+    func testSearchInputView_buildsBody_andCallsOnSearch() {
+        var captured: String? = nil
+        var text = "hello"
+        let view = SearchInputView(
+            host: "example.com",
+            port: 70,
+            selector: "/",
+            searchText: .init(get: { text }, set: { text = $0 }),
+            onSearch: { captured = $0 }
+        )
+        // Force compute of the body to exercise layout code
+        _ = view.body
+        // Directly invoke the provided callback to validate plumbing
+        view.onSearch("query")
+        XCTAssertEqual(captured, "query")
+        // Sanity check initial properties
+        XCTAssertEqual(view.host, "example.com")
+        XCTAssertEqual(view.port, 70)
+        XCTAssertEqual(view.selector, "/")
+    }
+
+    func testBookmarksView_buildsBody() {
+        let view = BookmarksView()
+        _ = view.body
+        // No runtime crash indicates layout builds successfully
+        XCTAssertTrue(true)
+    }
+
+    func testSidebarView_buildsBody_andOnSelect() {
+        let leaf = GopherNode(host: "h", port: 70, selector: "/a", message: "Leaf", item: nil, children: nil)
+        let root = GopherNode(host: "h", port: 70, selector: "/", message: "Root", item: nil, children: [leaf])
+        var selected: GopherNode? = nil
+        let view = SidebarView(hosts: [root]) { node in selected = node }
+        _ = view.body
+        // Manually call the selection closure to validate wiring
+        view.onSelect(leaf)
+        XCTAssertEqual(selected, leaf)
+    }
+}

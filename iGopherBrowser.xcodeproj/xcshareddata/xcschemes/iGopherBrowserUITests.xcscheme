@@ -22,7 +22,18 @@
       buildConfiguration = "Debug"
       selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
-      shouldUseLaunchSchemeArgsEnv = "YES">
+      shouldUseLaunchSchemeArgsEnv = "YES"
+      codeCoverageEnabled = "YES"
+      onlyGenerateCoverageForSpecifiedTargets = "YES">
+      <CodeCoverageTargets>
+         <BuildableReference
+            BuildableIdentifier = "primary"
+            BlueprintIdentifier = "3E1BCC512B297E9B00A4CB69"
+            BuildableName = "iGopherBrowser.app"
+            BlueprintName = "iGopherBrowser"
+            ReferencedContainer = "container:iGopherBrowser.xcodeproj">
+         </BuildableReference>
+      </CodeCoverageTargets>
       <TestPlans>
          <TestPlanReference
             reference = "container:iGopherBrowserUITests.xctestplan"
