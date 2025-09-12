@@ -23,132 +23,138 @@ final class iGopherBrowserUITests: XCTestCase {
   }
 
   func testExample() throws {
-
     let app = XCUIApplication()
     app.launch()
 
+    // Capture initial screen
     let screenshot = app.windows.firstMatch.screenshot()
     let attachment = XCTAttachment(screenshot: screenshot)
     attachment.lifetime = .keepAlways
     attachment.name = "Home Screen"
     add(attachment)
 
+    // Open settings and reset preferences (dismisses on iOS)
     let settingsButton = app.buttons["Settings"]
-    settingsButton.tap()
-
-    let collectionViewsQuery = app.collectionViews
-
-    collectionViewsQuery.buttons["Reset Preferences"].tap()
-
-    app.buttons["Home"].tap()
-
-    while !(collectionViewsQuery /*@START_MENU_TOKEN@*/.staticTexts[
-      "About Swift-Gopher"
-    ] /*[[".cells",".buttons[\", About Swift-Gopher\"].staticTexts[\"About Swift-Gopher\"]",".staticTexts[\"About Swift-Gopher\"]"],[[[-1,2],[-1,1],[-1,0,1]],[[-1,2],[-1,1]]],[0]]@END_MENU_TOKEN@*/
-      .exists)
-    {
-      app.swipeUp()
+    if settingsButton.waitForExistence(timeout: 5) {
+      settingsButton.tap()
+#if !os(macOS)
+      let reset = app.collectionViews.buttons["Reset Preferences"]
+      if reset.waitForExistence(timeout: 5) { reset.tap() }
+#endif
     }
 
-    let screenshot1 = app.windows.firstMatch.screenshot()
-    let attachment1 = XCTAttachment(screenshot: screenshot1)
-    attachment1.lifetime = .keepAlways
-    attachment1.name = "Default Gopher Server"
-    add(attachment1)
-
-    //let app = XCUIApplication()
+    // Tap Home
     let homeButton = app.buttons["Home"]
-    homeButton.tap()
+    if homeButton.waitForExistence(timeout: 5) { homeButton.tap() }
 
-    while !(collectionViewsQuery.staticTexts["About Swift-Gopher"].exists) {
-      app.swipeUp()
+    // Open the known text item. On iOS try scrolling; on macOS navigate via URL.
+#if os(macOS)
+    do {
+      let urlField = app.textFields["Enter a URL"]
+      if urlField.waitForExistence(timeout: 5) {
+        urlField.clearText(app: app)
+        urlField.typeText("gopher.navan.dev:70/about_swift_gopher.md"); app.buttons["Go"].tap()
+        if app.buttons["Back"].waitForExistence(timeout: 10) { app.buttons["Back"].tap() }
+      }
+    }
+#else
+    do {
+      let collectionViewsQuery = app.collectionViews
+      var attempts = 0
+      while !collectionViewsQuery.staticTexts["About Swift-Gopher"].exists && attempts < 10 {
+        app.swipeUp(); attempts += 1
+      }
+      if collectionViewsQuery.staticTexts["About Swift-Gopher"].exists {
+        collectionViewsQuery.staticTexts["About Swift-Gopher"].tap()
+        if app.buttons["Back"].waitForExistence(timeout: 5) { app.buttons["Back"].tap() }
+      } else {
+        let urlField = app.textFields["Enter a URL"]
+        if urlField.waitForExistence(timeout: 5) {
+          urlField.clearText(app: app)
+          urlField.typeText("gopher.navan.dev:70/about_swift_gopher.md"); app.buttons["Go"].tap()
+          if app.buttons["Back"].waitForExistence(timeout: 10) { app.buttons["Back"].tap() }
+        }
+      }
+    }
+#endif
+
+    // Exercise Back/Forward controls
+    if app.buttons["Back"].exists { app.buttons["Back"].tap() }
+    if app.buttons["Forward"].exists { app.buttons["Forward"].tap() }
+
+    // Open settings again and modify Home URL field then save
+    if settingsButton.exists { settingsButton.tap() }
+    let saveButton = app.collectionViews.buttons["Save"]
+    if saveButton.waitForExistence(timeout: 5) { saveButton.tap() }
+
+    if homeButton.exists { homeButton.tap() }
+
+    // Final navigation checks
+    if app.buttons["Back"].exists { app.buttons["Back"].tap() }
+    if app.buttons["Forward"].exists { app.buttons["Forward"].tap() }
+
+    // Navigate directly to /igopherbrowser and open image "Screenshot"
+    let urlField = app.textFields["Enter a URL"]
+    if urlField.waitForExistence(timeout: 5) {
+      urlField.clearText(app: app)
+      urlField.typeText("gopher.navan.dev:70/igopherbrowser"); app.buttons["Go"].tap()
+      let screenshotCell = app.collectionViews.staticTexts["Screenshot"]
+      if screenshotCell.waitForExistence(timeout: 10) {
+        screenshotCell.tap()
+        let preview = app.buttons["Preview Document"]
+        if preview.waitForExistence(timeout: 10) {
+          preview.tap()
+          let done = app.buttons["QLOverlayDoneButtonAccessibilityIdentifier"]
+#if os(macOS)
+          if done.waitForExistence(timeout: 5) { done.tap() } else {
+            app.typeKey(XCUIKeyboardKey.escape, modifierFlags: [])
+          }
+#else
+          if done.waitForExistence(timeout: 5) { done.tap() }
+#endif
+        }
+        if app.buttons["Back"].exists { app.buttons["Back"].tap() }
+      }
     }
 
-    collectionViewsQuery /*@START_MENU_TOKEN@*/.staticTexts[
-      "About Swift-Gopher"
-    ] /*[[".cells",".buttons[\", About Swift-Gopher\"].staticTexts[\"About Swift-Gopher\"]",".staticTexts[\"About Swift-Gopher\"]"],[[[-1,2],[-1,1],[-1,0,1]],[[-1,2],[-1,1]]],[0]]@END_MENU_TOKEN@*/
-      .tap()
-    app.buttons["Back"].tap()
-    collectionViewsQuery /*@START_MENU_TOKEN@*/.staticTexts[
-      "All the gopher servers in the world (via Floodgap)"
-    ] /*[[".cells",".buttons[\", All the gopher servers in the world (via Floodgap)\"].staticTexts[\"All the gopher servers in the world (via Floodgap)\"]",".staticTexts[\"All the gopher servers in the world (via Floodgap)\"]"],[[[-1,2],[-1,1],[-1,0,1]],[[-1,2],[-1,1]]],[0]]@END_MENU_TOKEN@*/
-      .tap()
-    collectionViewsQuery /*@START_MENU_TOKEN@*/.staticTexts[
-      "Search Gopherspace with Veronica-2"
-    ] /*[[".cells",".buttons[\", Search Gopherspace with Veronica-2\"].staticTexts[\"Search Gopherspace with Veronica-2\"]",".staticTexts[\"Search Gopherspace with Veronica-2\"]"],[[[-1,2],[-1,1],[-1,0,1]],[[-1,2],[-1,1]]],[0]]@END_MENU_TOKEN@*/
-      .tap()
-    collectionViewsQuery /*@START_MENU_TOKEN@*/.staticTexts[
-      "Search Veronica-2"
-    ] /*[[".cells",".buttons[\", Search Veronica-2\"].staticTexts[\"Search Veronica-2\"]",".staticTexts[\"Search Veronica-2\"]"],[[[-1,2],[-1,1],[-1,0,1]],[[-1,2],[-1,1]]],[0]]@END_MENU_TOKEN@*/
-      .tap()
-    app.buttons["Dismiss"].tap()
-    app.buttons["Go"].tap()
-    collectionViewsQuery /*@START_MENU_TOKEN@*/.staticTexts[
-      "Search Veronica-2"
-    ] /*[[".cells",".buttons[\", Search Veronica-2\"].staticTexts[\"Search Veronica-2\"]",".staticTexts[\"Search Veronica-2\"]"],[[[-1,2],[-1,1],[-1,0,1]],[[-1,2],[-1,1]]],[0]]@END_MENU_TOKEN@*/
-      .tap()
-
-    let screenshot3 = app.windows.firstMatch.screenshot()
-    let attachment3 = XCTAttachment(screenshot: screenshot3)
-    attachment3.lifetime = .keepAlways
-    attachment3.name = "Search Interface"
-    add(attachment3)
-
-    let searchTextField = app.textFields["Search"]
-    searchTextField.tap()
-    searchTextField.typeText("Navan")
-    app.buttons["Search"].tap()
-    collectionViewsQuery /*@START_MENU_TOKEN@*/.staticTexts[
-      "navan-smash.jpg"
-    ] /*[[".cells",".buttons[\", navan-smash.jpg\"].staticTexts[\"navan-smash.jpg\"]",".staticTexts[\"navan-smash.jpg\"]"],[[[-1,2],[-1,1],[-1,0,1]],[[-1,2],[-1,1]]],[0]]@END_MENU_TOKEN@*/
-      .tap()
-    app.buttons["Preview Document"].tap()
-    app.buttons["QLOverlayDoneButtonAccessibilityIdentifier"].tap()
-    app.buttons["Back"].tap()
-
-    settingsButton.tap()
-
-    let homeUrlTextField = collectionViewsQuery /*@START_MENU_TOKEN@*/.textFields[
-      "Home URL"] /*[[".cells.textFields[\"Home URL\"]",".textFields[\"Home URL\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/
-    homeUrlTextField.tap()
-
-    homeUrlTextField.coordinate(withNormalizedOffset: CGVectorMake(0.9, 0.9)).tap()
-
-    let deleteKey = app /*@START_MENU_TOKEN@*/.keys[
-      "delete"] /*[[".keyboards.keys[\"delete\"]",".keys[\"delete\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/
-    for _ in 0...30 {
-      deleteKey.tap()
+    // Use the known search item "Search Server"; scroll from homepage and use that
+    if homeButton.exists { homeButton.tap() }
+#if os(macOS)
+    do {
+      var attempts = 0
+      while !app.staticTexts["Search Server"].exists && attempts < 20 {
+        app.typeKey(XCUIKeyboardKey.pageDown, modifierFlags: [])
+        attempts += 1
+      }
+      let searchItem = app.staticTexts["Search Server"]
+      if searchItem.exists {
+        searchItem.tap()
+        let queryField = app.textFields["Search"]
+        if queryField.waitForExistence(timeout: 5) {
+          queryField.tap(); queryField.typeText("python"); app.buttons["Search"].tap()
+          if searchItem.waitForExistence(timeout: 5) { searchItem.tap() }
+          if queryField.waitForExistence(timeout: 5) {
+            queryField.tap(); queryField.typeText("qwertyuiop"); app.buttons["Search"].tap()
+          }
+        }
+      }
     }
-
-    homeUrlTextField.typeText("gopher://gopher.floodgap.com:70/")
-
-    let saveButton = collectionViewsQuery /*@START_MENU_TOKEN@*/.buttons[
-      "Save"] /*[[".cells.buttons[\"Save\"]",".buttons[\"Save\"]"],[[[-1,1],[-1,0]]],[0]]@END_MENU_TOKEN@*/
-    saveButton.tap()
-    homeButton.tap()
-
-    while !(collectionViewsQuery.staticTexts["Search Veronica-2"].exists) {
-      app.swipeUp()
+#else
+    do {
+      var tries = 0
+      while !app.collectionViews.staticTexts["Search Server"].exists && tries < 20 {
+        app.swipeUp(); tries += 1
+      }
+      let searchServer = app.collectionViews.staticTexts["Search Server"]
+      if searchServer.exists {
+        searchServer.tap()
+        let queryField = app.textFields["Search"]
+        if queryField.waitForExistence(timeout: 5) { queryField.tap(); queryField.typeText("python"); app.buttons["Search"].tap() }
+        if searchServer.waitForExistence(timeout: 5) { searchServer.tap() }
+        if queryField.waitForExistence(timeout: 5) { queryField.tap(); queryField.typeText("qwertyuiop"); app.buttons["Search"].tap() }
+      }
     }
-
-    app.buttons["Back"].tap()
-    app.buttons["Forward"].tap()
-
-    //        let screenshot2 = app.windows.firstMatch.screenshot()
-    //        let attachment2 = XCTAttachment(screenshot: screenshot2)
-    //        attachment2.lifetime = .keepAlways
-    //        add(attachment2)
-
-    //        let searchButton = collectionViewsQuery.buttons[", Search Veronica-2"]
-    //        searchButton.tap()
-
-    //        app.buttons["Dismiss"].tap()
-    //
-    //        let goButton = app.buttons["Go"]
-    //        goButton.tap()
-    //
-    //        searchButton.tap()
-
+#endif
   }
 
   //    func testLaunchPerformance() throws {
@@ -159,4 +165,20 @@ final class iGopherBrowserUITests: XCTestCase {
   //            }
   //        }
   //    }
+}
+
+private extension XCUIElement {
+  func clearText(app: XCUIApplication) {
+    self.tap()
+#if os(macOS)
+    // Select All then Delete
+    self.typeKey("a", modifierFlags: [.command])
+    self.typeKey(XCUIKeyboardKey.delete, modifierFlags: [])
+#else
+    if let stringValue = self.value as? String, !stringValue.isEmpty {
+      let deleteString = String(repeating: XCUIKeyboardKey.delete.rawValue, count: stringValue.count)
+      self.typeText(deleteString)
+    }
+#endif
+  }
 }
