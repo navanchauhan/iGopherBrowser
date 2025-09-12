@@ -132,7 +132,7 @@ struct BrowserView: View {
                                         }.buttonStyle(PlainButtonStyle())
                                             .id(idx)
                                     }
-                                } else if [.doc, .image, .gif, .movie, .sound, .bitmap].contains(
+                                } else if [.doc, .image, .gif, .movie, .sound, .bitmap, .binary].contains(
                                     item.parsedItemType)
                                 {
                                     NavigationLink(destination: FileView(item: item)) {
