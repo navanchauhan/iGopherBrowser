@@ -95,7 +95,9 @@ struct BrowserView: View {
                                         #if canImport(UIKit)
                                             hideKeyboard()
                                         #endif
+                                        // Always present the search sheet, even when re-tapping the same item
                                         self.selectedSearchItem = idx
+                                        self.showSearchInput = true
                                     }) {
                                         HStack {
                                             Text(Image(systemName: "magnifyingglass"))
@@ -176,7 +178,10 @@ struct BrowserView: View {
                             }
                         }
                     }
-                    .sheet(isPresented: $showSearchInput) {
+                    .sheet(isPresented: $showSearchInput, onDismiss: {
+                        // Reset selection so tapping the same search item will work again
+                        self.selectedSearchItem = nil
+                    }) {
                         if let index = selectedSearchItem, gopherItems.indices.contains(index) {
                             let searchItem = gopherItems[index]
                             SearchInputView(

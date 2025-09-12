@@ -59,6 +59,7 @@ extension Color: @retroactive RawRepresentable {
 }
 
 struct SettingsView: View {
+    @Environment(\.colorScheme) var colorScheme
 
     @AppStorage("accentColour", store: .standard) var accentColour: Color = Color(.blue)
     @AppStorage("linkColour", store: .standard) var linkColour: Color = Color(.white)
@@ -77,18 +78,146 @@ struct SettingsView: View {
     @Environment(\.dismiss) var dismiss
 
     var body: some View {
+        Group {
+        #if os(macOS)
+        VStack(alignment: .leading, spacing: 0) {
+            // Navigation section
+            VStack(alignment: .leading, spacing: 12) {
+                Text("Navigation")
+                    .font(.headline)
+                    .foregroundColor(.primary)
+                
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Home URL")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                    
+                    TextField("Enter home URL", text: $homeURLString)
+                        .textFieldStyle(.roundedBorder)
+                        .disableAutocorrection(true)
+                        .onSubmit {
+                            if let url = URL(string: homeURLString) {
+                                self.homeURL = url
+                            }
+                        }
+                    
+                    HStack(spacing: 8) {
+                        Button("Save") {
+                            if let url = URL(string: homeURLString) {
+                                homeURL = url
+                                print("Saved \(self.homeURL)")
+                            } else {
+                                self.alertMessage = "Unable to convert \(homeURLString) to a URL"
+                                self.showAlert = true
+                            }
+                        }
+                        .buttonStyle(.bordered)
+                        
+                        Button("Reset to Default") {
+                            self.homeURL = URL(string: "gopher://gopher.navan.dev:70/")!
+                            self.homeURLString = "gopher://gopher.navan.dev:70/"
+                        }
+                        .buttonStyle(.bordered)
+                        
+                        Spacer()
+                    }
+                }
+            }
+            .padding(.bottom, 20)
+            
+            Divider()
+            
+            // Appearance section
+            VStack(alignment: .leading, spacing: 12) {
+                Text("Appearance")
+                    .font(.headline)
+                    .foregroundColor(.primary)
+                
+                VStack(alignment: .leading, spacing: 12) {
+                    HStack {
+                        ColorPicker("Link Color", selection: $linkColour)
+                            .labelsHidden()
+                        Text("Link Color")
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                    
+                    HStack {
+                        ColorPicker("Accent Color", selection: $accentColour)
+                            .labelsHidden()
+                        Text("Accent Color")
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                    
+                    HStack {
+                        Button("Reset Colors") {
+                            self.linkColour = Color(.white)
+                            self.accentColour = Color(.blue)
+                        }
+                        .buttonStyle(.bordered)
+                        
+                        Spacer()
+                    }
+                }
+            }
+            .padding(.vertical, 20)
+            
+            Divider()
+            
+            // Privacy section
+            VStack(alignment: .leading, spacing: 12) {
+                Text("Privacy")
+                    .font(.headline)
+                    .foregroundColor(.primary)
+                
+                VStack(alignment: .leading, spacing: 8) {
+                    Toggle("Opt out of anonymous telemetry", isOn: $telemetryOptOut)
+                        .onChange(of: telemetryOptOut) { _, newValue in
+                            TelemetryDeck.terminate()
+                            let cfg = TelemetryDeck.Config(appID: "400187ED-ADA9-4AB4-91F8-8825AD8FC67C")
+                            cfg.analyticsDisabled = newValue
+                            TelemetryDeck.initialize(config: cfg)
+                        }
+                    
+                    Text("Opt out of anonymous telemetry that tracks crashes and random errors.")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+            .padding(.vertical, 20)
+            
+            Divider()
+            
+            // Share Settings section
+            VStack(alignment: .leading, spacing: 12) {
+                Text("Sharing")
+                    .font(.headline)
+                    .foregroundColor(.primary)
+                
+                VStack(alignment: .leading, spacing: 8) {
+                    Toggle("Share links through HTTP(s) proxy", isOn: $shareThroughProxy)
+                    
+                    Text("Enabling this option shares Gopher URLs through an HTTP proxy, allowing people to view the page without needing a Gopher client.")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+            .padding(.top, 20)
+            
+            Spacer()
+        }
+        .padding(24)
+        .frame(minWidth: 450, maxWidth: 550)
+        .frame(minHeight: 500, maxHeight: 650)
+        #else
         Form {
             Section(header: Text("Preferences")) {
                 VStack {
                     TextField("Home URL", text: $homeURLString)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         .disableAutocorrection(true)
-                        //            .onAppear {
-                        //              // Convert URL to String when the view appears
-                        //              self.homeURLString = homeURL.absoluteString
-                        //            }
                         .onSubmit {
-                            // Convert String back to URL when the user submits the text
                             if let url = URL(string: homeURLString) {
                                 self.homeURL = url
                             }
@@ -140,7 +269,11 @@ struct SettingsView: View {
                 ColorPicker("Link Colour", selection: $linkColour)
                 ColorPicker("Accent Colour", selection: $accentColour)
                 Button("Reset Colours") {
-                    self.linkColour = Color(.white)
+                    #if os(iOS)
+                        self.linkColour = colorScheme == .dark ? Color(.white) : Color(.systemBlue)
+                    #else
+                        self.linkColour = Color(.white)
+                    #endif
                     self.accentColour = Color(.blue)
                 }
             }
@@ -163,10 +296,11 @@ struct SettingsView: View {
                 }
             #endif
         }
-        #if os(OSX)
-            .padding(20)
-            .frame(width: 350, height: 350)
         #endif
+        }
+        .onAppear {
+            self.homeURLString = homeURL.absoluteString
+        }
         .alert(isPresented: $showAlert) {
             Alert(
                 title: Text("Error Saving"),
