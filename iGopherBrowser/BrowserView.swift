@@ -8,7 +8,7 @@
 import GopherHelpers
 import SwiftGopherClient
 import SwiftUI
-import TelemetryClient
+import TelemetryDeck
 
 func openURL(url: URL) {
     #if os(OSX)
@@ -143,9 +143,9 @@ struct BrowserView: View {
                                     }
                                 } else {
                                     Button(action: {
-                                        TelemetryManager.send(
+                                        TelemetryDeck.signal(
                                             "applicationBrowsedUnknown",
-                                            with: [
+                                            parameters: [
                                                 "gopherURL":
                                                     "\(item.host):\(item.port)\(item.selector)"
                                             ])
@@ -166,12 +166,12 @@ struct BrowserView: View {
                         }
                         //.background(Color.white)
                         .cornerRadius(10)
-                        .onChange(of: scrollToTop) {
+                        .onChange(of: scrollToTop) { _, _ in
                             // TODO: Cleanup
                             proxy.scrollTo(0, anchor: .top)
                         }
-                        .onChange(of: selectedSearchItem) {
-                            if let selectedSearchItem = selectedSearchItem {
+                        .onChange(of: selectedSearchItem) { _, newValue in
+                            if newValue != nil {
                                 self.showSearchInput = true
                             }
                         }
@@ -198,8 +198,8 @@ struct BrowserView: View {
                                 Button("Dismiss") {
                                     self.showSearchInput = false
                                 }.onAppear {
-                                    TelemetryManager.send(
-                                        "applicationSearchError", with: ["gopherURL": "\(self.url)"]
+                                    TelemetryDeck.signal(
+                                        "applicationSearchError", parameters: ["gopherURL": "\(self.url)"]
                                     )
                                 }
                             }
@@ -219,7 +219,7 @@ struct BrowserView: View {
 
                                 TextField("Enter a URL", text: $url)
                                     .keyboardType(.URL)
-                                    .autocapitalization(.none)
+                                    .textInputAutocapitalization(.never)
                                     .padding(10)
                                     .background(Color.gray.opacity(0.2))
                                     .cornerRadius(10)
@@ -230,12 +230,12 @@ struct BrowserView: View {
 
                             Button(
                                 "Go",
-                                action: {
-                                    TelemetryManager.send(
-                                        "applicationClickedGo", with: ["gopherURL": "\(self.url)"])
-                                    performGopherRequest(clearForward: false)
+                            action: {
+                                TelemetryDeck.signal(
+                                    "applicationClickedGo", parameters: ["gopherURL": "\(self.url)"])
+                                performGopherRequest(clearForward: false)
 
-                                }
+                            }
                             )
                             .keyboardShortcut(.defaultAction)
                             .onSubmit {
@@ -249,8 +249,8 @@ struct BrowserView: View {
                             Spacer()
                             Button {
                                 print(homeURL, "home")
-                                TelemetryManager.send(
-                                    "applicationClickedHome", with: ["gopherURL": "\(self.url)"])
+                                TelemetryDeck.signal(
+                                    "applicationClickedHome", parameters: ["gopherURL": "\(self.url)"])
                                 performGopherRequest(
                                     host: homeURL.host ?? "gopher.navan.dev",
                                     port: homeURL.port ?? 70,
@@ -317,8 +317,8 @@ struct BrowserView: View {
                         HStack {
                             Spacer()
                             Button {
-                                TelemetryManager.send(
-                                    "applicationClickedHome", with: ["gopherURL": "\(self.url)"])
+                                TelemetryDeck.signal(
+                                    "applicationClickedHome", parameters: ["gopherURL": "\(self.url)"])
                                 performGopherRequest(
                                     host: homeURL.host ?? "gopher.navan.dev",
                                     port: homeURL.port ?? 70,
@@ -359,7 +359,7 @@ struct BrowserView: View {
                             TextField("Enter a URL", text: $url)
                                 #if !os(OSX)
                                     .keyboardType(.URL)
-                                    .autocapitalization(.none)
+                                    .textInputAutocapitalization(.never)
                                 #endif
                                     .focused($isURLFocused)
                                 .padding(10)
@@ -380,8 +380,8 @@ struct BrowserView: View {
                         Button(
                             "Go",
                             action: {
-                                TelemetryManager.send(
-                                    "applicationClickedGo", with: ["gopherURL": "\(self.url)"])
+                                TelemetryDeck.signal(
+                                    "applicationClickedGo", parameters: ["gopherURL": "\(self.url)"])
                                 performGopherRequest(clearForward: false)
                             }
                         )
@@ -394,8 +394,8 @@ struct BrowserView: View {
                 #endif
             }
         }
-        .onChange(of: selectedNode) {
-            if let node = selectedNode {
+        .onChange(of: selectedNode) { _, newValue in
+            if let node = newValue {
                 performGopherRequest(host: node.host, port: node.port, selector: node.selector)
             }
         }
@@ -440,9 +440,9 @@ struct BrowserView: View {
         if let curNode = backwardStack.popLast() {
             forwardStack.append(curNode)
             if let prevNode = backwardStack.popLast() {
-                TelemetryManager.send(
+                TelemetryDeck.signal(
                     "applicationClickedBack",
-                    with: [
+                    parameters: [
                         "gopherURL":
                             "\(prevNode.host):\(prevNode.port)\(prevNode.selector)"
                     ])
@@ -458,9 +458,9 @@ struct BrowserView: View {
         if let curNode = backwardStack.popLast() {
             forwardStack.append(curNode)
             if let prevNode = backwardStack.popLast() {
-                TelemetryManager.send(
+                TelemetryDeck.signal(
                     "applicationClickedBack",
-                    with: [
+                    parameters: [
                         "gopherURL":
                             "\(prevNode.host):\(prevNode.port)\(prevNode.selector)"
                     ])
@@ -542,9 +542,9 @@ struct BrowserView: View {
             } catch is CancellationError {
                 print("Request was cancelled")
             } catch {
-                TelemetryManager.send(
+                TelemetryDeck.signal(
                     "applicationRequestError",
-                    with: ["gopherURL": "\(self.url)", "errorMessage": "\(error)"])
+                    parameters: ["gopherURL": "\(self.url)", "errorMessage": "\(error)"])
                 print("Error \(error)")
                 var item = gopherItem(rawLine: "Error \(error)")
                 item.message = "Error \(error)"

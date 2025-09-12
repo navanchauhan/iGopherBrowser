@@ -6,8 +6,9 @@
 //
 
 import SwiftUI
+import TelemetryDeck
 
-extension Color: RawRepresentable {
+extension Color: @retroactive RawRepresentable {
 
     public init?(rawValue: String) {
 
@@ -19,7 +20,7 @@ extension Color: RawRepresentable {
         do {
             #if os(macOS)
                 let color =
-                    try NSKeyedUnarchiver.unarchiveTopLevelObjectWithData(data) as? NSColor
+                    (try? NSKeyedUnarchiver.unarchivedObject(ofClass: NSColor.self, from: data))
                     ?? .black
             #else
                 let color =
@@ -62,6 +63,7 @@ struct SettingsView: View {
     @AppStorage("accentColour", store: .standard) var accentColour: Color = Color(.blue)
     @AppStorage("linkColour", store: .standard) var linkColour: Color = Color(.white)
     @AppStorage("shareThroughProxy", store: .standard) var shareThroughProxy: Bool = true
+    @AppStorage("telemetryOptOut", store: .standard) var telemetryOptOut: Bool = false
 
     #if os(macOS)
         @AppStorage("homeURL") var homeURL: URL = URL(string: "gopher://gopher.navan.dev:70/")!
@@ -117,6 +119,22 @@ struct SettingsView: View {
                             })
                     }
                 }
+            }
+            Section {
+                Toggle("Opt out of anonymous telemetry", isOn: $telemetryOptOut)
+                    .toggleStyle(.switch)
+                    .onChange(of: telemetryOptOut) { _, newValue in
+                        TelemetryDeck.terminate()
+                        let cfg = TelemetryDeck.Config(appID: "400187ED-ADA9-4AB4-91F8-8825AD8FC67C")
+                        cfg.analyticsDisabled = newValue
+                        TelemetryDeck.initialize(config: cfg)
+                    }
+            } header: {
+                Text("Privacy")
+            } footer: {
+                Text("Opt out of anonymous telemetry that tracks crashes and random errors.")
+                    .font(.caption)
+                    .foregroundColor(.gray)
             }
             Section(header: Text("UI Settings")) {
                 ColorPicker("Link Colour", selection: $linkColour)
