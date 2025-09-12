@@ -30,6 +30,7 @@ struct iGopherBrowserApp: App {
     init() {
         let configuration = TelemetryDeck.Config(
             appID: "400187ED-ADA9-4AB4-91F8-8825AD8FC67C")
+        configuration.analyticsDisabled = UserDefaults.standard.bool(forKey: "telemetryOptOut")
         TelemetryDeck.initialize(config: configuration)
 
         TelemetryDeck.signal("applicationDidFinishLaunching")
