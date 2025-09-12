@@ -8,7 +8,7 @@
 import GopherHelpers
 import SwiftGopherClient
 import SwiftUI
-import TelemetryClient
+import TelemetryDeck
 
 func openURL(url: URL) {
     #if os(OSX)

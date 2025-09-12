@@ -17,7 +17,7 @@
 		3E76CF862B36AC2900979E1A /* iGopherBrowserUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E76CF852B36AC2900979E1A /* iGopherBrowserUITests.swift */; };
 		3E76CF882B36AC2900979E1A /* iGopherBrowserUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E76CF872B36AC2900979E1A /* iGopherBrowserUITestsLaunchTests.swift */; };
 		3ECC94072C56F1BC0028D64D /* SwiftGopherClient in Frameworks */ = {isa = PBXBuildFile; productRef = 3ECC94062C56F1BC0028D64D /* SwiftGopherClient */; };
-		3ECFE7432B4493F300AEBAE0 /* TelemetryClient in Frameworks */ = {isa = PBXBuildFile; productRef = 3ECFE7422B4493F300AEBAE0 /* TelemetryClient */; };
+		3ECFE7432B4493F300AEBAE0 /* TelemetryDeck in Frameworks */ = {isa = PBXBuildFile; productRef = 3ECFE7422B4493F300AEBAE0 /* TelemetryDeck */; };
 		3EFB9C0D2B2E4F06005EAD7C /* SearchInputView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EFB9C0C2B2E4F06005EAD7C /* SearchInputView.swift */; };
 		3EFB9C0F2B2E6325005EAD7C /* FileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EFB9C0E2B2E6325005EAD7C /* FileView.swift */; };
 		3EFB9C112B2E869C005EAD7C /* BrowserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EFB9C102B2E869C005EAD7C /* BrowserView.swift */; };
@@ -61,7 +61,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				3ECC94072C56F1BC0028D64D /* SwiftGopherClient in Frameworks */,
-				3ECFE7432B4493F300AEBAE0 /* TelemetryClient in Frameworks */,
+				3ECFE7432B4493F300AEBAE0 /* TelemetryDeck in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -156,7 +156,7 @@
 			);
 			name = iGopherBrowser;
 			packageProductDependencies = (
-				3ECFE7422B4493F300AEBAE0 /* TelemetryClient */,
+				3ECFE7422B4493F300AEBAE0 /* TelemetryDeck */,
 				3ECC94062C56F1BC0028D64D /* SwiftGopherClient */,
 			);
 			productName = iGopherBrowser;
@@ -210,7 +210,7 @@
 			);
 			mainGroup = 3E1BCC492B297E9B00A4CB69;
 			packageReferences = (
-				3ECFE7412B4493F300AEBAE0 /* XCRemoteSwiftPackageReference "SwiftClient" */,
+				3ECFE7412B4493F300AEBAE0 /* XCRemoteSwiftPackageReference "SwiftSDK" */,
 				3ECC94052C56F1BC0028D64D /* XCRemoteSwiftPackageReference "swift-gopher" */,
 			);
 			productRefGroup = 3E1BCC532B297E9B00A4CB69 /* Products */;
@@ -568,12 +568,12 @@
 				kind = branch;
 			};
 		};
-		3ECFE7412B4493F300AEBAE0 /* XCRemoteSwiftPackageReference "SwiftClient" */ = {
+		3ECFE7412B4493F300AEBAE0 /* XCRemoteSwiftPackageReference "SwiftSDK" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/TelemetryDeck/SwiftClient";
+			repositoryURL = "https://github.com/TelemetryDeck/SwiftSDK";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 1.5.0;
+				minimumVersion = 2.0.0;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
@@ -584,10 +584,10 @@
 			package = 3ECC94052C56F1BC0028D64D /* XCRemoteSwiftPackageReference "swift-gopher" */;
 			productName = SwiftGopherClient;
 		};
-		3ECFE7422B4493F300AEBAE0 /* TelemetryClient */ = {
+		3ECFE7422B4493F300AEBAE0 /* TelemetryDeck */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 3ECFE7412B4493F300AEBAE0 /* XCRemoteSwiftPackageReference "SwiftClient" */;
-			productName = TelemetryClient;
+			package = 3ECFE7412B4493F300AEBAE0 /* XCRemoteSwiftPackageReference "SwiftSDK" */;
+			productName = TelemetryDeck;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
