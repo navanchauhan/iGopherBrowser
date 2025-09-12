@@ -29,13 +29,9 @@ func determineFileType(data: Data) -> String? {
         Data([0x52, 0x49, 0x46, 0x46]): "wav",
         Data([0x00, 0x00, 0x00, 0x18, 0x66, 0x74, 0x79, 0x70]): "mp4",
         Data([0x6D, 0x6F, 0x6F, 0x76]): "mov",
+        Data([0x1F, 0x8B]): "gz",
             // Add other file signatures as needed
     ]
-
-    // Debug file signatures
-    //    for byte in data.prefix(10) {
-    //        print(String(format: "%02x", byte), terminator: " ")
-    //    }
 
     // Check for each signature
     for (signature, fileType) in signatures {
@@ -53,8 +49,8 @@ struct FileView: View {
     @State private var fileContent: [String] = []
     @State private var fileURL: URL?
     @State private var QLURL: URL?
-    @State private var downloadedData: Data?
     @State private var isSaving: Bool = false
+    @State private var downloadedData: Data?
     @State private var showRawUnknown: Bool = false
 
     var body: some View {
@@ -87,7 +83,7 @@ struct FileView: View {
         } else if [.doc, .image, .gif, .movie, .sound, .bitmap].contains(item.parsedItemType) {  // Preview Document: .pdf, .docx, e.t.c
             // QuickLook + Download
             if let url = fileURL {
-                VStack(alignment: .leading, spacing: 12) {
+                VStack(spacing: 12) {
                     filenameLabel()
                     Button("Preview Document") {
                         print(url)
@@ -108,7 +104,7 @@ struct FileView: View {
                         Button(showRawUnknown ? "Hide Raw" : "Show Raw") {
                             showRawUnknown.toggle()
                         }
-                        downloadControl(label: "Save As…")
+                        downloadControl()
                     }
                     if showRawUnknown, let data = downloadedData {
                         ScrollView {
@@ -147,9 +143,7 @@ struct FileView: View {
                         }
                         print("Read entire file")
                         if item.parsedItemType == .text {
-                            print("parsing string file")
                             if let string = String(data: fileData, encoding: .utf8) {
-                                print("updating state")
                                 let lines = string.components(separatedBy: .newlines)
                                 let chunkSize = 100
                                 self.fileContent = stride(from: 0, to: lines.count, by: chunkSize)
@@ -163,13 +157,12 @@ struct FileView: View {
                                 try fileData.write(to: textURL)
                                 self.fileURL = textURL
                                 self.downloadedData = fileData
-                            } else {
-                                print("Could not get file")
+                                return
                             }
-                            return
+                            // fall through to binary flow if decoding fails
                         }
                         let fileURL = tempDirURL.appendingPathComponent(
-                            UUID().uuidString + ".\(determineFileType(data: fileData) ?? "unkown")")
+                            UUID().uuidString + ".\(determineFileType(data: fileData) ?? "unknown")")
                         print(fileURL)
 
                         if determineFileType(data: fileData) == nil {
@@ -194,18 +187,18 @@ struct FileView: View {
 
     // MARK: - Download / Save helpers
     @ViewBuilder
-    private func downloadControl(label: String? = nil) -> some View {
+    private func downloadControl() -> some View {
         if let url = fileURL {
             #if os(macOS)
             Button {
                 saveFile(from: url)
             } label: {
-                Label(label ?? "Save As…", systemImage: "square.and.arrow.down")
+                Label("Save As…", systemImage: "square.and.arrow.down")
             }
             .disabled(isSaving)
             #else
             ShareLink(item: url) {
-                Label(label ?? "Save As…", systemImage: "square.and.arrow.up")
+                Label("Save As…", systemImage: "square.and.arrow.up")
             }
             #endif
         }
@@ -252,15 +245,14 @@ struct FileView: View {
     // MARK: - UI helpers
     @ViewBuilder
     private func filenameLabel() -> some View {
-        if let url = fileURL {
+        let name = item.message.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !name.isEmpty {
             HStack(spacing: 8) {
                 Image(systemName: "doc")
-                Text(url.lastPathComponent)
+                Text(name)
                     .font(.subheadline)
                     .foregroundColor(.secondary)
             }
-        } else {
-            EmptyView()
         }
     }
 
@@ -270,19 +262,5 @@ struct FileView: View {
         }
         // Fallback to hex representation
         return data.map { String(format: "%02X", $0) }.joined(separator: " ")
-    }
-
-    private func getTempFileURL(_ data: [UInt8]) -> URL? {
-        let tempDirURL = FileManager.default.temporaryDirectory
-        let fileURL = tempDirURL.appendingPathComponent(UUID().uuidString + ".pdf")
-        print(fileURL)
-        do {
-            let fileData = Data(data)
-            try fileData.write(to: fileURL)
-            return fileURL
-        } catch {
-            print("Error writing file to temp directory: \(error)")
-            return nil
-        }
     }
 }
