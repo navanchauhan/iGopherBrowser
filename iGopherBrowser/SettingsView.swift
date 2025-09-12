@@ -59,6 +59,7 @@ extension Color: @retroactive RawRepresentable {
 }
 
 struct SettingsView: View {
+    @Environment(\.colorScheme) var colorScheme
 
     @AppStorage("accentColour", store: .standard) var accentColour: Color = Color(.blue)
     @AppStorage("linkColour", store: .standard) var linkColour: Color = Color(.white)
@@ -140,7 +141,11 @@ struct SettingsView: View {
                 ColorPicker("Link Colour", selection: $linkColour)
                 ColorPicker("Accent Colour", selection: $accentColour)
                 Button("Reset Colours") {
-                    self.linkColour = Color(.white)
+                    #if os(iOS)
+                        self.linkColour = colorScheme == .dark ? Color(.white) : Color(.systemBlue)
+                    #else
+                        self.linkColour = Color(.white)
+                    #endif
                     self.accentColour = Color(.blue)
                 }
             }
