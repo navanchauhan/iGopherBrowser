@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Scheme
    LastUpgradeVersion = "1640"
-   version = "2.1">
+   version = "1.7">
    <BuildAction
       parallelizeBuildables = "YES"
       buildImplicitDependencies = "YES">
@@ -9,12 +9,30 @@
          <BuildActionEntry
             buildForTesting = "YES"
             buildForRunning = "YES"
-            buildForProfiling = "YES"
-            buildForArchiving = "YES"
-            buildForAnalyzing = "YES">
-            <TestPlanReference
-               reference = "container:iGopherBrowserUITests.xctestplan">
-            </TestPlanReference>
+            buildForProfiling = "NO"
+            buildForArchiving = "NO"
+            buildForAnalyzing = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "3E1BCC512B297E9B00A4CB69"
+               BuildableName = "iGopherBrowser.app"
+               BlueprintName = "iGopherBrowser"
+               ReferencedContainer = "container:iGopherBrowser.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "NO"
+            buildForProfiling = "NO"
+            buildForArchiving = "NO"
+            buildForAnalyzing = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "A3C7E11C2D9D6D6500A7C1F1"
+               BuildableName = "iGopherBrowserTests.xctest"
+               BlueprintName = "iGopherBrowserTests"
+               ReferencedContainer = "container:iGopherBrowser.xcodeproj">
+            </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
    </BuildAction>
@@ -34,20 +52,14 @@
             ReferencedContainer = "container:iGopherBrowser.xcodeproj">
          </BuildableReference>
       </CodeCoverageTargets>
-      <TestPlans>
-         <TestPlanReference
-            reference = "container:iGopherBrowserUITests.xctestplan"
-            default = "YES">
-         </TestPlanReference>
-      </TestPlans>
       <Testables>
          <TestableReference
             skipped = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "3E76CF822B36AC2900979E1A"
-               BuildableName = "iGopherBrowserUITests.xctest"
-               BlueprintName = "iGopherBrowserUITests"
+               BlueprintIdentifier = "A3C7E11C2D9D6D6500A7C1F1"
+               BuildableName = "iGopherBrowserTests.xctest"
+               BlueprintName = "iGopherBrowserTests"
                ReferencedContainer = "container:iGopherBrowser.xcodeproj">
             </BuildableReference>
          </TestableReference>

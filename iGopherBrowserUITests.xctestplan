@@ -9,7 +9,16 @@
     }
   ],
   "defaultOptions" : {
-
+    "codeCoverage" : true,
+    "codeCoverageTargets" : [
+      {
+        "target" : {
+          "containerPath" : "container:iGopherBrowser.xcodeproj",
+          "identifier" : "3E1BCC512B297E9B00A4CB69",
+          "name" : "iGopherBrowser"
+        }
+      }
+    ]
   },
   "testTargets" : [
     {
