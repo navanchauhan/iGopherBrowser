@@ -10,6 +10,9 @@ import QuickLook
 import SwiftGopherClient
 import SwiftUI
 import TelemetryDeck
+#if os(macOS)
+import AppKit
+#endif
 
 func determineFileType(data: Data) -> String? {
     let signatures: [Data: String] = [
@@ -50,39 +53,55 @@ struct FileView: View {
     @State private var fileContent: [String] = []
     @State private var fileURL: URL?
     @State private var QLURL: URL?
+    @State private var isSaving: Bool = false
 
     var body: some View {
         if item.parsedItemType == .text {
-            GeometryReader { geometry in
-                ScrollView {
-                    LazyVStack(alignment: .leading, spacing: 0) {
-                        ForEach(fileContent.indices, id: \.self) { index in
-                            Text(fileContent[index])
-                                .font(.system(.body, design: .monospaced))
-                                .textSelection(.enabled)
-                                .padding(.vertical, 2)
+            GeometryReader { _ in
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack {
+                        Spacer()
+                        if let _ = fileURL {
+                            downloadControl()
+                        }
+                    }
+                    ScrollView {
+                        LazyVStack(alignment: .leading, spacing: 0) {
+                            ForEach(fileContent.indices, id: \.self) { index in
+                                Text(fileContent[index])
+                                    .font(.system(.body, design: .monospaced))
+                                    .textSelection(.enabled)
+                                    .padding(.vertical, 2)
+                            }
                         }
                     }
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding()
-                .task {
-                    readFile(item)
-                }
-                .listStyle(PlainListStyle())
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding()
+            .task { readFile(item) }
+            .listStyle(PlainListStyle())
         } else if [.doc, .image, .gif, .movie, .sound, .bitmap].contains(item.parsedItemType) {  // Preview Document: .pdf, .docx, e.t.c
-            // Quicklook
+            // QuickLook + Download
             if let url = fileURL {
-                Button("Preview Document") {
-                    print(url)
-                    QLURL = url
-                }.quickLookPreview($QLURL)
+                VStack(spacing: 12) {
+                    Button("Preview Document") {
+                        print(url)
+                        QLURL = url
+                    }.quickLookPreview($QLURL)
+                    downloadControl()
+                }
             } else {
                 Text("Loading Document...")
-                    .onAppear {
-                        readFile(item)
-                    }
+                    .onAppear { readFile(item) }
+            }
+        } else {
+            // Unknown type: still attempt to fetch and offer download
+            if let _ = fileURL {
+                downloadControl()
+            } else {
+                Text("Loading...")
+                    .onAppear { readFile(item) }
             }
         }
     }
@@ -116,6 +135,11 @@ struct FileView: View {
                                         lines[$0..<min($0 + chunkSize, lines.count)].joined(
                                             separator: "\n")
                                     }
+                                // Also persist a temporary text file to enable Save/Share
+                                let textURL = tempDirURL.appendingPathComponent(
+                                    UUID().uuidString + ".txt")
+                                try fileData.write(to: textURL)
+                                self.fileURL = textURL
                             } else {
                                 print("Could not get file")
                             }
@@ -143,6 +167,63 @@ struct FileView: View {
         }
 
     }
+
+    // MARK: - Download / Save helpers
+    @ViewBuilder
+    private func downloadControl() -> some View {
+        if let url = fileURL {
+            #if os(macOS)
+            Button {
+                saveFile(from: url)
+            } label: {
+                Label("Save As…", systemImage: "square.and.arrow.down")
+            }
+            .disabled(isSaving)
+            #else
+            ShareLink(item: url) {
+                Label("Share", systemImage: "square.and.arrow.up")
+            }
+            #endif
+        }
+    }
+
+    #if os(macOS)
+    private func saveFile(from tempURL: URL) {
+        isSaving = true
+        defer { isSaving = false }
+        let panel = NSSavePanel()
+        panel.canCreateDirectories = true
+        panel.isExtensionHidden = false
+        panel.nameFieldStringValue = defaultFileName(basedOn: tempURL)
+        if panel.runModal() == .OK, let destURL = panel.url {
+            do {
+                if FileManager.default.fileExists(atPath: destURL.path) {
+                    try FileManager.default.removeItem(at: destURL)
+                }
+                try FileManager.default.copyItem(at: tempURL, to: destURL)
+                TelemetryDeck.signal("applicationSavedFile", parameters: [
+                    "file": destURL.lastPathComponent
+                ])
+            } catch {
+                print("Failed to save file: \(error)")
+            }
+        }
+    }
+
+    private func defaultFileName(basedOn tempURL: URL) -> String {
+        let baseExt = tempURL.pathExtension.isEmpty ? "bin" : tempURL.pathExtension
+        var base = item.message.trimmingCharacters(in: .whitespacesAndNewlines)
+        if base.isEmpty { base = "download" }
+        // Remove path separators and illegal characters
+        let invalid = CharacterSet(charactersIn: "/\\?%*|:\"<>\n\r")
+        base = base.components(separatedBy: invalid).joined(separator: "-")
+        if base.lowercased().hasSuffix(".\(baseExt.lowercased())") {
+            return base
+        } else {
+            return "\(base).\(baseExt)"
+        }
+    }
+    #endif
 
     private func getTempFileURL(_ data: [UInt8]) -> URL? {
         let tempDirURL = FileManager.default.temporaryDirectory
