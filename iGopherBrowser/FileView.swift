@@ -53,13 +53,16 @@ struct FileView: View {
     @State private var fileContent: [String] = []
     @State private var fileURL: URL?
     @State private var QLURL: URL?
+    @State private var downloadedData: Data?
     @State private var isSaving: Bool = false
+    @State private var showRawUnknown: Bool = false
 
     var body: some View {
         if item.parsedItemType == .text {
             GeometryReader { _ in
                 VStack(alignment: .leading, spacing: 8) {
                     HStack {
+                        filenameLabel()
                         Spacer()
                         if let _ = fileURL {
                             downloadControl()
@@ -84,7 +87,8 @@ struct FileView: View {
         } else if [.doc, .image, .gif, .movie, .sound, .bitmap].contains(item.parsedItemType) {  // Preview Document: .pdf, .docx, e.t.c
             // QuickLook + Download
             if let url = fileURL {
-                VStack(spacing: 12) {
+                VStack(alignment: .leading, spacing: 12) {
+                    filenameLabel()
                     Button("Preview Document") {
                         print(url)
                         QLURL = url
@@ -96,9 +100,27 @@ struct FileView: View {
                     .onAppear { readFile(item) }
             }
         } else {
-            // Unknown type: still attempt to fetch and offer download
+            // Unknown type: offer two options — Show Raw and Save As
             if let _ = fileURL {
-                downloadControl()
+                VStack(alignment: .leading, spacing: 12) {
+                    filenameLabel()
+                    HStack(spacing: 12) {
+                        Button(showRawUnknown ? "Hide Raw" : "Show Raw") {
+                            showRawUnknown.toggle()
+                        }
+                        downloadControl(label: "Save As…")
+                    }
+                    if showRawUnknown, let data = downloadedData {
+                        ScrollView {
+                            Text(rawText(from: data))
+                                .font(.system(.caption, design: .monospaced))
+                                .textSelection(.enabled)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                        }
+                        .frame(maxHeight: 400)
+                    }
+                }
+                .padding()
             } else {
                 Text("Loading...")
                     .onAppear { readFile(item) }
@@ -140,6 +162,7 @@ struct FileView: View {
                                     UUID().uuidString + ".txt")
                                 try fileData.write(to: textURL)
                                 self.fileURL = textURL
+                                self.downloadedData = fileData
                             } else {
                                 print("Could not get file")
                             }
@@ -157,6 +180,7 @@ struct FileView: View {
 
                         try fileData.write(to: fileURL)
                         self.fileURL = fileURL
+                        self.downloadedData = fileData
                     } catch {
                         print("Error writing file to temp directory: \(error)")
                     }
@@ -170,18 +194,18 @@ struct FileView: View {
 
     // MARK: - Download / Save helpers
     @ViewBuilder
-    private func downloadControl() -> some View {
+    private func downloadControl(label: String? = nil) -> some View {
         if let url = fileURL {
             #if os(macOS)
             Button {
                 saveFile(from: url)
             } label: {
-                Label("Save As…", systemImage: "square.and.arrow.down")
+                Label(label ?? "Save As…", systemImage: "square.and.arrow.down")
             }
             .disabled(isSaving)
             #else
             ShareLink(item: url) {
-                Label("Share", systemImage: "square.and.arrow.up")
+                Label(label ?? "Save As…", systemImage: "square.and.arrow.up")
             }
             #endif
         }
@@ -224,6 +248,29 @@ struct FileView: View {
         }
     }
     #endif
+
+    // MARK: - UI helpers
+    @ViewBuilder
+    private func filenameLabel() -> some View {
+        if let url = fileURL {
+            HStack(spacing: 8) {
+                Image(systemName: "doc")
+                Text(url.lastPathComponent)
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+            }
+        } else {
+            EmptyView()
+        }
+    }
+
+    private func rawText(from data: Data) -> String {
+        if let string = String(data: data, encoding: .utf8), string.isEmpty == false {
+            return string
+        }
+        // Fallback to hex representation
+        return data.map { String(format: "%02X", $0) }.joined(separator: " ")
+    }
 
     private func getTempFileURL(_ data: [UInt8]) -> URL? {
         let tempDirURL = FileManager.default.temporaryDirectory
