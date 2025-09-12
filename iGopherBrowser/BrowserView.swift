@@ -47,6 +47,8 @@ struct BrowserView: View {
     @State private var searchText: String = ""
     @State private var showSearchInput = false
     @State var selectedSearchItem: Int?
+    // Supports presenting SearchInputView when deep-linking directly to a search selector
+    @State private var directSearchContext: (host: String, port: Int, selector: String)? = nil
 
     @State private var showPreferences = false
     @State private var showBookmarks = false
@@ -179,8 +181,9 @@ struct BrowserView: View {
                         }
                     }
                     .sheet(isPresented: $showSearchInput, onDismiss: {
-                        // Reset selection so tapping the same search item will work again
+                        // Reset contexts so tapping the same item or deep-link works again
                         self.selectedSearchItem = nil
+                        self.directSearchContext = nil
                     }) {
                         if let index = selectedSearchItem, gopherItems.indices.contains(index) {
                             let searchItem = gopherItems[index]
@@ -196,8 +199,20 @@ struct BrowserView: View {
                                     showSearchInput = false
                                 }
                             )
+                        } else if let ctx = directSearchContext {
+                            SearchInputView(
+                                host: ctx.host,
+                                port: ctx.port,
+                                selector: ctx.selector,
+                                searchText: $searchText,
+                                onSearch: { query in
+                                    performGopherRequest(
+                                        host: ctx.host, port: ctx.port,
+                                        selector: "\(ctx.selector)\t\(query)")
+                                    showSearchInput = false
+                                }
+                            )
                         } else {
-
                             VStack {
                                 Text("Weird bug. Please Dismiss -> Press Go -> Try Again")
                                 Button("Dismiss") {
@@ -208,7 +223,6 @@ struct BrowserView: View {
                                     )
                                 }
                             }
-
                         }
                     }
                 } else {
@@ -497,6 +511,28 @@ struct BrowserView: View {
             res.port = port
         }
 
+        // Normalize selector for search handling (decode percent-encoding for cases like %09)
+        var finalSelector = res.selector
+        if let decoded = finalSelector.removingPercentEncoding {
+            finalSelector = decoded
+        }
+
+        // Handle deep-link to search selector: present SearchInputView if no query
+        if finalSelector.hasPrefix("/search") {
+            // If a query is present (tab-delimited), proceed with the request directly
+            if finalSelector.contains("\t") {
+                res.selector = finalSelector
+            } else {
+                // No query provided — present the search input sheet with proper context
+                self.searchText = ""
+                self.selectedSearchItem = nil
+                self.directSearchContext = (host: res.host, port: res.port, selector: "/search")
+                self.showSearchInput = true
+                return
+            }
+        }
+
+        // Update the visible URL string
         self.url = "\(res.host):\(res.port)\(res.selector)"
 
         currentTask?.cancel()
