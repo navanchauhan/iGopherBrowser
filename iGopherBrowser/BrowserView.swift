@@ -6,6 +6,7 @@
 //
 
 import GopherHelpers
+import SwiftData
 import SwiftGopherClient
 import SwiftUI
 import TelemetryDeck
@@ -28,6 +29,8 @@ func openURL(url: URL) {
 #endif
 
 struct BrowserView: View {
+    @Environment(\.modelContext) private var modelContext
+
     @AppStorage("homeURL") var homeURL: URL = URL(string: "gopher://gopher.navan.dev:70/")!
     @AppStorage("accentColour", store: .standard) var accentColour: Color = Color(.blue)
     @AppStorage("linkColour", store: .standard) var linkColour: Color = Color(.white)
@@ -317,7 +320,7 @@ struct BrowserView: View {
             #endif
         }
         .sheet(isPresented: $showBookmarks) {
-            BookmarksView { host, port, selector in
+            BookmarksHistoryView { host, port, selector in
                 performGopherRequest(host: host, port: port, selector: selector)
             }
             #if os(iOS)
@@ -482,6 +485,15 @@ struct BrowserView: View {
                 } else {
                     self.gopherItems = resp
                     scrollToTop.toggle()
+
+                    // Save to history
+                    let historyItem = HistoryItem(
+                        title: "\(myHost)\(mySelector)",
+                        host: myHost,
+                        port: myPort,
+                        selector: mySelector
+                    )
+                    modelContext.insert(historyItem)
                 }
 
             } catch is CancellationError {
@@ -535,124 +547,141 @@ struct iOSToolbarView: View {
     let onBack: () -> Void
     let onForward: () -> Void
 
+    private var shareURL: URL {
+        shareThroughProxy
+            ? URL(string: "https://gopher.navan.dev/\(url)")!
+            : URL(string: "gopher://\(url)")!
+    }
+
     var body: some View {
         VStack(spacing: 0) {
-            // URL bar
-            HStack(spacing: 10) {
-                TextField("Enter a URL", text: $url)
+            // URL bar with Go button
+            HStack(spacing: 8) {
+                TextField("Enter URL", text: $url)
                     .keyboardType(.URL)
                     .textInputAutocapitalization(.never)
-                    .padding(10)
+                    .textContentType(.URL)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 10)
                     .background {
                         if #available(iOS 26.0, *) {
                             RoundedRectangle(cornerRadius: 10)
-                                .fill(.clear)
+                                .fill(.ultraThinMaterial)
                                 .glassEffect(in: .rect(cornerRadius: 10))
                         } else {
-                            Color.gray.opacity(0.2)
-                                .cornerRadius(10)
+                            RoundedRectangle(cornerRadius: 10)
+                                .fill(Color(.systemGray6))
                         }
                     }
 
-                goButton
-            }
-            .padding(.horizontal, 10)
-            .padding(.bottom, 10)
-            .padding(.top, 5)
-
-            // Navigation toolbar
-            toolbarContent
-                .padding(.horizontal)
-                .padding(.bottom, 8)
-        }
-    }
-
-    @ViewBuilder
-    private var goButton: some View {
-        if #available(iOS 26.0, *) {
-            Button("Go", action: onGo)
-                .buttonStyle(.glass)
-                .keyboardShortcut(.defaultAction)
-        } else {
-            Button("Go", action: onGo)
-                .keyboardShortcut(.defaultAction)
-        }
-    }
-
-    @ViewBuilder
-    private var toolbarContent: some View {
-        if #available(iOS 26.0, *) {
-            GlassEffectContainer(spacing: 16) {
-                HStack(spacing: 0) {
-                    toolbarButtons
+                Button(action: onGo) {
+                    Text("Go")
+                        .fontWeight(.medium)
                 }
+                .keyboardShortcut(.defaultAction)
+                .modifier(GoButtonStyle())
             }
-        } else {
-            HStack {
-                toolbarButtons
+            .padding(.horizontal, 12)
+            .padding(.top, 8)
+            .padding(.bottom, 12)
+
+            // Bottom toolbar - cleaner design
+            HStack(spacing: 0) {
+                // Navigation group
+                HStack(spacing: 4) {
+                    navButton(icon: "chevron.left", action: onBack)
+                        .disabled(backwardStack.count < 2)
+
+                    navButton(icon: "chevron.right", action: onForward)
+                        .disabled(forwardStack.isEmpty)
+                }
+                .modifier(ToolbarGroupStyle())
+
+                Spacer()
+
+                // Center actions - Home & Bookmark
+                HStack(spacing: 4) {
+                    navButton(icon: "house", action: onHome)
+
+                    Button(action: { showAddBookmark = true }) {
+                        Image(systemName: currentHost.isEmpty ? "bookmark" : "bookmark.fill")
+                            .font(.system(size: 18))
+                            .frame(width: 44, height: 36)
+                    }
+                    .disabled(currentHost.isEmpty)
+                }
+                .modifier(ToolbarGroupStyle())
+
+                Spacer()
+
+                // Right actions group
+                HStack(spacing: 4) {
+                    navButton(icon: "clock.arrow.circlepath", action: { showBookmarks = true })
+
+                    Menu {
+                        ShareLink(item: shareURL) {
+                            Label("Share", systemImage: "square.and.arrow.up")
+                        }
+
+                        Divider()
+
+                        Button(action: { showPreferences = true }) {
+                            Label("Settings", systemImage: "gear")
+                        }
+                    } label: {
+                        Image(systemName: "ellipsis.circle")
+                            .font(.system(size: 18))
+                            .frame(width: 44, height: 36)
+                    }
+                }
+                .modifier(ToolbarGroupStyle())
             }
+            .padding(.horizontal, 12)
         }
     }
 
     @ViewBuilder
-    private var toolbarButtons: some View {
-        Spacer()
-        toolbarButton(icon: "house", action: onHome)
-            .keyboardShortcut("r", modifiers: [.command])
-        Spacer()
-        toolbarButton(icon: "chevron.left", action: onBack)
-            .keyboardShortcut("[", modifiers: [.command])
-            .disabled(backwardStack.count < 2)
-        Spacer()
-        toolbarButton(icon: "chevron.right", action: onForward)
-            .keyboardShortcut("]", modifiers: [.command])
-            .disabled(forwardStack.isEmpty)
-        Spacer()
-        shareButton
-        Spacer()
-        toolbarButton(icon: "bookmark.fill", action: { showAddBookmark = true })
-            .disabled(currentHost.isEmpty)
-        Spacer()
-        toolbarButton(icon: "book", action: { showBookmarks = true })
-        Spacer()
-        toolbarButton(icon: "gear", action: { showPreferences = true })
-        Spacer()
-    }
-
-    @ViewBuilder
-    private func toolbarButton(icon: String, action: @escaping () -> Void) -> some View {
-        if #available(iOS 26.0, *) {
-            Button(action: action) {
-                Image(systemName: icon)
-                    .frame(width: 44, height: 44)
-            }
-            .glassEffect(.regular.interactive())
-        } else {
-            Button(action: action) {
-                Image(systemName: icon)
-            }
-        }
-    }
-
-    @ViewBuilder
-    private var shareButton: some View {
-        let shareURL = shareThroughProxy
-            ? URL(string: "https://gopher.navan.dev/\(url)")!
-            : URL(string: "gopher://\(url)")!
-
-        if #available(iOS 26.0, *) {
-            ShareLink(item: shareURL) {
-                Image(systemName: "square.and.arrow.up")
-                    .frame(width: 44, height: 44)
-            }
-            .glassEffect(.regular.interactive())
-        } else {
-            ShareLink(item: shareURL) {
-                Image(systemName: "square.and.arrow.up")
-            }
+    private func navButton(icon: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Image(systemName: icon)
+                .font(.system(size: 18))
+                .frame(width: 44, height: 36)
         }
     }
 }
+
+// MARK: - Button Styles for iOS Toolbar
+
+private struct GoButtonStyle: ViewModifier {
+    func body(content: Content) -> some View {
+        if #available(iOS 26.0, *) {
+            content
+                .buttonStyle(.glass)
+        } else {
+            content
+                .padding(.horizontal, 16)
+                .padding(.vertical, 8)
+                .background(Color.accentColor)
+                .foregroundColor(.white)
+                .cornerRadius(8)
+        }
+    }
+}
+
+private struct ToolbarGroupStyle: ViewModifier {
+    func body(content: Content) -> some View {
+        if #available(iOS 26.0, *) {
+            content
+                .glassEffect(in: .capsule)
+        } else {
+            content
+                .padding(.horizontal, 4)
+                .background(Color(.systemGray6))
+                .cornerRadius(10)
+        }
+    }
+}
+
 #endif
 
 #if os(macOS) || os(visionOS)

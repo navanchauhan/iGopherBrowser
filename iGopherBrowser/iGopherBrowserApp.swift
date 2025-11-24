@@ -16,7 +16,7 @@ import TelemetryDeck
 @main
 struct iGopherBrowserApp: App {
     var sharedModelContainer: ModelContainer = {
-        let schema = Schema([Bookmark.self])
+        let schema = Schema([Bookmark.self, HistoryItem.self])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
         do {
             return try ModelContainer(for: schema, configurations: [modelConfiguration])
