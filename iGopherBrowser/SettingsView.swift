@@ -66,6 +66,12 @@ struct SettingsView: View {
     @AppStorage("shareThroughProxy", store: .standard) var shareThroughProxy: Bool = true
     @AppStorage("telemetryOptOut", store: .standard) var telemetryOptOut: Bool = false
 
+    // CRT Mode settings
+    @AppStorage("crtMode") var crtMode: Bool = false
+    @AppStorage("crtScanlines") var crtScanlines: Bool = true
+    @AppStorage("crtVignette") var crtVignette: Bool = true
+    @AppStorage("crtPhosphorColor") var crtPhosphorColor: String = CRTPhosphorColor.green.rawValue
+
     #if os(macOS)
         @AppStorage("homeURL") var homeURL: URL = URL(string: "gopher://gopher.navan.dev:70/")!
         @State var homeURLString: String = ""
@@ -132,7 +138,7 @@ struct SettingsView: View {
                 Text("Appearance")
                     .font(.headline)
                     .foregroundColor(.primary)
-                
+
                 VStack(alignment: .leading, spacing: 12) {
                     HStack {
                         ColorPicker("Link Color", selection: $linkColour)
@@ -140,27 +146,75 @@ struct SettingsView: View {
                         Text("Link Color")
                             .frame(maxWidth: .infinity, alignment: .leading)
                     }
-                    
+
                     HStack {
                         ColorPicker("Accent Color", selection: $accentColour)
                             .labelsHidden()
                         Text("Accent Color")
                             .frame(maxWidth: .infinity, alignment: .leading)
                     }
-                    
+
                     HStack {
                         Button("Reset Colors") {
                             self.linkColour = Color(.white)
                             self.accentColour = Color(.blue)
                         }
                         .buttonStyle(.bordered)
-                        
+
                         Spacer()
                     }
                 }
             }
             .padding(.vertical, 20)
-            
+
+            Divider()
+
+            // Retro Display section
+            VStack(alignment: .leading, spacing: 12) {
+                HStack {
+                    Image(systemName: "tv")
+                    Text("Retro Display")
+                        .font(.headline)
+                        .foregroundColor(.primary)
+                }
+
+                VStack(alignment: .leading, spacing: 8) {
+                    Toggle("CRT Mode", isOn: $crtMode)
+
+                    if crtMode {
+                        HStack {
+                            Text("Phosphor Color")
+                            Spacer()
+                            Picker("", selection: $crtPhosphorColor) {
+                                ForEach(CRTPhosphorColor.allCases) { color in
+                                    HStack {
+                                        Circle()
+                                            .fill(color.color)
+                                            .frame(width: 10, height: 10)
+                                        Text(color.displayName)
+                                    }
+                                    .tag(color.rawValue)
+                                }
+                            }
+                            .pickerStyle(.menu)
+                            .frame(width: 120)
+                        }
+                        .padding(.leading, 20)
+
+                        Toggle("Scanlines", isOn: $crtScanlines)
+                            .padding(.leading, 20)
+                        Toggle("Screen Vignette", isOn: $crtVignette)
+                            .padding(.leading, 20)
+                    }
+
+                    Text("Enable 80s NASA vector-style CRT display with phosphor glow, scanlines, and vignette effects.")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+            .padding(.vertical, 20)
+
             Divider()
             
             // Privacy section
@@ -276,6 +330,39 @@ struct SettingsView: View {
                     #endif
                     self.accentColour = Color(.blue)
                 }
+            }
+
+            Section {
+                Toggle("CRT Mode", isOn: $crtMode)
+                    .toggleStyle(.switch)
+
+                if crtMode {
+                    Picker("Phosphor Color", selection: $crtPhosphorColor) {
+                        ForEach(CRTPhosphorColor.allCases) { color in
+                            HStack {
+                                Circle()
+                                    .fill(color.color)
+                                    .frame(width: 12, height: 12)
+                                Text(color.displayName)
+                            }
+                            .tag(color.rawValue)
+                        }
+                    }
+
+                    Toggle("Scanlines", isOn: $crtScanlines)
+                        .toggleStyle(.switch)
+                    Toggle("Screen Vignette", isOn: $crtVignette)
+                        .toggleStyle(.switch)
+                }
+            } header: {
+                HStack {
+                    Image(systemName: "tv")
+                    Text("Retro Display")
+                }
+            } footer: {
+                Text("Enable 80s NASA vector-style CRT display mode with phosphor glow, scanlines, and vignette effects.")
+                    .font(.caption)
+                    .foregroundColor(.gray)
             }
 
             Section {

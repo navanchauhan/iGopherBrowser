@@ -30,25 +30,52 @@ struct ContentView: View {
 
     @State private var columnVisibility = NavigationSplitViewVisibility.automatic
 
+    @AppStorage("crtMode") var crtMode: Bool = false
+    @AppStorage("crtScanlines") var crtScanlines: Bool = true
+    @AppStorage("crtVignette") var crtVignette: Bool = true
+
     var body: some View {
-
-        #if os(iOS)
-            BrowserView(hosts: $hosts, selectedNode: $selectedNode)
-        #else
-
-            NavigationSplitView(columnVisibility: $columnVisibility) {
-                SidebarView(
-                    hosts: hosts,
-                    onSelect: { node in
-                        selectedNode = node
-
-                    }
-                )
-                .listStyle(.sidebar)
-            } detail: {
-                BrowserView(hosts: $hosts, selectedNode: $selectedNode)
+        ZStack {
+            // Background for CRT mode
+            if crtMode {
+                CRTTheme.screenBackground
+                    .ignoresSafeArea()
             }
-        #endif
+
+            // Main content
+            Group {
+                #if os(iOS)
+                    BrowserView(hosts: $hosts, selectedNode: $selectedNode)
+                #else
+                    NavigationSplitView(columnVisibility: $columnVisibility) {
+                        SidebarView(
+                            hosts: hosts,
+                            onSelect: { node in
+                                selectedNode = node
+                            }
+                        )
+                        .listStyle(.sidebar)
+                    } detail: {
+                        BrowserView(hosts: $hosts, selectedNode: $selectedNode)
+                    }
+                #endif
+            }
+
+            // CRT overlay effects
+            if crtMode {
+                if crtScanlines {
+                    ScanlineOverlay()
+                        .ignoresSafeArea()
+                        .allowsHitTesting(false)
+                }
+                if crtVignette {
+                    CRTVignette()
+                        .ignoresSafeArea()
+                        .allowsHitTesting(false)
+                }
+            }
+        }
+        .preferredColorScheme(crtMode ? .dark : nil)
     }
 
 }

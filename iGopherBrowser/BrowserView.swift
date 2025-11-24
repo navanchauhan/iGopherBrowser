@@ -35,6 +35,21 @@ struct BrowserView: View {
     @AppStorage("accentColour", store: .standard) var accentColour: Color = Color(.blue)
     @AppStorage("linkColour", store: .standard) var linkColour: Color = Color(.white)
     @AppStorage("shareThroughProxy", store: .standard) var shareThroughProxy: Bool = true
+    @AppStorage("crtMode") var crtMode: Bool = false
+    @AppStorage("crtPhosphorColor") var crtPhosphorColorRaw: String = CRTPhosphorColor.green.rawValue
+
+    // CRT-aware colors
+    private var crtPhosphorColor: Color {
+        (CRTPhosphorColor(rawValue: crtPhosphorColorRaw) ?? .green).color
+    }
+
+    private var effectiveLinkColor: Color {
+        crtMode ? crtPhosphorColor : linkColour
+    }
+
+    private var effectiveTextColor: Color {
+        crtMode ? crtPhosphorColor : .primary
+    }
 
     @State var homeURLString = "gopher://gopher.navan.dev:70/"
 
@@ -93,6 +108,8 @@ struct BrowserView: View {
                                 if item.parsedItemType == .info {
                                     Text(item.message)
                                         .font(.system(size: 12, design: .monospaced))
+                                        .foregroundStyle(effectiveTextColor)
+                                        .shadow(color: crtMode ? effectiveTextColor.opacity(0.5) : .clear, radius: crtMode ? 2 : 0)
                                         .frame(height: 20)
                                         .listRowSeparator(.hidden)
                                         .padding(.vertical, -8)
@@ -110,7 +127,8 @@ struct BrowserView: View {
                                             Text(Image(systemName: "folder"))
                                             Text(item.message)
                                             Spacer()
-                                        }.foregroundStyle(linkColour)
+                                        }.foregroundStyle(effectiveLinkColor)
+                                        .shadow(color: crtMode ? effectiveLinkColor.opacity(0.5) : .clear, radius: crtMode ? 2 : 0)
                                     }.buttonStyle(PlainButtonStyle())
                                         .id(idx)
                                 } else if item.parsedItemType == .search {
@@ -126,7 +144,8 @@ struct BrowserView: View {
                                             Text(Image(systemName: "magnifyingglass"))
                                             Text(item.message)
                                             Spacer()
-                                        }.foregroundStyle(linkColour)
+                                        }.foregroundStyle(effectiveLinkColor)
+                                        .shadow(color: crtMode ? effectiveLinkColor.opacity(0.5) : .clear, radius: crtMode ? 2 : 0)
                                     }.buttonStyle(PlainButtonStyle())
                                         .id(idx)
                                 } else if item.parsedItemType == .text {
@@ -135,7 +154,8 @@ struct BrowserView: View {
                                             Text(Image(systemName: "doc.plaintext"))
                                             Text(item.message)
                                             Spacer()
-                                        }.foregroundStyle(linkColour)
+                                        }.foregroundStyle(effectiveLinkColor)
+                                        .shadow(color: crtMode ? effectiveLinkColor.opacity(0.5) : .clear, radius: crtMode ? 2 : 0)
                                     }
                                     .id(idx)
                                 } else if item.selector.hasPrefix("URL:") {
@@ -151,7 +171,8 @@ struct BrowserView: View {
                                                 Image(systemName: "link")
                                                 Text(item.message)
                                                 Spacer()
-                                            }.foregroundStyle(linkColour)
+                                            }.foregroundStyle(effectiveLinkColor)
+                                        .shadow(color: crtMode ? effectiveLinkColor.opacity(0.5) : .clear, radius: crtMode ? 2 : 0)
                                         }.buttonStyle(PlainButtonStyle())
                                             .id(idx)
                                     }
@@ -163,7 +184,8 @@ struct BrowserView: View {
                                             Text(Image(systemName: itemToImageType(item)))
                                             Text(item.message)
                                             Spacer()
-                                        }.foregroundStyle(linkColour)
+                                        }.foregroundStyle(effectiveLinkColor)
+                                        .shadow(color: crtMode ? effectiveLinkColor.opacity(0.5) : .clear, radius: crtMode ? 2 : 0)
                                             .id(idx)
                                     }
                                 } else {
@@ -182,7 +204,8 @@ struct BrowserView: View {
                                             Text(Image(systemName: "questionmark.app.dashed"))
                                             Text(item.message)
                                             Spacer()
-                                        }.foregroundStyle(linkColour)
+                                        }.foregroundStyle(effectiveLinkColor)
+                                        .shadow(color: crtMode ? effectiveLinkColor.opacity(0.5) : .clear, radius: crtMode ? 2 : 0)
                                     }.buttonStyle(PlainButtonStyle())
                                         .id(idx)
                                 }
@@ -190,7 +213,8 @@ struct BrowserView: View {
                                 .listRowBackground(findHighlightColor(for: idx))
                             }
                         }
-                        //.background(Color.white)
+                        .scrollContentBackground(crtMode ? .hidden : .automatic)
+                        .background(crtMode ? Color.clear : Color.clear)
                         .cornerRadius(10)
                         .onChange(of: scrollToTop) { _, _ in
                             // TODO: Cleanup
@@ -586,11 +610,20 @@ struct BrowserView: View {
     }
     
     private func findHighlightColor(for idx: Int) -> Color? {
-        guard findMatches.contains(idx) else { return nil }
-        if findMatches.firstIndex(of: idx) == currentFindIndex {
-            return Color.yellow.opacity(0.5)
+        guard findMatches.contains(idx) else {
+            return crtMode ? CRTTheme.screenBackground : nil
         }
-        return Color.yellow.opacity(0.2)
+        if crtMode {
+            if findMatches.firstIndex(of: idx) == currentFindIndex {
+                return crtPhosphorColor.opacity(0.3)
+            }
+            return crtPhosphorColor.opacity(0.15)
+        } else {
+            if findMatches.firstIndex(of: idx) == currentFindIndex {
+                return Color.yellow.opacity(0.5)
+            }
+            return Color.yellow.opacity(0.2)
+        }
     }
 
     private func convertToHostNodes(_ responseItems: [gopherItem]) -> [GopherNode] {
