@@ -52,6 +52,10 @@ struct BrowserView: View {
 
     @State private var showPreferences = false
     @State private var showBookmarks = false
+    @State private var showAddBookmark = false
+    @State private var currentHost: String = ""
+    @State private var currentPort: Int = 70
+    @State private var currentSelector: String = ""
 
     @Namespace var topID
     @State private var scrollToTop: Bool = false
@@ -231,185 +235,60 @@ struct BrowserView: View {
                     Spacer()
                 }
                 #if os(iOS)
-                    VStack {
-                        HStack(spacing: 10) {
-                            HStack {
-                                Spacer()
-
-                                TextField("Enter a URL", text: $url)
-                                    .keyboardType(.URL)
-                                    .textInputAutocapitalization(.never)
-                                    .padding(10)
-                                    .background(Color.gray.opacity(0.2))
-                                    .cornerRadius(10)
-                                Spacer()
-                            }
-                            //.background(Color.white)
-                            .cornerRadius(30)
-
-                            Button(
-                                "Go",
-                            action: {
-                                TelemetryDeck.signal(
-                                    "applicationClickedGo", parameters: ["gopherURL": "\(self.url)"])
-                                performGopherRequest(clearForward: false)
-
-                            }
-                            )
-                            .keyboardShortcut(.defaultAction)
-                            .onSubmit {
-                                performGopherRequest()
-                            }
-                            Spacer()
-                        }
-                        .padding(.bottom, 10)
-                        .padding(.top, 5)
-                        HStack {
-                            Spacer()
-                            Button {
-                                print(homeURL, "home")
-                                TelemetryDeck.signal(
-                                    "applicationClickedHome", parameters: ["gopherURL": "\(self.url)"])
-                                performGopherRequest(
-                                    host: homeURL.host ?? "gopher.navan.dev",
-                                    port: homeURL.port ?? 70,
-                                    selector: homeURL.path)
-                            } label: {
-                                Label("Home", systemImage: "house")
-                                    .labelStyle(.iconOnly)
-                            }
-                            .keyboardShortcut("r", modifiers: [.command])
-                            Spacer()
-                            Button {
-                                goBack();
-
-                            } label: {
-                                Label("Back", systemImage: "chevron.left")
-                                    .labelStyle(.iconOnly)
-                            }
-                            .keyboardShortcut("[", modifiers: [.command])
-                            .disabled(backwardStack.count < 2)
-                            Spacer()
-                            Button {
-                                goForward()
-                            } label: {
-                                Label("Forward", systemImage: "chevron.right")
-                                    .labelStyle(.iconOnly)
-                            }
-                            .keyboardShortcut("]", modifiers: [.command])
-                            .disabled(forwardStack.isEmpty)
-                            Spacer()
-                            if shareThroughProxy {
-                                ShareLink(item: URL(string: "https://gopher.navan.dev/\(url)")!) {
-                                    Label("Share", systemImage: "square.and.arrow.up").labelStyle(
-                                        .iconOnly)
-                                }
-                            } else {
-                                ShareLink(item: URL(string: "gopher://\(url)")!) {
-                                    Label("Share", systemImage: "square.and.arrow.up").labelStyle(
-                                        .iconOnly)
-                                }
-                            }
-                            Spacer()
-                            //                Button {
-                            //                    showBookmarks = true
-                            //                } label: {
-                            //                    Label("Bookmarks", systemImage: "book")
-                            //                        .labelStyle(.iconOnly)
-                            //                }.sheet(isPresented: $showBookmarks) {
-                            //                    BookmarksView()
-                            //                        .presentationDetents([.height(400), .medium, .large])
-                            //                        .presentationDragIndicator(.automatic)
-                            //                }
-                            //              Spacer()
-                            Button {
-                                self.showPreferences = true
-                            } label: {
-                                Label("Settings", systemImage: "gear")
-                                    .labelStyle(.iconOnly)
-                            }
-                            Spacer()
-                        }
-                    }
+                    iOSToolbarView(
+                        url: $url,
+                        homeURL: homeURL,
+                        shareThroughProxy: shareThroughProxy,
+                        backwardStack: backwardStack,
+                        forwardStack: forwardStack,
+                        currentHost: currentHost,
+                        showAddBookmark: $showAddBookmark,
+                        showBookmarks: $showBookmarks,
+                        showPreferences: $showPreferences,
+                        onGo: {
+                            TelemetryDeck.signal(
+                                "applicationClickedGo", parameters: ["gopherURL": "\(self.url)"])
+                            performGopherRequest(clearForward: false)
+                        },
+                        onHome: {
+                            TelemetryDeck.signal(
+                                "applicationClickedHome", parameters: ["gopherURL": "\(self.url)"])
+                            performGopherRequest(
+                                host: homeURL.host ?? "gopher.navan.dev",
+                                port: homeURL.port ?? 70,
+                                selector: homeURL.path)
+                        },
+                        onBack: { goBack() },
+                        onForward: { goForward() }
+                    )
                 #else
-                    HStack(spacing: 10) {
-                        HStack {
-                            Spacer()
-                            Button {
-                                TelemetryDeck.signal(
-                                    "applicationClickedHome", parameters: ["gopherURL": "\(self.url)"])
-                                performGopherRequest(
-                                    host: homeURL.host ?? "gopher.navan.dev",
-                                    port: homeURL.port ?? 70,
-                                    selector: homeURL.path)
-                            } label: {
-                                Label("Home", systemImage: "house")
-                                    .labelStyle(.iconOnly)
-                            }
-                            .keyboardShortcut("r", modifiers: [.command])
-
-                            #if os(visionOS)
-                                Button {
-                                    self.showPreferences = true
-                                } label: {
-                                    Label("Settings", systemImage: "gear")
-                                        .labelStyle(.iconOnly)
-                                }
-                            #endif
-
-                            Button {
-                                goBack()
-                            } label: {
-                                Label("Back", systemImage: "chevron.left")
-                                    .labelStyle(.iconOnly)
-                            }
-                            .keyboardShortcut("[", modifiers: [.command])
-                            .disabled(backwardStack.count < 2)
-
-                            Button {
-                                goForward();
-                           } label: {
-                                Label("Forward", systemImage: "chevron.right")
-                                    .labelStyle(.iconOnly)
-                            }
-                           .keyboardShortcut("]", modifiers: [.command])
-                            .disabled(forwardStack.isEmpty)
-
-                            TextField("Enter a URL", text: $url)
-                                #if !os(OSX)
-                                    .keyboardType(.URL)
-                                    .textInputAutocapitalization(.never)
-                                #endif
-                                    .focused($isURLFocused)
-                                .padding(10)
-                       }
-                        //.background(Color.white)
-                        .cornerRadius(30)
-                        if shareThroughProxy {
-                            ShareLink(item: URL(string: "https://gopher.navan.dev/\(url)")!) {
-                                Label("Share", systemImage: "square.and.arrow.up").labelStyle(
-                                    .iconOnly)
-                            }
-                        } else {
-                            ShareLink(item: URL(string: "gopher://\(url)")!) {
-                                Label("Share", systemImage: "square.and.arrow.up").labelStyle(
-                                    .iconOnly)
-                            }
-                        }
-                        Button(
-                            "Go",
-                            action: {
-                                TelemetryDeck.signal(
-                                    "applicationClickedGo", parameters: ["gopherURL": "\(self.url)"])
-                                performGopherRequest(clearForward: false)
-                            }
-                        )
-                        .keyboardShortcut(.defaultAction)
-                        .onSubmit {
-                            performGopherRequest()
-                        }
-                        Spacer()
-                    }
+                    macOSToolbarView(
+                        url: $url,
+                        isURLFocused: $isURLFocused,
+                        homeURL: homeURL,
+                        shareThroughProxy: shareThroughProxy,
+                        backwardStack: backwardStack,
+                        forwardStack: forwardStack,
+                        currentHost: currentHost,
+                        showAddBookmark: $showAddBookmark,
+                        showBookmarks: $showBookmarks,
+                        showPreferences: $showPreferences,
+                        onGo: {
+                            TelemetryDeck.signal(
+                                "applicationClickedGo", parameters: ["gopherURL": "\(self.url)"])
+                            performGopherRequest(clearForward: false)
+                        },
+                        onHome: {
+                            TelemetryDeck.signal(
+                                "applicationClickedHome", parameters: ["gopherURL": "\(self.url)"])
+                            performGopherRequest(
+                                host: homeURL.host ?? "gopher.navan.dev",
+                                port: homeURL.port ?? 70,
+                                selector: homeURL.path)
+                        },
+                        onBack: { goBack() },
+                        onForward: { goForward() }
+                    )
                 #endif
             }
         }
@@ -435,6 +314,26 @@ struct BrowserView: View {
                 SettingsView()
             #else
                 SettingsView(homeURL: $homeURL, homeURLString: $homeURLString)
+            #endif
+        }
+        .sheet(isPresented: $showBookmarks) {
+            BookmarksView { host, port, selector in
+                performGopherRequest(host: host, port: port, selector: selector)
+            }
+            #if os(iOS)
+            .presentationDetents([.medium, .large])
+            .presentationDragIndicator(.automatic)
+            #endif
+        }
+        .sheet(isPresented: $showAddBookmark) {
+            AddBookmarkView(
+                host: currentHost,
+                port: currentPort,
+                selector: currentSelector
+            )
+            #if os(iOS)
+            .presentationDetents([.medium])
+            .presentationDragIndicator(.automatic)
             #endif
         }
         .accentColor(accentColour)
@@ -535,6 +434,11 @@ struct BrowserView: View {
         // Update the visible URL string
         self.url = "\(res.host):\(res.port)\(res.selector)"
 
+        // Track current location for bookmarking
+        self.currentHost = res.host
+        self.currentPort = res.port
+        self.currentSelector = res.selector
+
         currentTask?.cancel()
 
         let myHost = res.host
@@ -614,3 +518,331 @@ struct BrowserView: View {
     }
 
 }
+
+#if os(iOS)
+struct iOSToolbarView: View {
+    @Binding var url: String
+    let homeURL: URL
+    let shareThroughProxy: Bool
+    let backwardStack: [GopherNode]
+    let forwardStack: [GopherNode]
+    let currentHost: String
+    @Binding var showAddBookmark: Bool
+    @Binding var showBookmarks: Bool
+    @Binding var showPreferences: Bool
+    let onGo: () -> Void
+    let onHome: () -> Void
+    let onBack: () -> Void
+    let onForward: () -> Void
+
+    var body: some View {
+        VStack(spacing: 0) {
+            // URL bar
+            HStack(spacing: 10) {
+                TextField("Enter a URL", text: $url)
+                    .keyboardType(.URL)
+                    .textInputAutocapitalization(.never)
+                    .padding(10)
+                    .background {
+                        if #available(iOS 26.0, *) {
+                            RoundedRectangle(cornerRadius: 10)
+                                .fill(.clear)
+                                .glassEffect(in: .rect(cornerRadius: 10))
+                        } else {
+                            Color.gray.opacity(0.2)
+                                .cornerRadius(10)
+                        }
+                    }
+
+                goButton
+            }
+            .padding(.horizontal, 10)
+            .padding(.bottom, 10)
+            .padding(.top, 5)
+
+            // Navigation toolbar
+            toolbarContent
+                .padding(.horizontal)
+                .padding(.bottom, 8)
+        }
+    }
+
+    @ViewBuilder
+    private var goButton: some View {
+        if #available(iOS 26.0, *) {
+            Button("Go", action: onGo)
+                .buttonStyle(.glass)
+                .keyboardShortcut(.defaultAction)
+        } else {
+            Button("Go", action: onGo)
+                .keyboardShortcut(.defaultAction)
+        }
+    }
+
+    @ViewBuilder
+    private var toolbarContent: some View {
+        if #available(iOS 26.0, *) {
+            GlassEffectContainer(spacing: 16) {
+                HStack(spacing: 0) {
+                    toolbarButtons
+                }
+            }
+        } else {
+            HStack {
+                toolbarButtons
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var toolbarButtons: some View {
+        Spacer()
+        toolbarButton(icon: "house", action: onHome)
+            .keyboardShortcut("r", modifiers: [.command])
+        Spacer()
+        toolbarButton(icon: "chevron.left", action: onBack)
+            .keyboardShortcut("[", modifiers: [.command])
+            .disabled(backwardStack.count < 2)
+        Spacer()
+        toolbarButton(icon: "chevron.right", action: onForward)
+            .keyboardShortcut("]", modifiers: [.command])
+            .disabled(forwardStack.isEmpty)
+        Spacer()
+        shareButton
+        Spacer()
+        toolbarButton(icon: "bookmark.fill", action: { showAddBookmark = true })
+            .disabled(currentHost.isEmpty)
+        Spacer()
+        toolbarButton(icon: "book", action: { showBookmarks = true })
+        Spacer()
+        toolbarButton(icon: "gear", action: { showPreferences = true })
+        Spacer()
+    }
+
+    @ViewBuilder
+    private func toolbarButton(icon: String, action: @escaping () -> Void) -> some View {
+        if #available(iOS 26.0, *) {
+            Button(action: action) {
+                Image(systemName: icon)
+                    .frame(width: 44, height: 44)
+            }
+            .glassEffect(.regular.interactive())
+        } else {
+            Button(action: action) {
+                Image(systemName: icon)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var shareButton: some View {
+        let shareURL = shareThroughProxy
+            ? URL(string: "https://gopher.navan.dev/\(url)")!
+            : URL(string: "gopher://\(url)")!
+
+        if #available(iOS 26.0, *) {
+            ShareLink(item: shareURL) {
+                Image(systemName: "square.and.arrow.up")
+                    .frame(width: 44, height: 44)
+            }
+            .glassEffect(.regular.interactive())
+        } else {
+            ShareLink(item: shareURL) {
+                Image(systemName: "square.and.arrow.up")
+            }
+        }
+    }
+}
+#endif
+
+#if os(macOS) || os(visionOS)
+struct macOSToolbarView: View {
+    @Binding var url: String
+    var isURLFocused: FocusState<Bool>.Binding
+    let homeURL: URL
+    let shareThroughProxy: Bool
+    let backwardStack: [GopherNode]
+    let forwardStack: [GopherNode]
+    let currentHost: String
+    @Binding var showAddBookmark: Bool
+    @Binding var showBookmarks: Bool
+    @Binding var showPreferences: Bool
+    let onGo: () -> Void
+    let onHome: () -> Void
+    let onBack: () -> Void
+    let onForward: () -> Void
+
+    var body: some View {
+        HStack(spacing: 10) {
+            navigationButtons
+            urlField
+            actionButtons
+            goButton
+            Spacer()
+        }
+    }
+
+    @ViewBuilder
+    private var navigationButtons: some View {
+        if #available(macOS 26.0, visionOS 26.0, *) {
+            GlassEffectContainer(spacing: 8) {
+                HStack(spacing: 8) {
+                    Button(action: onHome) {
+                        Label("Home", systemImage: "house")
+                            .labelStyle(.iconOnly)
+                    }
+                    .glassEffect(.regular.interactive())
+                    .keyboardShortcut("r", modifiers: [.command])
+
+                    #if os(visionOS)
+                    Button(action: { showPreferences = true }) {
+                        Label("Settings", systemImage: "gear")
+                            .labelStyle(.iconOnly)
+                    }
+                    .glassEffect(.regular.interactive())
+                    #endif
+
+                    Button(action: onBack) {
+                        Label("Back", systemImage: "chevron.left")
+                            .labelStyle(.iconOnly)
+                    }
+                    .glassEffect(.regular.interactive())
+                    .keyboardShortcut("[", modifiers: [.command])
+                    .disabled(backwardStack.count < 2)
+
+                    Button(action: onForward) {
+                        Label("Forward", systemImage: "chevron.right")
+                            .labelStyle(.iconOnly)
+                    }
+                    .glassEffect(.regular.interactive())
+                    .keyboardShortcut("]", modifiers: [.command])
+                    .disabled(forwardStack.isEmpty)
+                }
+            }
+        } else {
+            HStack {
+                Spacer()
+                Button(action: onHome) {
+                    Label("Home", systemImage: "house")
+                        .labelStyle(.iconOnly)
+                }
+                .keyboardShortcut("r", modifiers: [.command])
+
+                #if os(visionOS)
+                Button(action: { showPreferences = true }) {
+                    Label("Settings", systemImage: "gear")
+                        .labelStyle(.iconOnly)
+                }
+                #endif
+
+                Button(action: onBack) {
+                    Label("Back", systemImage: "chevron.left")
+                        .labelStyle(.iconOnly)
+                }
+                .keyboardShortcut("[", modifiers: [.command])
+                .disabled(backwardStack.count < 2)
+
+                Button(action: onForward) {
+                    Label("Forward", systemImage: "chevron.right")
+                        .labelStyle(.iconOnly)
+                }
+                .keyboardShortcut("]", modifiers: [.command])
+                .disabled(forwardStack.isEmpty)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var urlField: some View {
+        if #available(macOS 26.0, visionOS 26.0, *) {
+            TextField("Enter a URL", text: $url)
+                #if os(visionOS)
+                .keyboardType(.URL)
+                .textInputAutocapitalization(.never)
+                #endif
+                .focused(isURLFocused)
+                .padding(10)
+                .glassEffect(in: .rect(cornerRadius: 8))
+        } else {
+            TextField("Enter a URL", text: $url)
+                #if os(visionOS)
+                .keyboardType(.URL)
+                .textInputAutocapitalization(.never)
+                #endif
+                .focused(isURLFocused)
+                .padding(10)
+        }
+    }
+
+    @ViewBuilder
+    private var actionButtons: some View {
+        if #available(macOS 26.0, visionOS 26.0, *) {
+            GlassEffectContainer(spacing: 8) {
+                HStack(spacing: 8) {
+                    Button(action: { showAddBookmark = true }) {
+                        Label("Add Bookmark", systemImage: "bookmark.fill")
+                            .labelStyle(.iconOnly)
+                    }
+                    .glassEffect(.regular.interactive())
+                    .disabled(currentHost.isEmpty)
+
+                    Button(action: { showBookmarks = true }) {
+                        Label("Bookmarks", systemImage: "book")
+                            .labelStyle(.iconOnly)
+                    }
+                    .glassEffect(.regular.interactive())
+
+                    shareLink
+                }
+            }
+        } else {
+            HStack {
+                Button(action: { showAddBookmark = true }) {
+                    Label("Add Bookmark", systemImage: "bookmark.fill")
+                        .labelStyle(.iconOnly)
+                }
+                .disabled(currentHost.isEmpty)
+
+                Button(action: { showBookmarks = true }) {
+                    Label("Bookmarks", systemImage: "book")
+                        .labelStyle(.iconOnly)
+                }
+
+                shareLink
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var shareLink: some View {
+        let shareURL = shareThroughProxy
+            ? URL(string: "https://gopher.navan.dev/\(url)")!
+            : URL(string: "gopher://\(url)")!
+
+        if #available(macOS 26.0, visionOS 26.0, *) {
+            ShareLink(item: shareURL) {
+                Label("Share", systemImage: "square.and.arrow.up")
+                    .labelStyle(.iconOnly)
+            }
+            .glassEffect(.regular.interactive())
+        } else {
+            ShareLink(item: shareURL) {
+                Label("Share", systemImage: "square.and.arrow.up")
+                    .labelStyle(.iconOnly)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var goButton: some View {
+        if #available(macOS 26.0, visionOS 26.0, *) {
+            Button("Go", action: onGo)
+                .buttonStyle(.glass)
+                .keyboardShortcut(.defaultAction)
+        } else {
+            Button("Go", action: onGo)
+                .keyboardShortcut(.defaultAction)
+        }
+    }
+}
+#endif
