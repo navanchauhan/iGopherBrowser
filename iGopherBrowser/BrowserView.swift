@@ -64,8 +64,21 @@ struct BrowserView: View {
     @State private var scrollToTop: Bool = false
 
     @State var currentTask: Task<Void, Never>?
-    
+
     @FocusState private var isURLFocused: Bool
+
+    // Find in page
+    @State private var showFindInPage = false
+    @State private var findText: String = ""
+    @State private var currentFindIndex: Int = 0
+    @FocusState private var isFindFocused: Bool
+
+    private var findMatches: [Int] {
+        guard !findText.isEmpty else { return [] }
+        return gopherItems.enumerated().compactMap { idx, item in
+            item.message.localizedCaseInsensitiveContains(findText) ? idx : nil
+        }
+    }
     
     let client = GopherClient()
 
@@ -76,6 +89,7 @@ struct BrowserView: View {
                     ScrollViewReader { proxy in
                         List {
                             ForEach(Array(gopherItems.enumerated()), id: \.offset) { idx, item in
+                                Group {
                                 if item.parsedItemType == .info {
                                     Text(item.message)
                                         .font(.system(size: 12, design: .monospaced))
@@ -172,7 +186,8 @@ struct BrowserView: View {
                                     }.buttonStyle(PlainButtonStyle())
                                         .id(idx)
                                 }
-
+                                }
+                                .listRowBackground(findHighlightColor(for: idx))
                             }
                         }
                         //.background(Color.white)
@@ -184,6 +199,35 @@ struct BrowserView: View {
                         .onChange(of: selectedSearchItem) { _, newValue in
                             if newValue != nil {
                                 self.showSearchInput = true
+                            }
+                        }
+                        .onChange(of: currentFindIndex) { _, newIndex in
+                            if !findMatches.isEmpty && newIndex < findMatches.count {
+                                withAnimation {
+                                    proxy.scrollTo(findMatches[newIndex], anchor: .center)
+                                }
+                            }
+                        }
+                        .onChange(of: findText) { _, _ in
+                            currentFindIndex = 0
+                            if !findMatches.isEmpty {
+                                withAnimation {
+                                    proxy.scrollTo(findMatches[0], anchor: .center)
+                                }
+                            }
+                        }
+                        .safeAreaInset(edge: .top) {
+                            if showFindInPage {
+                                FindInPageBar(
+                                    findText: $findText,
+                                    currentIndex: $currentFindIndex,
+                                    totalMatches: findMatches.count,
+                                    isFocused: $isFindFocused,
+                                    onDismiss: {
+                                        showFindInPage = false
+                                        findText = ""
+                                    }
+                                )
                             }
                         }
                     }
@@ -248,6 +292,8 @@ struct BrowserView: View {
                         showAddBookmark: $showAddBookmark,
                         showBookmarks: $showBookmarks,
                         showPreferences: $showPreferences,
+                        showFindInPage: $showFindInPage,
+                        hasContent: !gopherItems.isEmpty,
                         onGo: {
                             TelemetryDeck.signal(
                                 "applicationClickedGo", parameters: ["gopherURL": "\(self.url)"])
@@ -344,16 +390,41 @@ struct BrowserView: View {
         .onAppear {
             #if os(OSX)
             NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
+                // Command+F for Find in Page
+                if event.modifierFlags.contains(.command) && !event.modifierFlags.contains(.option) && event.charactersIgnoringModifiers == "f" {
+                    if !gopherItems.isEmpty {
+                        showFindInPage = true
+                    }
+                    return nil
+                }
+                // Option+Command+F for URL focus
                 if event.modifierFlags.contains([.option, .command]) && event.charactersIgnoringModifiers == "f" {
                     isURLFocused = true
                     return nil
-                } else if event.keyCode == 53 {
-                    isURLFocused = false
+                }
+                // Escape to dismiss find bar or unfocus URL
+                if event.keyCode == 53 {
+                    if showFindInPage {
+                        showFindInPage = false
+                        findText = ""
+                    } else {
+                        isURLFocused = false
+                    }
                     return nil
                 }
                 return event
             }
             #endif
+        }
+        .background {
+            // Hidden button for Command+F keyboard shortcut on iOS
+            Button("") {
+                if !gopherItems.isEmpty {
+                    showFindInPage = true
+                }
+            }
+            .keyboardShortcut("f", modifiers: .command)
+            .hidden()
         }
     }
     
@@ -514,6 +585,14 @@ struct BrowserView: View {
         }
     }
     
+    private func findHighlightColor(for idx: Int) -> Color? {
+        guard findMatches.contains(idx) else { return nil }
+        if findMatches.firstIndex(of: idx) == currentFindIndex {
+            return Color.yellow.opacity(0.5)
+        }
+        return Color.yellow.opacity(0.2)
+    }
+
     private func convertToHostNodes(_ responseItems: [gopherItem]) -> [GopherNode] {
         var returnItems: [GopherNode] = []
         responseItems.forEach { item in
@@ -542,6 +621,8 @@ struct iOSToolbarView: View {
     @Binding var showAddBookmark: Bool
     @Binding var showBookmarks: Bool
     @Binding var showPreferences: Bool
+    @Binding var showFindInPage: Bool
+    let hasContent: Bool
     let onGo: () -> Void
     let onHome: () -> Void
     let onBack: () -> Void
@@ -619,6 +700,11 @@ struct iOSToolbarView: View {
                     navButton(icon: "clock.arrow.circlepath", action: { showBookmarks = true })
 
                     Menu {
+                        Button(action: { showFindInPage = true }) {
+                            Label("Find in Page", systemImage: "doc.text.magnifyingglass")
+                        }
+                        .disabled(!hasContent)
+
                         ShareLink(item: shareURL) {
                             Label("Share", systemImage: "square.and.arrow.up")
                         }
@@ -875,3 +961,70 @@ struct macOSToolbarView: View {
     }
 }
 #endif
+
+// MARK: - Find in Page Bar
+
+struct FindInPageBar: View {
+    @Binding var findText: String
+    @Binding var currentIndex: Int
+    let totalMatches: Int
+    var isFocused: FocusState<Bool>.Binding
+    let onDismiss: () -> Void
+
+    var body: some View {
+        HStack(spacing: 8) {
+            HStack(spacing: 4) {
+                Image(systemName: "magnifyingglass")
+                    .foregroundStyle(.secondary)
+
+                TextField("Find in page", text: $findText)
+                    .textFieldStyle(.plain)
+                    .focused(isFocused)
+                    #if os(iOS)
+                    .textInputAutocapitalization(.never)
+                    .autocorrectionDisabled()
+                    #endif
+
+                if !findText.isEmpty {
+                    Text("\(totalMatches > 0 ? currentIndex + 1 : 0)/\(totalMatches)")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .monospacedDigit()
+                }
+            }
+            .padding(.horizontal, 8)
+            .padding(.vertical, 6)
+            .background(Color(.systemGray).opacity(0.2))
+            .cornerRadius(8)
+
+            if !findText.isEmpty {
+                Button {
+                    if totalMatches > 0 {
+                        currentIndex = (currentIndex - 1 + totalMatches) % totalMatches
+                    }
+                } label: {
+                    Image(systemName: "chevron.up")
+                }
+                .disabled(totalMatches == 0)
+
+                Button {
+                    if totalMatches > 0 {
+                        currentIndex = (currentIndex + 1) % totalMatches
+                    }
+                } label: {
+                    Image(systemName: "chevron.down")
+                }
+                .disabled(totalMatches == 0)
+            }
+
+            Button("Done", action: onDismiss)
+                .fontWeight(.medium)
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
+        .background(.regularMaterial)
+        .onAppear {
+            isFocused.wrappedValue = true
+        }
+    }
+}
