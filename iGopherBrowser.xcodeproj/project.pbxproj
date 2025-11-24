@@ -11,6 +11,7 @@
 		3E1BCC582B297E9B00A4CB69 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E1BCC572B297E9B00A4CB69 /* ContentView.swift */; };
 		A3C7E1262DAA123400A7C1F1 /* Bookmark.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3C7E1272DAA123400A7C1F1 /* Bookmark.swift */; };
 		A3C7E1282DAA123400A7C1F1 /* LiquidGlass.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3C7E1292DAA123400A7C1F1 /* LiquidGlass.swift */; };
+		A3C7E12A2DAA234500A7C1F1 /* History.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3C7E12B2DAA234500A7C1F1 /* History.swift */; };
 		3E1BCC5C2B297E9C00A4CB69 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3E1BCC5B2B297E9C00A4CB69 /* Assets.xcassets */; };
 		3E1BCC602B297E9C00A4CB69 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3E1BCC5F2B297E9C00A4CB69 /* Preview Assets.xcassets */; };
 		3E1BCC862B299E9F00A4CB69 /* SidebarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E1BCC852B299E9F00A4CB69 /* SidebarView.swift */; };
@@ -69,6 +70,7 @@
 		A3C7E11D2D9D6D6500A7C1F1 /* iGopherBrowserTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = iGopherBrowserTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		A3C7E1272DAA123400A7C1F1 /* Bookmark.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Bookmark.swift; sourceTree = "<group>"; };
 		A3C7E1292DAA123400A7C1F1 /* LiquidGlass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiquidGlass.swift; sourceTree = "<group>"; };
+		A3C7E12B2DAA234500A7C1F1 /* History.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = History.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -140,6 +142,7 @@
 				3E52F6412B3697B000F0921C /* SettingsView.swift */,
 				A3C7E1272DAA123400A7C1F1 /* Bookmark.swift */,
 				A3C7E1292DAA123400A7C1F1 /* LiquidGlass.swift */,
+				A3C7E12B2DAA234500A7C1F1 /* History.swift */,
 			);
 			path = iGopherBrowser;
 			sourceTree = "<group>";
@@ -325,6 +328,7 @@
 				3EFB9C0D2B2E4F06005EAD7C /* SearchInputView.swift in Sources */,
 				A3C7E1262DAA123400A7C1F1 /* Bookmark.swift in Sources */,
 				A3C7E1282DAA123400A7C1F1 /* LiquidGlass.swift in Sources */,
+				A3C7E12A2DAA234500A7C1F1 /* History.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
