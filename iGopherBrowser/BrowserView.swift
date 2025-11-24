@@ -702,13 +702,14 @@ struct macOSToolbarView: View {
     let onForward: () -> Void
 
     var body: some View {
-        HStack(spacing: 10) {
+        HStack(spacing: 8) {
             navigationButtons
             urlField
             actionButtons
             goButton
-            Spacer()
         }
+        .padding(.horizontal, 8)
+        .padding(.vertical, 4)
     }
 
     @ViewBuilder
@@ -749,8 +750,7 @@ struct macOSToolbarView: View {
                 }
             }
         } else {
-            HStack {
-                Spacer()
+            HStack(spacing: 4) {
                 Button(action: onHome) {
                     Label("Home", systemImage: "house")
                         .labelStyle(.iconOnly)
