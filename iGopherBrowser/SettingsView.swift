@@ -86,184 +86,156 @@ struct SettingsView: View {
     var body: some View {
         Group {
         #if os(macOS)
-        VStack(alignment: .leading, spacing: 0) {
-            // Navigation section
-            VStack(alignment: .leading, spacing: 12) {
-                Text("Navigation")
-                    .font(.headline)
-                    .foregroundColor(.primary)
-                
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("Home URL")
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                    
-                    TextField("Enter home URL", text: $homeURLString)
-                        .textFieldStyle(.roundedBorder)
-                        .disableAutocorrection(true)
-                        .onSubmit {
-                            if let url = URL(string: homeURLString) {
-                                self.homeURL = url
+        ScrollView {
+            VStack(alignment: .leading, spacing: 20) {
+                // Navigation section
+                GroupBox {
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("Home URL")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+
+                        TextField("Enter home URL", text: $homeURLString)
+                            .textFieldStyle(.roundedBorder)
+                            .disableAutocorrection(true)
+                            .onSubmit {
+                                if let url = URL(string: homeURLString) {
+                                    self.homeURL = url
+                                }
                             }
-                        }
-                    
-                    HStack(spacing: 8) {
-                        Button("Save") {
-                            if let url = URL(string: homeURLString) {
-                                homeURL = url
-                                print("Saved \(self.homeURL)")
-                            } else {
-                                self.alertMessage = "Unable to convert \(homeURLString) to a URL"
-                                self.showAlert = true
+
+                        HStack(spacing: 8) {
+                            Button("Save") {
+                                if let url = URL(string: homeURLString) {
+                                    homeURL = url
+                                    print("Saved \(self.homeURL)")
+                                } else {
+                                    self.alertMessage = "Unable to convert \(homeURLString) to a URL"
+                                    self.showAlert = true
+                                }
                             }
+                            .buttonStyle(.bordered)
+
+                            Button("Reset to Default") {
+                                self.homeURL = URL(string: "gopher://gopher.navan.dev:70/")!
+                                self.homeURLString = "gopher://gopher.navan.dev:70/"
+                            }
+                            .buttonStyle(.bordered)
+
+                            Spacer()
                         }
-                        .buttonStyle(.bordered)
-                        
-                        Button("Reset to Default") {
-                            self.homeURL = URL(string: "gopher://gopher.navan.dev:70/")!
-                            self.homeURLString = "gopher://gopher.navan.dev:70/"
-                        }
-                        .buttonStyle(.bordered)
-                        
-                        Spacer()
                     }
+                    .padding(.vertical, 4)
+                } label: {
+                    Label("Navigation", systemImage: "house")
                 }
-            }
-            .padding(.bottom, 20)
-            
-            Divider()
-            
-            // Appearance section
-            VStack(alignment: .leading, spacing: 12) {
-                Text("Appearance")
-                    .font(.headline)
-                    .foregroundColor(.primary)
 
-                VStack(alignment: .leading, spacing: 12) {
-                    HStack {
-                        ColorPicker("Link Color", selection: $linkColour)
-                            .labelsHidden()
-                        Text("Link Color")
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                    }
+                // Appearance section
+                GroupBox {
+                    VStack(alignment: .leading, spacing: 12) {
+                        HStack {
+                            ColorPicker("Link Color", selection: $linkColour)
+                                .labelsHidden()
+                            Text("Link Color")
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                        }
 
-                    HStack {
-                        ColorPicker("Accent Color", selection: $accentColour)
-                            .labelsHidden()
-                        Text("Accent Color")
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                    }
+                        HStack {
+                            ColorPicker("Accent Color", selection: $accentColour)
+                                .labelsHidden()
+                            Text("Accent Color")
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                        }
 
-                    HStack {
                         Button("Reset Colors") {
                             self.linkColour = Color(.white)
                             self.accentColour = Color(.blue)
                         }
                         .buttonStyle(.bordered)
-
-                        Spacer()
                     }
-                }
-            }
-            .padding(.vertical, 20)
-
-            Divider()
-
-            // Retro Display section
-            VStack(alignment: .leading, spacing: 12) {
-                HStack {
-                    Image(systemName: "tv")
-                    Text("Retro Display")
-                        .font(.headline)
-                        .foregroundColor(.primary)
+                    .padding(.vertical, 4)
+                } label: {
+                    Label("Appearance", systemImage: "paintbrush")
                 }
 
-                VStack(alignment: .leading, spacing: 8) {
-                    Toggle("CRT Mode", isOn: $crtMode)
+                // Retro Display section
+                GroupBox {
+                    VStack(alignment: .leading, spacing: 12) {
+                        Toggle("CRT Mode", isOn: $crtMode)
 
-                    if crtMode {
-                        HStack {
-                            Text("Phosphor Color")
-                            Spacer()
-                            Picker("", selection: $crtPhosphorColor) {
-                                ForEach(CRTPhosphorColor.allCases) { color in
-                                    HStack {
-                                        Circle()
-                                            .fill(color.color)
-                                            .frame(width: 10, height: 10)
-                                        Text(color.displayName)
+                        if crtMode {
+                            HStack {
+                                Text("Phosphor Color")
+                                Spacer()
+                                Picker("", selection: $crtPhosphorColor) {
+                                    ForEach(CRTPhosphorColor.allCases) { color in
+                                        HStack {
+                                            Circle()
+                                                .fill(color.color)
+                                                .frame(width: 10, height: 10)
+                                            Text(color.displayName)
+                                        }
+                                        .tag(color.rawValue)
                                     }
-                                    .tag(color.rawValue)
                                 }
+                                .pickerStyle(.menu)
+                                .frame(width: 130)
                             }
-                            .pickerStyle(.menu)
-                            .frame(width: 120)
-                        }
-                        .padding(.leading, 20)
+                            .padding(.leading, 20)
 
-                        Toggle("Scanlines", isOn: $crtScanlines)
-                            .padding(.leading, 20)
-                        Toggle("Screen Vignette", isOn: $crtVignette)
-                            .padding(.leading, 20)
+                            Toggle("Scanlines", isOn: $crtScanlines)
+                                .padding(.leading, 20)
+                            Toggle("Screen Vignette", isOn: $crtVignette)
+                                .padding(.leading, 20)
+                        }
+
+                        Text("Enable 80s NASA vector-style CRT display with phosphor glow, scanlines, and vignette effects.")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
                     }
+                    .padding(.vertical, 4)
+                } label: {
+                    Label("Retro Display", systemImage: "tv")
+                }
 
-                    Text("Enable 80s NASA vector-style CRT display with phosphor glow, scanlines, and vignette effects.")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-            }
-            .padding(.vertical, 20)
+                // Privacy section
+                GroupBox {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Toggle("Opt out of anonymous telemetry", isOn: $telemetryOptOut)
+                            .onChange(of: telemetryOptOut) { _, newValue in
+                                TelemetryDeck.terminate()
+                                let cfg = TelemetryDeck.Config(appID: "400187ED-ADA9-4AB4-91F8-8825AD8FC67C")
+                                cfg.analyticsDisabled = newValue
+                                TelemetryDeck.initialize(config: cfg)
+                            }
 
-            Divider()
-            
-            // Privacy section
-            VStack(alignment: .leading, spacing: 12) {
-                Text("Privacy")
-                    .font(.headline)
-                    .foregroundColor(.primary)
-                
-                VStack(alignment: .leading, spacing: 8) {
-                    Toggle("Opt out of anonymous telemetry", isOn: $telemetryOptOut)
-                        .onChange(of: telemetryOptOut) { _, newValue in
-                            TelemetryDeck.terminate()
-                            let cfg = TelemetryDeck.Config(appID: "400187ED-ADA9-4AB4-91F8-8825AD8FC67C")
-                            cfg.analyticsDisabled = newValue
-                            TelemetryDeck.initialize(config: cfg)
-                        }
-                    
-                    Text("Opt out of anonymous telemetry that tracks crashes and random errors.")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                        .fixedSize(horizontal: false, vertical: true)
+                        Text("Opt out of anonymous telemetry that tracks crashes and random errors.")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                    .padding(.vertical, 4)
+                } label: {
+                    Label("Privacy", systemImage: "hand.raised")
+                }
+
+                // Share Settings section
+                GroupBox {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Toggle("Share links through HTTP(s) proxy", isOn: $shareThroughProxy)
+
+                        Text("Enabling this option shares Gopher URLs through an HTTP proxy, allowing people to view the page without needing a Gopher client.")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                    .padding(.vertical, 4)
+                } label: {
+                    Label("Sharing", systemImage: "square.and.arrow.up")
                 }
             }
-            .padding(.vertical, 20)
-            
-            Divider()
-            
-            // Share Settings section
-            VStack(alignment: .leading, spacing: 12) {
-                Text("Sharing")
-                    .font(.headline)
-                    .foregroundColor(.primary)
-                
-                VStack(alignment: .leading, spacing: 8) {
-                    Toggle("Share links through HTTP(s) proxy", isOn: $shareThroughProxy)
-                    
-                    Text("Enabling this option shares Gopher URLs through an HTTP proxy, allowing people to view the page without needing a Gopher client.")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-            }
-            .padding(.top, 20)
-            
-            Spacer()
+            .padding(20)
         }
-        .padding(24)
-        .frame(minWidth: 450, maxWidth: 550)
-        .frame(minHeight: 500, maxHeight: 650)
+        .frame(minWidth: 450, maxWidth: 500)
+        .frame(minHeight: 480, maxHeight: 600)
         #else
         Form {
             Section(header: Text("Preferences")) {
