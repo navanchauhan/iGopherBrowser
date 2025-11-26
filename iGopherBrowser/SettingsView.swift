@@ -71,7 +71,6 @@ struct SettingsView: View {
     @AppStorage("crtScanlines") var crtScanlines: Bool = true
     @AppStorage("crtVignette") var crtVignette: Bool = true
     @AppStorage("crtPhosphorColor") var crtPhosphorColor: String = CRTPhosphorColor.green.rawValue
-    @AppStorage("crtHoverHighlight") var crtHoverHighlight: Bool = true
 
     #if os(macOS)
         @AppStorage("homeURL") var homeURL: URL = URL(string: "gopher://gopher.navan.dev:70/")!
@@ -187,8 +186,6 @@ struct SettingsView: View {
                             Toggle("Scanlines", isOn: $crtScanlines)
                                 .padding(.leading, 20)
                             Toggle("Screen Vignette", isOn: $crtVignette)
-                                .padding(.leading, 20)
-                            Toggle("Hover Highlight", isOn: $crtHoverHighlight)
                                 .padding(.leading, 20)
                         }
 
@@ -327,8 +324,6 @@ struct SettingsView: View {
                     Toggle("Scanlines", isOn: $crtScanlines)
                         .toggleStyle(.switch)
                     Toggle("Screen Vignette", isOn: $crtVignette)
-                        .toggleStyle(.switch)
-                    Toggle("Hover Highlight", isOn: $crtHoverHighlight)
                         .toggleStyle(.switch)
                 }
             } header: {

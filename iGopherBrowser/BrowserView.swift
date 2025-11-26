@@ -37,7 +37,6 @@ struct BrowserView: View {
     @AppStorage("shareThroughProxy", store: .standard) var shareThroughProxy: Bool = true
     @AppStorage("crtMode") var crtMode: Bool = false
     @AppStorage("crtPhosphorColor") var crtPhosphorColorRaw: String = CRTPhosphorColor.green.rawValue
-    @AppStorage("crtHoverHighlight") var crtHoverHighlight: Bool = true
 
     // CRT-aware colors
     private var crtPhosphorColor: Color {
@@ -88,9 +87,6 @@ struct BrowserView: View {
     @State private var findText: String = ""
     @State private var currentFindIndex: Int = 0
     @FocusState private var isFindFocused: Bool
-
-    // Hover tracking for CRT mode
-    @State private var hoveredRowIndex: Int? = nil
 
     private var findMatches: [Int] {
         guard !findText.isEmpty else { return [] }
@@ -227,13 +223,6 @@ struct BrowserView: View {
                                 }
                                 }
                                 .listRowBackground(rowBackgroundColor(for: idx))
-                                #if os(macOS)
-                                .onHover { hovering in
-                                    if crtMode && crtHoverHighlight {
-                                        hoveredRowIndex = hovering ? idx : nil
-                                    }
-                                }
-                                #endif
                             }
                         }
                         .scrollContentBackground(crtMode ? .hidden : .automatic)
@@ -646,11 +635,6 @@ struct BrowserView: View {
                 }
                 return Color.yellow.opacity(0.2)
             }
-        }
-
-        // Hover highlight in CRT mode
-        if crtMode && crtHoverHighlight && hoveredRowIndex == idx {
-            return crtPhosphorColor.opacity(0.2)
         }
 
         return crtMode ? CRTTheme.screenBackground : nil
