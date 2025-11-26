@@ -71,6 +71,7 @@ struct SettingsView: View {
     @AppStorage("crtScanlines") var crtScanlines: Bool = true
     @AppStorage("crtVignette") var crtVignette: Bool = true
     @AppStorage("crtPhosphorColor") var crtPhosphorColor: String = CRTPhosphorColor.green.rawValue
+    @AppStorage("crtHoverHighlight") var crtHoverHighlight: Bool = true
 
     #if os(macOS)
         @AppStorage("homeURL") var homeURL: URL = URL(string: "gopher://gopher.navan.dev:70/")!
@@ -187,9 +188,11 @@ struct SettingsView: View {
                                 .padding(.leading, 20)
                             Toggle("Screen Vignette", isOn: $crtVignette)
                                 .padding(.leading, 20)
+                            Toggle("Hover Highlight", isOn: $crtHoverHighlight)
+                                .padding(.leading, 20)
                         }
 
-                        Text("Enable 80s NASA vector-style CRT display with phosphor glow, scanlines, and vignette effects.")
+                        Text("Enable CRT display mode with phosphor glow, scanlines, and vignette effects.")
                             .font(.caption)
                             .foregroundColor(.secondary)
                     }
@@ -325,6 +328,8 @@ struct SettingsView: View {
                         .toggleStyle(.switch)
                     Toggle("Screen Vignette", isOn: $crtVignette)
                         .toggleStyle(.switch)
+                    Toggle("Hover Highlight", isOn: $crtHoverHighlight)
+                        .toggleStyle(.switch)
                 }
             } header: {
                 HStack {
@@ -332,7 +337,7 @@ struct SettingsView: View {
                     Text("Retro Display")
                 }
             } footer: {
-                Text("Enable 80s NASA vector-style CRT display mode with phosphor glow, scanlines, and vignette effects.")
+                Text("Enable CRT display mode with phosphor glow, scanlines, and vignette effects.")
                     .font(.caption)
                     .foregroundColor(.gray)
             }

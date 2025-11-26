@@ -37,6 +37,7 @@ struct BrowserView: View {
     @AppStorage("shareThroughProxy", store: .standard) var shareThroughProxy: Bool = true
     @AppStorage("crtMode") var crtMode: Bool = false
     @AppStorage("crtPhosphorColor") var crtPhosphorColorRaw: String = CRTPhosphorColor.green.rawValue
+    @AppStorage("crtHoverHighlight") var crtHoverHighlight: Bool = true
 
     // CRT-aware colors
     private var crtPhosphorColor: Color {
@@ -87,6 +88,9 @@ struct BrowserView: View {
     @State private var findText: String = ""
     @State private var currentFindIndex: Int = 0
     @FocusState private var isFindFocused: Bool
+
+    // Hover tracking for CRT mode
+    @State private var hoveredRowIndex: Int? = nil
 
     private var findMatches: [Int] {
         guard !findText.isEmpty else { return [] }
@@ -210,7 +214,14 @@ struct BrowserView: View {
                                         .id(idx)
                                 }
                                 }
-                                .listRowBackground(findHighlightColor(for: idx))
+                                .listRowBackground(rowBackgroundColor(for: idx))
+                                #if os(macOS)
+                                .onHover { hovering in
+                                    if crtMode && crtHoverHighlight {
+                                        hoveredRowIndex = hovering ? idx : nil
+                                    }
+                                }
+                                #endif
                             }
                         }
                         .scrollContentBackground(crtMode ? .hidden : .automatic)
@@ -609,21 +620,28 @@ struct BrowserView: View {
         }
     }
     
-    private func findHighlightColor(for idx: Int) -> Color? {
-        guard findMatches.contains(idx) else {
-            return crtMode ? CRTTheme.screenBackground : nil
-        }
-        if crtMode {
-            if findMatches.firstIndex(of: idx) == currentFindIndex {
-                return crtPhosphorColor.opacity(0.3)
+    private func rowBackgroundColor(for idx: Int) -> Color? {
+        // Find highlight takes priority
+        if findMatches.contains(idx) {
+            if crtMode {
+                if findMatches.firstIndex(of: idx) == currentFindIndex {
+                    return crtPhosphorColor.opacity(0.3)
+                }
+                return crtPhosphorColor.opacity(0.15)
+            } else {
+                if findMatches.firstIndex(of: idx) == currentFindIndex {
+                    return Color.yellow.opacity(0.5)
+                }
+                return Color.yellow.opacity(0.2)
             }
-            return crtPhosphorColor.opacity(0.15)
-        } else {
-            if findMatches.firstIndex(of: idx) == currentFindIndex {
-                return Color.yellow.opacity(0.5)
-            }
-            return Color.yellow.opacity(0.2)
         }
+
+        // Hover highlight in CRT mode
+        if crtMode && crtHoverHighlight && hoveredRowIndex == idx {
+            return crtPhosphorColor.opacity(0.2)
+        }
+
+        return crtMode ? CRTTheme.screenBackground : nil
     }
 
     private func convertToHostNodes(_ responseItems: [gopherItem]) -> [GopherNode] {
