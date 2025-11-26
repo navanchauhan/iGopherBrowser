@@ -131,7 +131,9 @@ struct BrowserView: View {
                                             Text(Image(systemName: "folder"))
                                             Text(item.message)
                                             Spacer()
-                                        }.foregroundStyle(effectiveLinkColor)
+                                        }
+                                        .contentShape(Rectangle())
+                                        .foregroundStyle(effectiveLinkColor)
                                         .shadow(color: crtMode ? effectiveLinkColor.opacity(0.5) : .clear, radius: crtMode ? 2 : 0)
                                     }.buttonStyle(PlainButtonStyle())
                                         .id(idx)
@@ -148,7 +150,9 @@ struct BrowserView: View {
                                             Text(Image(systemName: "magnifyingglass"))
                                             Text(item.message)
                                             Spacer()
-                                        }.foregroundStyle(effectiveLinkColor)
+                                        }
+                                        .contentShape(Rectangle())
+                                        .foregroundStyle(effectiveLinkColor)
                                         .shadow(color: crtMode ? effectiveLinkColor.opacity(0.5) : .clear, radius: crtMode ? 2 : 0)
                                     }.buttonStyle(PlainButtonStyle())
                                         .id(idx)
@@ -158,7 +162,9 @@ struct BrowserView: View {
                                             Text(Image(systemName: "doc.plaintext"))
                                             Text(item.message)
                                             Spacer()
-                                        }.foregroundStyle(effectiveLinkColor)
+                                        }
+                                        .contentShape(Rectangle())
+                                        .foregroundStyle(effectiveLinkColor)
                                         .shadow(color: crtMode ? effectiveLinkColor.opacity(0.5) : .clear, radius: crtMode ? 2 : 0)
                                     }
                                     .id(idx)
@@ -175,8 +181,10 @@ struct BrowserView: View {
                                                 Image(systemName: "link")
                                                 Text(item.message)
                                                 Spacer()
-                                            }.foregroundStyle(effectiveLinkColor)
-                                        .shadow(color: crtMode ? effectiveLinkColor.opacity(0.5) : .clear, radius: crtMode ? 2 : 0)
+                                            }
+                                            .contentShape(Rectangle())
+                                            .foregroundStyle(effectiveLinkColor)
+                                            .shadow(color: crtMode ? effectiveLinkColor.opacity(0.5) : .clear, radius: crtMode ? 2 : 0)
                                         }.buttonStyle(PlainButtonStyle())
                                             .id(idx)
                                     }
@@ -188,10 +196,12 @@ struct BrowserView: View {
                                             Text(Image(systemName: itemToImageType(item)))
                                             Text(item.message)
                                             Spacer()
-                                        }.foregroundStyle(effectiveLinkColor)
+                                        }
+                                        .contentShape(Rectangle())
+                                        .foregroundStyle(effectiveLinkColor)
                                         .shadow(color: crtMode ? effectiveLinkColor.opacity(0.5) : .clear, radius: crtMode ? 2 : 0)
-                                            .id(idx)
                                     }
+                                    .id(idx)
                                 } else {
                                     Button(action: {
                                         TelemetryDeck.signal(
@@ -208,7 +218,9 @@ struct BrowserView: View {
                                             Text(Image(systemName: "questionmark.app.dashed"))
                                             Text(item.message)
                                             Spacer()
-                                        }.foregroundStyle(effectiveLinkColor)
+                                        }
+                                        .contentShape(Rectangle())
+                                        .foregroundStyle(effectiveLinkColor)
                                         .shadow(color: crtMode ? effectiveLinkColor.opacity(0.5) : .clear, radius: crtMode ? 2 : 0)
                                     }.buttonStyle(PlainButtonStyle())
                                         .id(idx)
