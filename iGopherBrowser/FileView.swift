@@ -53,6 +53,14 @@ struct FileView: View {
     @State private var downloadedData: Data?
     @State private var showRawUnknown: Bool = false
 
+    // CRT Mode
+    @AppStorage("crtMode") var crtMode: Bool = false
+    @AppStorage("crtPhosphorColor") var crtPhosphorColorRaw: String = CRTPhosphorColor.green.rawValue
+
+    private var textColor: Color {
+        crtMode ? (CRTPhosphorColor(rawValue: crtPhosphorColorRaw) ?? .green).color : .primary
+    }
+
     var body: some View {
         if item.parsedItemType == .text {
             GeometryReader { _ in
@@ -69,6 +77,8 @@ struct FileView: View {
                             ForEach(fileContent.indices, id: \.self) { index in
                                 Text(fileContent[index])
                                     .font(.system(.body, design: .monospaced))
+                                    .foregroundStyle(textColor)
+                                    .shadow(color: crtMode ? textColor.opacity(0.5) : .clear, radius: crtMode ? 2 : 0)
                                     .textSelection(.enabled)
                                     .padding(.vertical, 2)
                             }
@@ -110,6 +120,8 @@ struct FileView: View {
                         ScrollView {
                             Text(rawText(from: data))
                                 .font(.system(.caption, design: .monospaced))
+                                .foregroundStyle(textColor)
+                                .shadow(color: crtMode ? textColor.opacity(0.5) : .clear, radius: crtMode ? 2 : 0)
                                 .textSelection(.enabled)
                                 .frame(maxWidth: .infinity, alignment: .leading)
                         }
@@ -249,10 +261,12 @@ struct FileView: View {
         if !name.isEmpty {
             HStack(spacing: 8) {
                 Image(systemName: "doc")
+                    .foregroundStyle(crtMode ? textColor : .secondary)
                 Text(name)
                     .font(.subheadline)
-                    .foregroundColor(.secondary)
+                    .foregroundStyle(crtMode ? textColor : .secondary)
             }
+            .shadow(color: crtMode ? textColor.opacity(0.5) : .clear, radius: crtMode ? 2 : 0)
         }
     }
 

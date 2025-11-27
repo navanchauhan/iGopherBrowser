@@ -6,9 +6,13 @@
 //
 
 import GopherHelpers
+import SwiftData
 import SwiftGopherClient
 import SwiftUI
 import TelemetryDeck
+#if os(macOS)
+import AppKit
+#endif
 
 func openURL(url: URL) {
     #if os(OSX)
@@ -28,10 +32,29 @@ func openURL(url: URL) {
 #endif
 
 struct BrowserView: View {
+    @Environment(\.modelContext) private var modelContext
+
     @AppStorage("homeURL") var homeURL: URL = URL(string: "gopher://gopher.navan.dev:70/")!
     @AppStorage("accentColour", store: .standard) var accentColour: Color = Color(.blue)
     @AppStorage("linkColour", store: .standard) var linkColour: Color = Color(.white)
     @AppStorage("shareThroughProxy", store: .standard) var shareThroughProxy: Bool = true
+    @AppStorage("crtMode") var crtMode: Bool = false
+    @AppStorage("crtPhosphorColor") var crtPhosphorColorRaw: String = CRTPhosphorColor.green.rawValue
+    @AppStorage("hasFinishedFirstRunTips") var hasFinishedFirstRunTips: Bool = false
+    @AppStorage("lastSeenWhatsNewVersion") var lastSeenWhatsNewVersion: String = ""
+
+    // CRT-aware colors
+    private var crtPhosphorColor: Color {
+        (CRTPhosphorColor(rawValue: crtPhosphorColorRaw) ?? .green).color
+    }
+
+    private var effectiveLinkColor: Color {
+        crtMode ? crtPhosphorColor : linkColour
+    }
+
+    private var effectiveTextColor: Color {
+        crtMode ? crtPhosphorColor : .primary
+    }
 
     @State var homeURLString = "gopher://gopher.navan.dev:70/"
 
@@ -52,13 +75,33 @@ struct BrowserView: View {
 
     @State private var showPreferences = false
     @State private var showBookmarks = false
+    @State private var showAddBookmark = false
+    @State private var currentHost: String = ""
+    @State private var currentPort: Int = 70
+    @State private var currentSelector: String = ""
 
     @Namespace var topID
     @State private var scrollToTop: Bool = false
 
     @State var currentTask: Task<Void, Never>?
-    
+    @State private var showHomeTooltip: Bool = false
+
     @FocusState private var isURLFocused: Bool
+
+    // Find in page
+    @State private var showFindInPage = false
+    @State private var findText: String = ""
+    @State private var currentFindIndex: Int = 0
+    @FocusState private var isFindFocused: Bool
+
+    private let homeTooltipMessage = "Tap Home to visit your first Gopherhole."
+
+    private var findMatches: [Int] {
+        guard !findText.isEmpty else { return [] }
+        return gopherItems.enumerated().compactMap { idx, item in
+            item.message.localizedCaseInsensitiveContains(findText) ? idx : nil
+        }
+    }
     
     let client = GopherClient()
 
@@ -69,9 +112,12 @@ struct BrowserView: View {
                     ScrollViewReader { proxy in
                         List {
                             ForEach(Array(gopherItems.enumerated()), id: \.offset) { idx, item in
+                                Group {
                                 if item.parsedItemType == .info {
                                     Text(item.message)
                                         .font(.system(size: 12, design: .monospaced))
+                                        .foregroundStyle(effectiveTextColor)
+                                        .shadow(color: crtMode ? effectiveTextColor.opacity(0.5) : .clear, radius: crtMode ? 2 : 0)
                                         .frame(height: 20)
                                         .listRowSeparator(.hidden)
                                         .padding(.vertical, -8)
@@ -89,7 +135,10 @@ struct BrowserView: View {
                                             Text(Image(systemName: "folder"))
                                             Text(item.message)
                                             Spacer()
-                                        }.foregroundStyle(linkColour)
+                                        }
+                                        .contentShape(Rectangle())
+                                        .foregroundStyle(effectiveLinkColor)
+                                        .shadow(color: crtMode ? effectiveLinkColor.opacity(0.5) : .clear, radius: crtMode ? 2 : 0)
                                     }.buttonStyle(PlainButtonStyle())
                                         .id(idx)
                                 } else if item.parsedItemType == .search {
@@ -105,7 +154,10 @@ struct BrowserView: View {
                                             Text(Image(systemName: "magnifyingglass"))
                                             Text(item.message)
                                             Spacer()
-                                        }.foregroundStyle(linkColour)
+                                        }
+                                        .contentShape(Rectangle())
+                                        .foregroundStyle(effectiveLinkColor)
+                                        .shadow(color: crtMode ? effectiveLinkColor.opacity(0.5) : .clear, radius: crtMode ? 2 : 0)
                                     }.buttonStyle(PlainButtonStyle())
                                         .id(idx)
                                 } else if item.parsedItemType == .text {
@@ -114,7 +166,10 @@ struct BrowserView: View {
                                             Text(Image(systemName: "doc.plaintext"))
                                             Text(item.message)
                                             Spacer()
-                                        }.foregroundStyle(linkColour)
+                                        }
+                                        .contentShape(Rectangle())
+                                        .foregroundStyle(effectiveLinkColor)
+                                        .shadow(color: crtMode ? effectiveLinkColor.opacity(0.5) : .clear, radius: crtMode ? 2 : 0)
                                     }
                                     .id(idx)
                                 } else if item.selector.hasPrefix("URL:") {
@@ -130,7 +185,10 @@ struct BrowserView: View {
                                                 Image(systemName: "link")
                                                 Text(item.message)
                                                 Spacer()
-                                            }.foregroundStyle(linkColour)
+                                            }
+                                            .contentShape(Rectangle())
+                                            .foregroundStyle(effectiveLinkColor)
+                                            .shadow(color: crtMode ? effectiveLinkColor.opacity(0.5) : .clear, radius: crtMode ? 2 : 0)
                                         }.buttonStyle(PlainButtonStyle())
                                             .id(idx)
                                     }
@@ -142,9 +200,12 @@ struct BrowserView: View {
                                             Text(Image(systemName: itemToImageType(item)))
                                             Text(item.message)
                                             Spacer()
-                                        }.foregroundStyle(linkColour)
-                                            .id(idx)
+                                        }
+                                        .contentShape(Rectangle())
+                                        .foregroundStyle(effectiveLinkColor)
+                                        .shadow(color: crtMode ? effectiveLinkColor.opacity(0.5) : .clear, radius: crtMode ? 2 : 0)
                                     }
+                                    .id(idx)
                                 } else {
                                     Button(action: {
                                         TelemetryDeck.signal(
@@ -161,14 +222,19 @@ struct BrowserView: View {
                                             Text(Image(systemName: "questionmark.app.dashed"))
                                             Text(item.message)
                                             Spacer()
-                                        }.foregroundStyle(linkColour)
+                                        }
+                                        .contentShape(Rectangle())
+                                        .foregroundStyle(effectiveLinkColor)
+                                        .shadow(color: crtMode ? effectiveLinkColor.opacity(0.5) : .clear, radius: crtMode ? 2 : 0)
                                     }.buttonStyle(PlainButtonStyle())
                                         .id(idx)
                                 }
-
+                                }
+                                .listRowBackground(rowBackgroundColor(for: idx))
                             }
                         }
-                        //.background(Color.white)
+                        .scrollContentBackground(crtMode ? .hidden : .automatic)
+                        .background(crtMode ? Color.clear : Color.clear)
                         .cornerRadius(10)
                         .onChange(of: scrollToTop) { _, _ in
                             // TODO: Cleanup
@@ -177,6 +243,35 @@ struct BrowserView: View {
                         .onChange(of: selectedSearchItem) { _, newValue in
                             if newValue != nil {
                                 self.showSearchInput = true
+                            }
+                        }
+                        .onChange(of: currentFindIndex) { _, newIndex in
+                            if !findMatches.isEmpty && newIndex < findMatches.count {
+                                withAnimation {
+                                    proxy.scrollTo(findMatches[newIndex], anchor: .center)
+                                }
+                            }
+                        }
+                        .onChange(of: findText) { _, _ in
+                            currentFindIndex = 0
+                            if !findMatches.isEmpty {
+                                withAnimation {
+                                    proxy.scrollTo(findMatches[0], anchor: .center)
+                                }
+                            }
+                        }
+                        .safeAreaInset(edge: .top) {
+                            if showFindInPage {
+                                FindInPageBar(
+                                    findText: $findText,
+                                    currentIndex: $currentFindIndex,
+                                    totalMatches: findMatches.count,
+                                    isFocused: $isFindFocused,
+                                    onDismiss: {
+                                        showFindInPage = false
+                                        findText = ""
+                                    }
+                                )
                             }
                         }
                     }
@@ -231,185 +326,58 @@ struct BrowserView: View {
                     Spacer()
                 }
                 #if os(iOS)
-                    VStack {
-                        HStack(spacing: 10) {
-                            HStack {
-                                Spacer()
-
-                                TextField("Enter a URL", text: $url)
-                                    .keyboardType(.URL)
-                                    .textInputAutocapitalization(.never)
-                                    .padding(10)
-                                    .background(Color.gray.opacity(0.2))
-                                    .cornerRadius(10)
-                                Spacer()
-                            }
-                            //.background(Color.white)
-                            .cornerRadius(30)
-
-                            Button(
-                                "Go",
-                            action: {
-                                TelemetryDeck.signal(
-                                    "applicationClickedGo", parameters: ["gopherURL": "\(self.url)"])
-                                performGopherRequest(clearForward: false)
-
-                            }
-                            )
-                            .keyboardShortcut(.defaultAction)
-                            .onSubmit {
-                                performGopherRequest()
-                            }
-                            Spacer()
-                        }
-                        .padding(.bottom, 10)
-                        .padding(.top, 5)
-                        HStack {
-                            Spacer()
-                            Button {
-                                print(homeURL, "home")
-                                TelemetryDeck.signal(
-                                    "applicationClickedHome", parameters: ["gopherURL": "\(self.url)"])
-                                performGopherRequest(
-                                    host: homeURL.host ?? "gopher.navan.dev",
-                                    port: homeURL.port ?? 70,
-                                    selector: homeURL.path)
-                            } label: {
-                                Label("Home", systemImage: "house")
-                                    .labelStyle(.iconOnly)
-                            }
-                            .keyboardShortcut("r", modifiers: [.command])
-                            Spacer()
-                            Button {
-                                goBack();
-
-                            } label: {
-                                Label("Back", systemImage: "chevron.left")
-                                    .labelStyle(.iconOnly)
-                            }
-                            .keyboardShortcut("[", modifiers: [.command])
-                            .disabled(backwardStack.count < 2)
-                            Spacer()
-                            Button {
-                                goForward()
-                            } label: {
-                                Label("Forward", systemImage: "chevron.right")
-                                    .labelStyle(.iconOnly)
-                            }
-                            .keyboardShortcut("]", modifiers: [.command])
-                            .disabled(forwardStack.isEmpty)
-                            Spacer()
-                            if shareThroughProxy {
-                                ShareLink(item: URL(string: "https://gopher.navan.dev/\(url)")!) {
-                                    Label("Share", systemImage: "square.and.arrow.up").labelStyle(
-                                        .iconOnly)
-                                }
-                            } else {
-                                ShareLink(item: URL(string: "gopher://\(url)")!) {
-                                    Label("Share", systemImage: "square.and.arrow.up").labelStyle(
-                                        .iconOnly)
-                                }
-                            }
-                            Spacer()
-                            //                Button {
-                            //                    showBookmarks = true
-                            //                } label: {
-                            //                    Label("Bookmarks", systemImage: "book")
-                            //                        .labelStyle(.iconOnly)
-                            //                }.sheet(isPresented: $showBookmarks) {
-                            //                    BookmarksView()
-                            //                        .presentationDetents([.height(400), .medium, .large])
-                            //                        .presentationDragIndicator(.automatic)
-                            //                }
-                            //              Spacer()
-                            Button {
-                                self.showPreferences = true
-                            } label: {
-                                Label("Settings", systemImage: "gear")
-                                    .labelStyle(.iconOnly)
-                            }
-                            Spacer()
-                        }
-                    }
+                    iOSToolbarView(
+                        url: $url,
+                        homeURL: homeURL,
+                        shareThroughProxy: shareThroughProxy,
+                        backwardStack: backwardStack,
+                        forwardStack: forwardStack,
+                        currentHost: currentHost,
+                        showAddBookmark: $showAddBookmark,
+                        showBookmarks: $showBookmarks,
+                        showPreferences: $showPreferences,
+                        showFindInPage: $showFindInPage,
+                        hasContent: !gopherItems.isEmpty,
+                        onGo: {
+                            TelemetryDeck.signal(
+                                "applicationClickedGo", parameters: ["gopherURL": "\(self.url)"])
+                            performGopherRequest(clearForward: false)
+                        },
+                        onHome: {
+                            handleHomeTap()
+                        },
+                        onBack: { goBack() },
+                        onForward: { goForward() },
+                        showHomeTooltip: $showHomeTooltip,
+                        homeTooltipMessage: homeTooltipMessage,
+                        onHomeTooltipAutoDismiss: { dismissHomeTooltip() }
+                    )
                 #else
-                    HStack(spacing: 10) {
-                        HStack {
-                            Spacer()
-                            Button {
-                                TelemetryDeck.signal(
-                                    "applicationClickedHome", parameters: ["gopherURL": "\(self.url)"])
-                                performGopherRequest(
-                                    host: homeURL.host ?? "gopher.navan.dev",
-                                    port: homeURL.port ?? 70,
-                                    selector: homeURL.path)
-                            } label: {
-                                Label("Home", systemImage: "house")
-                                    .labelStyle(.iconOnly)
-                            }
-                            .keyboardShortcut("r", modifiers: [.command])
-
-                            #if os(visionOS)
-                                Button {
-                                    self.showPreferences = true
-                                } label: {
-                                    Label("Settings", systemImage: "gear")
-                                        .labelStyle(.iconOnly)
-                                }
-                            #endif
-
-                            Button {
-                                goBack()
-                            } label: {
-                                Label("Back", systemImage: "chevron.left")
-                                    .labelStyle(.iconOnly)
-                            }
-                            .keyboardShortcut("[", modifiers: [.command])
-                            .disabled(backwardStack.count < 2)
-
-                            Button {
-                                goForward();
-                           } label: {
-                                Label("Forward", systemImage: "chevron.right")
-                                    .labelStyle(.iconOnly)
-                            }
-                           .keyboardShortcut("]", modifiers: [.command])
-                            .disabled(forwardStack.isEmpty)
-
-                            TextField("Enter a URL", text: $url)
-                                #if !os(OSX)
-                                    .keyboardType(.URL)
-                                    .textInputAutocapitalization(.never)
-                                #endif
-                                    .focused($isURLFocused)
-                                .padding(10)
-                       }
-                        //.background(Color.white)
-                        .cornerRadius(30)
-                        if shareThroughProxy {
-                            ShareLink(item: URL(string: "https://gopher.navan.dev/\(url)")!) {
-                                Label("Share", systemImage: "square.and.arrow.up").labelStyle(
-                                    .iconOnly)
-                            }
-                        } else {
-                            ShareLink(item: URL(string: "gopher://\(url)")!) {
-                                Label("Share", systemImage: "square.and.arrow.up").labelStyle(
-                                    .iconOnly)
-                            }
-                        }
-                        Button(
-                            "Go",
-                            action: {
-                                TelemetryDeck.signal(
-                                    "applicationClickedGo", parameters: ["gopherURL": "\(self.url)"])
-                                performGopherRequest(clearForward: false)
-                            }
-                        )
-                        .keyboardShortcut(.defaultAction)
-                        .onSubmit {
-                            performGopherRequest()
-                        }
-                        Spacer()
-                    }
+                    macOSToolbarView(
+                        url: $url,
+                        isURLFocused: $isURLFocused,
+                        homeURL: homeURL,
+                        shareThroughProxy: shareThroughProxy,
+                        backwardStack: backwardStack,
+                        forwardStack: forwardStack,
+                        currentHost: currentHost,
+                        showAddBookmark: $showAddBookmark,
+                        showBookmarks: $showBookmarks,
+                        showPreferences: $showPreferences,
+                        onGo: {
+                            TelemetryDeck.signal(
+                                "applicationClickedGo", parameters: ["gopherURL": "\(self.url)"])
+                            performGopherRequest(clearForward: false)
+                        },
+                        onHome: {
+                            handleHomeTap()
+                        },
+                        onBack: { goBack() },
+                        onForward: { goForward() },
+                        showHomeTooltip: $showHomeTooltip,
+                        homeTooltipMessage: homeTooltipMessage,
+                        onHomeTooltipAutoDismiss: { dismissHomeTooltip() }
+                    )
                 #endif
             }
         }
@@ -437,21 +405,71 @@ struct BrowserView: View {
                 SettingsView(homeURL: $homeURL, homeURLString: $homeURLString)
             #endif
         }
+        .sheet(isPresented: $showBookmarks) {
+            BookmarksHistoryView { host, port, selector in
+                performGopherRequest(host: host, port: port, selector: selector)
+            }
+            #if os(iOS)
+            .presentationDetents([.medium, .large])
+            .presentationDragIndicator(.automatic)
+            #endif
+        }
+        .sheet(isPresented: $showAddBookmark) {
+            AddBookmarkView(
+                host: currentHost,
+                port: currentPort,
+                selector: currentSelector
+            )
+            #if os(iOS)
+            .presentationDetents([.medium])
+            .presentationDragIndicator(.automatic)
+            #endif
+        }
         .accentColor(accentColour)
         
         .onAppear {
+            if !hasFinishedFirstRunTips && !showHomeTooltip {
+                withAnimation(.spring()) {
+                    showHomeTooltip = true
+                }
+            }
             #if os(OSX)
             NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
+                // Command+F for Find in Page
+                if event.modifierFlags.contains(.command) && !event.modifierFlags.contains(.option) && event.charactersIgnoringModifiers == "f" {
+                    if !gopherItems.isEmpty {
+                        showFindInPage = true
+                    }
+                    return nil
+                }
+                // Option+Command+F for URL focus
                 if event.modifierFlags.contains([.option, .command]) && event.charactersIgnoringModifiers == "f" {
                     isURLFocused = true
                     return nil
-                } else if event.keyCode == 53 {
-                    isURLFocused = false
+                }
+                // Escape to dismiss find bar or unfocus URL
+                if event.keyCode == 53 {
+                    if showFindInPage {
+                        showFindInPage = false
+                        findText = ""
+                    } else {
+                        isURLFocused = false
+                    }
                     return nil
                 }
                 return event
             }
             #endif
+        }
+        .background {
+            // Hidden button for Command+F keyboard shortcut on iOS
+            Button("") {
+                if !gopherItems.isEmpty {
+                    showFindInPage = true
+                }
+            }
+            .keyboardShortcut("f", modifiers: .command)
+            .hidden()
         }
     }
     
@@ -489,6 +507,36 @@ struct BrowserView: View {
                     clearForward: false)
             }
         }
+    }
+
+    private func handleHomeTap() {
+        if showHomeTooltip {
+            withAnimation(.spring()) {
+                showHomeTooltip = false
+            }
+        }
+        completeFirstRunExperience()
+        TelemetryDeck.signal(
+            "applicationClickedHome", parameters: ["gopherURL": "\(self.url)"])
+        performGopherRequest(
+            host: homeURL.host ?? "gopher.navan.dev",
+            port: homeURL.port ?? 70,
+            selector: homeURL.path)
+    }
+
+    private func dismissHomeTooltip() {
+        if showHomeTooltip {
+            withAnimation(.spring()) {
+                showHomeTooltip = false
+            }
+        }
+        completeFirstRunExperience()
+    }
+
+    private func completeFirstRunExperience() {
+        guard !hasFinishedFirstRunTips else { return }
+        hasFinishedFirstRunTips = true
+        lastSeenWhatsNewVersion = WhatsNewConfig.currentVersion
     }
 
     private func performGopherRequest(
@@ -535,6 +583,11 @@ struct BrowserView: View {
         // Update the visible URL string
         self.url = "\(res.host):\(res.port)\(res.selector)"
 
+        // Track current location for bookmarking
+        self.currentHost = res.host
+        self.currentPort = res.port
+        self.currentSelector = res.selector
+
         currentTask?.cancel()
 
         let myHost = res.host
@@ -578,6 +631,15 @@ struct BrowserView: View {
                 } else {
                     self.gopherItems = resp
                     scrollToTop.toggle()
+
+                    // Save to history
+                    let historyItem = HistoryItem(
+                        title: "\(myHost)\(mySelector)",
+                        host: myHost,
+                        port: myPort,
+                        selector: mySelector
+                    )
+                    modelContext.insert(historyItem)
                 }
 
             } catch is CancellationError {
@@ -598,6 +660,25 @@ struct BrowserView: View {
         }
     }
     
+    private func rowBackgroundColor(for idx: Int) -> Color? {
+        // Find highlight takes priority
+        if findMatches.contains(idx) {
+            if crtMode {
+                if findMatches.firstIndex(of: idx) == currentFindIndex {
+                    return crtPhosphorColor.opacity(0.3)
+                }
+                return crtPhosphorColor.opacity(0.15)
+            } else {
+                if findMatches.firstIndex(of: idx) == currentFindIndex {
+                    return Color.yellow.opacity(0.5)
+                }
+                return Color.yellow.opacity(0.2)
+            }
+        }
+
+        return crtMode ? CRTTheme.screenBackground : nil
+    }
+
     private func convertToHostNodes(_ responseItems: [gopherItem]) -> [GopherNode] {
         var returnItems: [GopherNode] = []
         responseItems.forEach { item in
@@ -613,4 +694,526 @@ struct BrowserView: View {
         return returnItems
     }
 
+}
+
+#if os(iOS)
+struct iOSToolbarView: View {
+    @Binding var url: String
+    let homeURL: URL
+    let shareThroughProxy: Bool
+    let backwardStack: [GopherNode]
+    let forwardStack: [GopherNode]
+    let currentHost: String
+    @Binding var showAddBookmark: Bool
+    @Binding var showBookmarks: Bool
+    @Binding var showPreferences: Bool
+    @Binding var showFindInPage: Bool
+    let hasContent: Bool
+    let onGo: () -> Void
+    let onHome: () -> Void
+    let onBack: () -> Void
+    let onForward: () -> Void
+    @Binding var showHomeTooltip: Bool
+    let homeTooltipMessage: String
+    let onHomeTooltipAutoDismiss: () -> Void
+
+    private var shareURL: URL {
+        shareThroughProxy
+            ? URL(string: "https://gopher.navan.dev/\(url)")!
+            : URL(string: "gopher://\(url)")!
+    }
+
+    var body: some View {
+        VStack(spacing: 0) {
+            // URL bar with Go button
+            HStack(spacing: 8) {
+                TextField("Enter URL", text: $url)
+                    .keyboardType(.URL)
+                    .textInputAutocapitalization(.never)
+                    .textContentType(.URL)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 10)
+                    .background {
+                        if #available(iOS 26.0, *) {
+                            RoundedRectangle(cornerRadius: 10)
+                                .fill(.ultraThinMaterial)
+                                .glassEffect(in: .rect(cornerRadius: 10))
+                        } else {
+                            RoundedRectangle(cornerRadius: 10)
+                                .fill(Color(.systemGray6))
+                        }
+                    }
+
+                Button(action: onGo) {
+                    Text("Go")
+                        .fontWeight(.medium)
+                }
+                .keyboardShortcut(.defaultAction)
+                .modifier(GoButtonStyle())
+            }
+            .padding(.horizontal, 12)
+            .padding(.top, 8)
+            .padding(.bottom, 12)
+
+            // Bottom toolbar - cleaner design
+            HStack(spacing: 0) {
+                // Navigation group
+                HStack(spacing: 4) {
+                    navButton(icon: "chevron.left", action: onBack)
+                        .disabled(backwardStack.count < 2)
+
+                    navButton(icon: "chevron.right", action: onForward)
+                        .disabled(forwardStack.isEmpty)
+                }
+                .modifier(ToolbarGroupStyle())
+
+                Spacer()
+
+                // Center actions - Home & Bookmark
+                HStack(spacing: 4) {
+                    HomeButtonTooltipWrapper(
+                        isVisible: $showHomeTooltip,
+                        message: homeTooltipMessage,
+                        onAutoDismiss: onHomeTooltipAutoDismiss
+                    ) {
+                        navButton(icon: "house", action: onHome)
+                    }
+
+                    Button(action: { showAddBookmark = true }) {
+                        Image(systemName: currentHost.isEmpty ? "bookmark" : "bookmark.fill")
+                            .font(.system(size: 18))
+                            .frame(width: 44, height: 36)
+                    }
+                    .disabled(currentHost.isEmpty)
+                }
+                .modifier(ToolbarGroupStyle())
+
+                Spacer()
+
+                // Right actions group
+                HStack(spacing: 4) {
+                    navButton(icon: "clock.arrow.circlepath", action: { showBookmarks = true })
+
+                    Menu {
+                        Button(action: { showFindInPage = true }) {
+                            Label("Find in Page", systemImage: "doc.text.magnifyingglass")
+                        }
+                        .disabled(!hasContent)
+
+                        ShareLink(item: shareURL) {
+                            Label("Share", systemImage: "square.and.arrow.up")
+                        }
+
+                        Divider()
+
+                        Button(action: { showPreferences = true }) {
+                            Label("Settings", systemImage: "gear")
+                        }
+                    } label: {
+                        Image(systemName: "ellipsis.circle")
+                            .font(.system(size: 18))
+                            .frame(width: 44, height: 36)
+                    }
+                }
+                .modifier(ToolbarGroupStyle())
+            }
+            .padding(.horizontal, 12)
+        }
+    }
+
+    @ViewBuilder
+    private func navButton(icon: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Image(systemName: icon)
+                .font(.system(size: 18))
+                .frame(width: 44, height: 36)
+        }
+    }
+}
+
+// MARK: - Button Styles for iOS Toolbar
+
+private struct GoButtonStyle: ViewModifier {
+    func body(content: Content) -> some View {
+        if #available(iOS 26.0, *) {
+            content
+                .buttonStyle(.glass)
+        } else {
+            content
+                .padding(.horizontal, 16)
+                .padding(.vertical, 8)
+                .background(Color.accentColor)
+                .foregroundColor(.white)
+                .cornerRadius(8)
+        }
+    }
+}
+
+private struct ToolbarGroupStyle: ViewModifier {
+    func body(content: Content) -> some View {
+        if #available(iOS 26.0, *) {
+            content
+                .glassEffect(in: .capsule)
+        } else {
+            content
+                .padding(.horizontal, 4)
+                .background(Color(.systemGray6))
+                .cornerRadius(10)
+        }
+    }
+}
+
+#endif
+
+#if os(macOS) || os(visionOS)
+struct macOSToolbarView: View {
+    @Binding var url: String
+    var isURLFocused: FocusState<Bool>.Binding
+    let homeURL: URL
+    let shareThroughProxy: Bool
+    let backwardStack: [GopherNode]
+    let forwardStack: [GopherNode]
+    let currentHost: String
+    @Binding var showAddBookmark: Bool
+    @Binding var showBookmarks: Bool
+    @Binding var showPreferences: Bool
+    let onGo: () -> Void
+    let onHome: () -> Void
+    let onBack: () -> Void
+    let onForward: () -> Void
+    @Binding var showHomeTooltip: Bool
+    let homeTooltipMessage: String
+    let onHomeTooltipAutoDismiss: () -> Void
+
+    var body: some View {
+        HStack(spacing: 8) {
+            navigationButtons
+            urlField
+            actionButtons
+            goButton
+        }
+        .padding(.horizontal, 8)
+        .padding(.vertical, 4)
+    }
+
+    @ViewBuilder
+    private var navigationButtons: some View {
+        if #available(macOS 26.0, visionOS 26.0, *) {
+            GlassEffectContainer(spacing: 8) {
+                HStack(spacing: 8) {
+                    HomeButtonTooltipWrapper(
+                        isVisible: $showHomeTooltip,
+                        message: homeTooltipMessage,
+                        onAutoDismiss: onHomeTooltipAutoDismiss
+                    ) {
+                        Button(action: onHome) {
+                            Label("Home", systemImage: "house")
+                                .labelStyle(.iconOnly)
+                        }
+                        .glassEffect(.regular.interactive())
+                        .keyboardShortcut("r", modifiers: [.command])
+                    }
+
+                    #if os(visionOS)
+                    Button(action: { showPreferences = true }) {
+                        Label("Settings", systemImage: "gear")
+                            .labelStyle(.iconOnly)
+                    }
+                    .glassEffect(.regular.interactive())
+                    #endif
+
+                    Button(action: onBack) {
+                        Label("Back", systemImage: "chevron.left")
+                            .labelStyle(.iconOnly)
+                    }
+                    .glassEffect(.regular.interactive())
+                    .keyboardShortcut("[", modifiers: [.command])
+                    .disabled(backwardStack.count < 2)
+
+                    Button(action: onForward) {
+                        Label("Forward", systemImage: "chevron.right")
+                            .labelStyle(.iconOnly)
+                    }
+                    .glassEffect(.regular.interactive())
+                    .keyboardShortcut("]", modifiers: [.command])
+                    .disabled(forwardStack.isEmpty)
+                }
+            }
+        } else {
+            HStack(spacing: 4) {
+                HomeButtonTooltipWrapper(
+                    isVisible: $showHomeTooltip,
+                    message: homeTooltipMessage,
+                    onAutoDismiss: onHomeTooltipAutoDismiss
+                ) {
+                    Button(action: onHome) {
+                        Label("Home", systemImage: "house")
+                            .labelStyle(.iconOnly)
+                    }
+                    .keyboardShortcut("r", modifiers: [.command])
+                }
+
+                #if os(visionOS)
+                Button(action: { showPreferences = true }) {
+                    Label("Settings", systemImage: "gear")
+                        .labelStyle(.iconOnly)
+                }
+                #endif
+
+                Button(action: onBack) {
+                    Label("Back", systemImage: "chevron.left")
+                        .labelStyle(.iconOnly)
+                }
+                .keyboardShortcut("[", modifiers: [.command])
+                .disabled(backwardStack.count < 2)
+
+                Button(action: onForward) {
+                    Label("Forward", systemImage: "chevron.right")
+                        .labelStyle(.iconOnly)
+                }
+                .keyboardShortcut("]", modifiers: [.command])
+                .disabled(forwardStack.isEmpty)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var urlField: some View {
+        if #available(macOS 26.0, visionOS 26.0, *) {
+            TextField("Enter a URL", text: $url)
+                #if os(visionOS)
+                .keyboardType(.URL)
+                .textInputAutocapitalization(.never)
+                #endif
+                .focused(isURLFocused)
+                .padding(10)
+                .glassEffect(in: .rect(cornerRadius: 8))
+        } else {
+            TextField("Enter a URL", text: $url)
+                #if os(visionOS)
+                .keyboardType(.URL)
+                .textInputAutocapitalization(.never)
+                #endif
+                .focused(isURLFocused)
+                .padding(10)
+        }
+    }
+
+    @ViewBuilder
+    private var actionButtons: some View {
+        if #available(macOS 26.0, visionOS 26.0, *) {
+            GlassEffectContainer(spacing: 8) {
+                HStack(spacing: 8) {
+                    Button(action: { showAddBookmark = true }) {
+                        Label("Add Bookmark", systemImage: "bookmark.fill")
+                            .labelStyle(.iconOnly)
+                    }
+                    .glassEffect(.regular.interactive())
+                    .disabled(currentHost.isEmpty)
+
+                    Button(action: { showBookmarks = true }) {
+                        Label("Bookmarks", systemImage: "book")
+                            .labelStyle(.iconOnly)
+                    }
+                    .glassEffect(.regular.interactive())
+
+                    shareLink
+                }
+            }
+        } else {
+            HStack {
+                Button(action: { showAddBookmark = true }) {
+                    Label("Add Bookmark", systemImage: "bookmark.fill")
+                        .labelStyle(.iconOnly)
+                }
+                .disabled(currentHost.isEmpty)
+
+                Button(action: { showBookmarks = true }) {
+                    Label("Bookmarks", systemImage: "book")
+                        .labelStyle(.iconOnly)
+                }
+
+                shareLink
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var shareLink: some View {
+        let shareURL = shareThroughProxy
+            ? URL(string: "https://gopher.navan.dev/\(url)")!
+            : URL(string: "gopher://\(url)")!
+
+        if #available(macOS 26.0, visionOS 26.0, *) {
+            ShareLink(item: shareURL) {
+                Label("Share", systemImage: "square.and.arrow.up")
+                    .labelStyle(.iconOnly)
+            }
+            .glassEffect(.regular.interactive())
+        } else {
+            ShareLink(item: shareURL) {
+                Label("Share", systemImage: "square.and.arrow.up")
+                    .labelStyle(.iconOnly)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var goButton: some View {
+        if #available(macOS 26.0, visionOS 26.0, *) {
+            Button("Go", action: onGo)
+                .buttonStyle(.glass)
+                .keyboardShortcut(.defaultAction)
+        } else {
+            Button("Go", action: onGo)
+                .keyboardShortcut(.defaultAction)
+        }
+    }
+}
+#endif
+
+struct HomeButtonTooltipWrapper<Content: View>: View {
+    @Binding var isVisible: Bool
+    let message: String
+    let onAutoDismiss: () -> Void
+    private let content: () -> Content
+    @State private var didScheduleDismiss = false
+
+    init(
+        isVisible: Binding<Bool>,
+        message: String,
+        onAutoDismiss: @escaping () -> Void,
+        @ViewBuilder content: @escaping () -> Content
+    ) {
+        self._isVisible = isVisible
+        self.message = message
+        self.onAutoDismiss = onAutoDismiss
+        self.content = content
+    }
+
+    var body: some View {
+        ZStack(alignment: .top) {
+            content()
+
+            if isVisible {
+                HomeTooltipCard(message: message)
+                    .offset(y: -72)
+                    .transition(.move(edge: .top).combined(with: .opacity))
+                    .onAppear {
+                        scheduleAutoDismiss()
+                    }
+            }
+        }
+    }
+
+    private func scheduleAutoDismiss() {
+        guard !didScheduleDismiss else { return }
+        didScheduleDismiss = true
+        DispatchQueue.main.asyncAfter(deadline: .now() + 6) {
+            if isVisible {
+                withAnimation(.spring()) {
+                    isVisible = false
+                }
+                onAutoDismiss()
+            }
+        }
+    }
+}
+
+private struct HomeTooltipCard: View {
+    let message: String
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text("Tip")
+                .font(.caption.bold())
+                .foregroundStyle(.secondary)
+
+            Text(message)
+                .font(.caption)
+                .multilineTextAlignment(.leading)
+        }
+        .padding(12)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(tooltipBackground)
+                .shadow(color: .black.opacity(0.1), radius: 6, x: 0, y: 4)
+        )
+        .frame(maxWidth: 220)
+    }
+
+    private var tooltipBackground: Color {
+        #if os(macOS)
+            Color(nsColor: NSColor.windowBackgroundColor)
+        #else
+            Color(uiColor: .systemBackground)
+        #endif
+    }
+}
+
+// MARK: - Find in Page Bar
+
+struct FindInPageBar: View {
+    @Binding var findText: String
+    @Binding var currentIndex: Int
+    let totalMatches: Int
+    var isFocused: FocusState<Bool>.Binding
+    let onDismiss: () -> Void
+
+    var body: some View {
+        HStack(spacing: 8) {
+            HStack(spacing: 4) {
+                Image(systemName: "magnifyingglass")
+                    .foregroundStyle(.secondary)
+
+                TextField("Find in page", text: $findText)
+                    .textFieldStyle(.plain)
+                    .focused(isFocused)
+                    #if os(iOS)
+                    .textInputAutocapitalization(.never)
+                    .autocorrectionDisabled()
+                    #endif
+
+                if !findText.isEmpty {
+                    Text("\(totalMatches > 0 ? currentIndex + 1 : 0)/\(totalMatches)")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .monospacedDigit()
+                }
+            }
+            .padding(.horizontal, 8)
+            .padding(.vertical, 6)
+            .background(Color(.systemGray).opacity(0.2))
+            .cornerRadius(8)
+
+            if !findText.isEmpty {
+                Button {
+                    if totalMatches > 0 {
+                        currentIndex = (currentIndex - 1 + totalMatches) % totalMatches
+                    }
+                } label: {
+                    Image(systemName: "chevron.up")
+                }
+                .disabled(totalMatches == 0)
+
+                Button {
+                    if totalMatches > 0 {
+                        currentIndex = (currentIndex + 1) % totalMatches
+                    }
+                } label: {
+                    Image(systemName: "chevron.down")
+                }
+                .disabled(totalMatches == 0)
+            }
+
+            Button("Done", action: onDismiss)
+                .fontWeight(.medium)
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
+        .background(.regularMaterial)
+        .onAppear {
+            isFocused.wrappedValue = true
+        }
+    }
 }
