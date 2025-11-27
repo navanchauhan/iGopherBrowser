@@ -7,6 +7,9 @@
 
 import SwiftUI
 import TelemetryDeck
+#if os(macOS)
+import AppKit
+#endif
 
 extension Color: @retroactive RawRepresentable {
 
@@ -148,10 +151,17 @@ struct SettingsView: View {
                         }
 
                         Button("Reset Colors") {
-                            self.linkColour = Color(.white)
+                            self.linkColour = smartDefaultLinkColor
                             self.accentColour = Color(.blue)
                         }
                         .buttonStyle(.bordered)
+                        .disabled(crtMode)
+
+                        if crtMode {
+                            Text("Link and accent colours have no visible effect while CRT Mode is enabled.")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
                     }
                     .padding(.vertical, 4)
                 } label: {
@@ -293,14 +303,19 @@ struct SettingsView: View {
             }
             Section(header: Text("UI Settings")) {
                 ColorPicker("Link Colour", selection: $linkColour)
+                    .disabled(crtMode)
                 ColorPicker("Accent Colour", selection: $accentColour)
+                    .disabled(crtMode)
                 Button("Reset Colours") {
-                    #if os(iOS)
-                        self.linkColour = colorScheme == .dark ? Color(.white) : Color(.systemBlue)
-                    #else
-                        self.linkColour = Color(.white)
-                    #endif
+                    self.linkColour = smartDefaultLinkColor
                     self.accentColour = Color(.blue)
+                }
+                .disabled(crtMode)
+
+                if crtMode {
+                    Text("Link and accent colours have no visible effect while CRT Mode is enabled.")
+                        .font(.caption)
+                        .foregroundColor(.gray)
                 }
             }
 
@@ -367,5 +382,13 @@ struct SettingsView: View {
                 dismissButton: .default(Text("Got it!"))
             )
         }
+    }
+
+    private var smartDefaultLinkColor: Color {
+        #if os(macOS)
+            colorScheme == .dark ? Color.white : Color(nsColor: .controlAccentColor)
+        #else
+            colorScheme == .dark ? Color(.white) : Color(.systemBlue)
+        #endif
     }
 }

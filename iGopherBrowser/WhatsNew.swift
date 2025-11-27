@@ -46,48 +46,64 @@ struct WhatsNewFeature: Identifiable {
 struct WhatsNewView: View {
     let features: [WhatsNewFeature]
     let dismissTitle: String
+    let onPrimaryAction: (() -> Void)?
     let onDismiss: () -> Void
 
     var body: some View {
         NavigationStack {
-            VStack(alignment: .leading, spacing: 24) {
-                VStack(alignment: .leading, spacing: 8) {
-                    Text(WhatsNewConfig.title)
-                        .font(.largeTitle.weight(.bold))
-                    Text(WhatsNewConfig.subtitle)
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-
-                ScrollView {
-                    LazyVStack(spacing: 16) {
-                        ForEach(features) { feature in
-                            featureRow(feature)
-                        }
-                    }
-                    .padding(.vertical, 4)
-                }
-
-                Button(action: onDismiss) {
-                    Text(dismissTitle)
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color.accentColor)
-                        .foregroundColor(.white)
-                        .cornerRadius(12)
-                }
-            }
-            .padding(24)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Later") { onDismiss() }
-                }
-            }
+            content
+                .padding(containerOuterPadding)
         }
         #if os(iOS) || os(visionOS)
             .presentationDetents([.medium, .large])
         #endif
+    }
+
+    private var content: some View {
+        VStack(alignment: .leading, spacing: 24) {
+            VStack(alignment: .leading, spacing: 8) {
+                Text(WhatsNewConfig.title)
+                    .font(.largeTitle.weight(.bold))
+                Text(WhatsNewConfig.subtitle)
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+
+            ScrollView {
+                LazyVStack(spacing: 16) {
+                    ForEach(features) { feature in
+                        featureRow(feature)
+                    }
+                }
+                .padding(.vertical, 4)
+            }
+
+            Button {
+                onPrimaryAction?()
+                onDismiss()
+            } label: {
+                Text(dismissTitle)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, continueButtonVerticalPadding)
+            }
+            #if os(macOS)
+                .buttonStyle(.borderedProminent)
+                .controlSize(.large)
+            #else
+                .buttonStyle(PrimaryFillButtonStyle())
+            #endif
+        }
+            .padding(containerInnerPadding)
+        .frame(maxWidth: containerWidth)
+        .background(containerBackground)
+        .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
+        .shadow(color: Color.black.opacity(containerShadowOpacity), radius: 30, y: 18)
+        .toolbar {
+            ToolbarItem(placement: .cancellationAction) {
+                Button("Later") { onDismiss() }
+            }
+        }
     }
 
     @ViewBuilder
@@ -135,4 +151,76 @@ struct WhatsNewView: View {
             Color(uiColor: .secondarySystemBackground)
         #endif
     }
+
+    private var containerWidth: CGFloat? {
+        #if os(macOS)
+            520
+        #else
+            nil
+        #endif
+    }
+
+    private var containerInnerPadding: CGFloat {
+        #if os(macOS)
+            32
+        #else
+            24
+        #endif
+    }
+
+    private var containerOuterPadding: CGFloat {
+        #if os(macOS)
+            24
+        #else
+            0
+        #endif
+    }
+
+    private var containerBackground: some View {
+        #if os(macOS)
+            RoundedRectangle(cornerRadius: 28, style: .continuous)
+                .fill(
+                    LinearGradient(
+                        colors: [
+                            Color(nsColor: NSColor.windowBackgroundColor),
+                            Color(nsColor: NSColor.controlBackgroundColor)
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+        #else
+            RoundedRectangle(cornerRadius: 28, style: .continuous)
+                .fill(Color(.systemBackground))
+        #endif
+    }
+
+    private var containerShadowOpacity: Double {
+        #if os(macOS)
+            0.35
+        #else
+            0
+        #endif
+    }
+
+    private var continueButtonVerticalPadding: CGFloat {
+        #if os(macOS)
+            10
+        #else
+            14
+        #endif
+    }
+
 }
+
+#if os(iOS) || os(visionOS)
+private struct PrimaryFillButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .background(Color.accentColor)
+            .foregroundStyle(Color.white)
+            .cornerRadius(12)
+            .opacity(configuration.isPressed ? 0.8 : 1)
+    }
+}
+#endif

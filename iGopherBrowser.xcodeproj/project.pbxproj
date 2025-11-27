@@ -9,10 +9,6 @@
 /* Begin PBXBuildFile section */
 		3E1BCC562B297E9B00A4CB69 /* iGopherBrowserApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E1BCC552B297E9B00A4CB69 /* iGopherBrowserApp.swift */; };
 		3E1BCC582B297E9B00A4CB69 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E1BCC572B297E9B00A4CB69 /* ContentView.swift */; };
-		A3C7E1262DAA123400A7C1F1 /* Bookmark.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3C7E1272DAA123400A7C1F1 /* Bookmark.swift */; };
-		A3C7E1282DAA123400A7C1F1 /* LiquidGlass.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3C7E1292DAA123400A7C1F1 /* LiquidGlass.swift */; };
-		A3C7E12A2DAA234500A7C1F1 /* History.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3C7E12B2DAA234500A7C1F1 /* History.swift */; };
-		A3C7E12C2DAA345600A7C1F1 /* CRTEffect.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3C7E12D2DAA345600A7C1F1 /* CRTEffect.swift */; };
 		3E1BCC5C2B297E9C00A4CB69 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3E1BCC5B2B297E9C00A4CB69 /* Assets.xcassets */; };
 		3E1BCC602B297E9C00A4CB69 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3E1BCC5F2B297E9C00A4CB69 /* Preview Assets.xcassets */; };
 		3E1BCC862B299E9F00A4CB69 /* SidebarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E1BCC852B299E9F00A4CB69 /* SidebarView.swift */; };
@@ -29,6 +25,11 @@
 		A3C7E11A2D9D6D3B00A7C1F1 /* iGopherBrowserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3C7E1192D9D6D3B00A7C1F1 /* iGopherBrowserTests.swift */; };
 		A3C7E1242D9D6E1500A7C1F1 /* TelemetryDeck in Frameworks */ = {isa = PBXBuildFile; productRef = 3ECFE7422B4493F300AEBAE0 /* TelemetryDeck */; };
 		A3C7E1252D9D6E1500A7C1F1 /* SwiftGopherClient in Frameworks */ = {isa = PBXBuildFile; productRef = 3ECC94062C56F1BC0028D64D /* SwiftGopherClient */; };
+		A3C7E1262DAA123400A7C1F1 /* Bookmark.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3C7E1272DAA123400A7C1F1 /* Bookmark.swift */; };
+		A3C7E1282DAA123400A7C1F1 /* LiquidGlass.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3C7E1292DAA123400A7C1F1 /* LiquidGlass.swift */; };
+		A3C7E12A2DAA234500A7C1F1 /* History.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3C7E12B2DAA234500A7C1F1 /* History.swift */; };
+		A3C7E12C2DAA345600A7C1F1 /* CRTEffect.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3C7E12D2DAA345600A7C1F1 /* CRTEffect.swift */; };
+		AC17612674E44063856BB112C68D41C1 /* WhatsNew.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC17612574E44063856BB112C68D41C1 /* WhatsNew.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -73,6 +74,7 @@
 		A3C7E1292DAA123400A7C1F1 /* LiquidGlass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiquidGlass.swift; sourceTree = "<group>"; };
 		A3C7E12B2DAA234500A7C1F1 /* History.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = History.swift; sourceTree = "<group>"; };
 		A3C7E12D2DAA345600A7C1F1 /* CRTEffect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CRTEffect.swift; sourceTree = "<group>"; };
+		AC17612574E44063856BB112C68D41C1 /* WhatsNew.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WhatsNew.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -136,6 +138,7 @@
 				3E1BCC612B297E9C00A4CB69 /* Info.plist */,
 				3E1BCC5E2B297E9C00A4CB69 /* Preview Content */,
 				3E1BCC852B299E9F00A4CB69 /* SidebarView.swift */,
+				AC17612574E44063856BB112C68D41C1 /* WhatsNew.swift */,
 				3EFB9C0C2B2E4F06005EAD7C /* SearchInputView.swift */,
 				3EFB9C0E2B2E6325005EAD7C /* FileView.swift */,
 				3EFB9C102B2E869C005EAD7C /* BrowserView.swift */,
@@ -326,6 +329,7 @@
 				3EFB9C112B2E869C005EAD7C /* BrowserView.swift in Sources */,
 				3E6584872B7409740078C282 /* BookmarksView.swift in Sources */,
 				3EFB9C132B2E872A005EAD7C /* Helpers.swift in Sources */,
+				AC17612674E44063856BB112C68D41C1 /* WhatsNew.swift in Sources */,
 				3E1BCC862B299E9F00A4CB69 /* SidebarView.swift in Sources */,
 				3E1BCC562B297E9B00A4CB69 /* iGopherBrowserApp.swift in Sources */,
 				3EFB9C0D2B2E4F06005EAD7C /* SearchInputView.swift in Sources */,
@@ -496,13 +500,14 @@
 				CODE_SIGN_ENTITLEMENTS = iGopherBrowser/iGopherBrowser.entitlements;
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 15;
+				CURRENT_PROJECT_VERSION = 16;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"iGopherBrowser/Preview Content\"";
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = iGopherBrowser/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = iGopherBrowser;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
@@ -518,7 +523,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 1.0.9;
+				MARKETING_VERSION = 1.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.navanchauhan.iGopherBrowser;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = auto;
@@ -540,13 +545,14 @@
 				CODE_SIGN_ENTITLEMENTS = iGopherBrowser/iGopherBrowser.entitlements;
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 15;
+				CURRENT_PROJECT_VERSION = 16;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"iGopherBrowser/Preview Content\"";
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = iGopherBrowser/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = iGopherBrowser;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
@@ -562,7 +568,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 1.0.9;
+				MARKETING_VERSION = 1.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.navanchauhan.iGopherBrowser;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = auto;

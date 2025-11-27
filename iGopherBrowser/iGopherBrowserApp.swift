@@ -48,6 +48,14 @@ struct iGopherBrowserApp: App {
         configuration.analyticsDisabled = UserDefaults.standard.bool(forKey: "telemetryOptOut")
         TelemetryDeck.initialize(config: configuration)
 
+        // Default CRT experience for brand-new installs
+        if UserDefaults.standard.object(forKey: "crtMode") == nil {
+            UserDefaults.standard.set(true, forKey: "crtMode")
+            UserDefaults.standard.set(
+                CRTPhosphorColor.amber.rawValue,
+                forKey: "crtPhosphorColor")
+        }
+
 #if os(iOS)
         // Set default link colour if none saved yet: light mode = system blue, dark mode = white
         if UserDefaults.standard.object(forKey: "linkColour") == nil {

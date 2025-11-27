@@ -33,6 +33,7 @@ struct ContentView: View {
     @AppStorage("crtMode") var crtMode: Bool = false
     @AppStorage("crtScanlines") var crtScanlines: Bool = true
     @AppStorage("crtVignette") var crtVignette: Bool = true
+    @AppStorage("crtPhosphorColor") private var crtPhosphorColor: String = CRTPhosphorColor.green.rawValue
     @AppStorage("hasFinishedFirstRunTips") private var hasFinishedFirstRunTips: Bool = false
     @AppStorage("lastSeenWhatsNewVersion") private var lastSeenWhatsNewVersion: String = ""
 
@@ -85,6 +86,9 @@ struct ContentView: View {
             WhatsNewView(
                 features: pendingWhatsNewFeatures,
                 dismissTitle: "Continue",
+                onPrimaryAction: {
+                    activateCRTPreview()
+                },
                 onDismiss: {
                     lastSeenWhatsNewVersion = WhatsNewConfig.currentVersion
                     showWhatsNew = false
@@ -114,16 +118,17 @@ struct ContentView: View {
                     id: "crt-mode",
                     title: "CRT Display Mode",
                     message:
-                        "Immerse yourself in phosphor glow, scanlines, and subtle vignette effects for every Gopherhole.",
-                    iconSystemName: "display",
-                    accessory: AnyView(
-                        Toggle("Enable CRT Display Mode", isOn: $crtMode)
-                            .toggleStyle(SwitchToggleStyle())
-                    )
+                        "Immerse yourself in phosphor glow, scanlines, and subtle vignette effects for every Gopherhole. You can change the display style anytime in Settings.",
+                    iconSystemName: "display"
                 )
             ]
             showWhatsNew = true
         }
+    }
+
+    private func activateCRTPreview() {
+        crtMode = true
+        crtPhosphorColor = CRTPhosphorColor.amber.rawValue
     }
 
 }
