@@ -837,7 +837,7 @@ private struct GoButtonStyle: ViewModifier {
     func body(content: Content) -> some View {
         if #available(iOS 26.0, *) {
             content
-                .buttonStyle(.glass)
+                .buttonStyle(.liquidGlass)
         } else {
             content
                 .padding(.horizontal, 16)
@@ -898,49 +898,8 @@ struct macOSToolbarView: View {
 
     @ViewBuilder
     private var navigationButtons: some View {
-        if #available(macOS 26.0, visionOS 26.0, *) {
-            GlassEffectContainer(spacing: 8) {
-                HStack(spacing: 8) {
-                    HomeButtonTooltipWrapper(
-                        isVisible: $showHomeTooltip,
-                        message: homeTooltipMessage,
-                        onAutoDismiss: onHomeTooltipAutoDismiss
-                    ) {
-                        Button(action: onHome) {
-                            Label("Home", systemImage: "house")
-                                .labelStyle(.iconOnly)
-                        }
-                        .glassEffect(.regular.interactive())
-                        .keyboardShortcut("r", modifiers: [.command])
-                    }
-
-                    #if os(visionOS)
-                    Button(action: { showPreferences = true }) {
-                        Label("Settings", systemImage: "gear")
-                            .labelStyle(.iconOnly)
-                    }
-                    .glassEffect(.regular.interactive())
-                    #endif
-
-                    Button(action: onBack) {
-                        Label("Back", systemImage: "chevron.left")
-                            .labelStyle(.iconOnly)
-                    }
-                    .glassEffect(.regular.interactive())
-                    .keyboardShortcut("[", modifiers: [.command])
-                    .disabled(backwardStack.count < 2)
-
-                    Button(action: onForward) {
-                        Label("Forward", systemImage: "chevron.right")
-                            .labelStyle(.iconOnly)
-                    }
-                    .glassEffect(.regular.interactive())
-                    .keyboardShortcut("]", modifiers: [.command])
-                    .disabled(forwardStack.isEmpty)
-                }
-            }
-        } else {
-            HStack(spacing: 4) {
+        #if os(visionOS)
+            HStack(spacing: 8) {
                 HomeButtonTooltipWrapper(
                     isVisible: $showHomeTooltip,
                     message: homeTooltipMessage,
@@ -953,12 +912,10 @@ struct macOSToolbarView: View {
                     .keyboardShortcut("r", modifiers: [.command])
                 }
 
-                #if os(visionOS)
                 Button(action: { showPreferences = true }) {
                     Label("Settings", systemImage: "gear")
                         .labelStyle(.iconOnly)
                 }
-                #endif
 
                 Button(action: onBack) {
                     Label("Back", systemImage: "chevron.left")
@@ -974,54 +931,98 @@ struct macOSToolbarView: View {
                 .keyboardShortcut("]", modifiers: [.command])
                 .disabled(forwardStack.isEmpty)
             }
-        }
+        #else
+            if #available(macOS 26.0, *) {
+                GlassEffectContainer(spacing: 8) {
+                    HStack(spacing: 8) {
+                        HomeButtonTooltipWrapper(
+                            isVisible: $showHomeTooltip,
+                            message: homeTooltipMessage,
+                            onAutoDismiss: onHomeTooltipAutoDismiss
+                        ) {
+                            Button(action: onHome) {
+                                Label("Home", systemImage: "house")
+                                    .labelStyle(.iconOnly)
+                            }
+                            .glassEffect(.regular.interactive())
+                            .keyboardShortcut("r", modifiers: [.command])
+                        }
+
+                        Button(action: onBack) {
+                            Label("Back", systemImage: "chevron.left")
+                                .labelStyle(.iconOnly)
+                        }
+                        .glassEffect(.regular.interactive())
+                        .keyboardShortcut("[", modifiers: [.command])
+                        .disabled(backwardStack.count < 2)
+
+                        Button(action: onForward) {
+                            Label("Forward", systemImage: "chevron.right")
+                                .labelStyle(.iconOnly)
+                        }
+                        .glassEffect(.regular.interactive())
+                        .keyboardShortcut("]", modifiers: [.command])
+                        .disabled(forwardStack.isEmpty)
+                    }
+                }
+            } else {
+                HStack(spacing: 4) {
+                    HomeButtonTooltipWrapper(
+                        isVisible: $showHomeTooltip,
+                        message: homeTooltipMessage,
+                        onAutoDismiss: onHomeTooltipAutoDismiss
+                    ) {
+                        Button(action: onHome) {
+                            Label("Home", systemImage: "house")
+                                .labelStyle(.iconOnly)
+                        }
+                        .keyboardShortcut("r", modifiers: [.command])
+                    }
+
+                    Button(action: onBack) {
+                        Label("Back", systemImage: "chevron.left")
+                            .labelStyle(.iconOnly)
+                    }
+                    .keyboardShortcut("[", modifiers: [.command])
+                    .disabled(backwardStack.count < 2)
+
+                    Button(action: onForward) {
+                        Label("Forward", systemImage: "chevron.right")
+                            .labelStyle(.iconOnly)
+                    }
+                    .keyboardShortcut("]", modifiers: [.command])
+                    .disabled(forwardStack.isEmpty)
+                }
+            }
+        #endif
     }
 
     @ViewBuilder
     private var urlField: some View {
-        if #available(macOS 26.0, visionOS 26.0, *) {
+        #if os(visionOS)
             TextField("Enter a URL", text: $url)
-                #if os(visionOS)
                 .keyboardType(.URL)
                 .textInputAutocapitalization(.never)
-                #endif
                 .focused(isURLFocused)
                 .padding(10)
-                .glassEffect(in: .rect(cornerRadius: 8))
-        } else {
-            TextField("Enter a URL", text: $url)
-                #if os(visionOS)
-                .keyboardType(.URL)
-                .textInputAutocapitalization(.never)
-                #endif
-                .focused(isURLFocused)
-                .padding(10)
-        }
+        #else
+            if #available(macOS 26.0, *) {
+                TextField("Enter a URL", text: $url)
+                    .focused(isURLFocused)
+                    .padding(10)
+                    .glassEffect(in: .rect(cornerRadius: 8))
+            } else {
+                TextField("Enter a URL", text: $url)
+                    .focused(isURLFocused)
+                    .padding(10)
+            }
+        #endif
     }
 
     @ViewBuilder
     private var actionButtons: some View {
-        if #available(macOS 26.0, visionOS 26.0, *) {
-            GlassEffectContainer(spacing: 8) {
-                HStack(spacing: 8) {
-                    Button(action: { showAddBookmark = true }) {
-                        Label("Add Bookmark", systemImage: "bookmark.fill")
-                            .labelStyle(.iconOnly)
-                    }
-                    .glassEffect(.regular.interactive())
-                    .disabled(currentHost.isEmpty)
-
-                    Button(action: { showBookmarks = true }) {
-                        Label("Bookmarks", systemImage: "book")
-                            .labelStyle(.iconOnly)
-                    }
-                    .glassEffect(.regular.interactive())
-
-                    shareLink
-                }
-            }
-        } else {
-            HStack {
+        #if os(visionOS)
+            HStack(spacing: 8) {
                 Button(action: { showAddBookmark = true }) {
                     Label("Add Bookmark", systemImage: "bookmark.fill")
                         .labelStyle(.iconOnly)
@@ -1035,7 +1036,43 @@ struct macOSToolbarView: View {
 
                 shareLink
             }
-        }
+        #else
+            if #available(macOS 26.0, *) {
+                GlassEffectContainer(spacing: 8) {
+                    HStack(spacing: 8) {
+                        Button(action: { showAddBookmark = true }) {
+                            Label("Add Bookmark", systemImage: "bookmark.fill")
+                                .labelStyle(.iconOnly)
+                        }
+                        .glassEffect(.regular.interactive())
+                        .disabled(currentHost.isEmpty)
+
+                        Button(action: { showBookmarks = true }) {
+                            Label("Bookmarks", systemImage: "book")
+                                .labelStyle(.iconOnly)
+                        }
+                        .glassEffect(.regular.interactive())
+
+                        shareLink
+                    }
+                }
+            } else {
+                HStack {
+                    Button(action: { showAddBookmark = true }) {
+                        Label("Add Bookmark", systemImage: "bookmark.fill")
+                            .labelStyle(.iconOnly)
+                    }
+                    .disabled(currentHost.isEmpty)
+
+                    Button(action: { showBookmarks = true }) {
+                        Label("Bookmarks", systemImage: "book")
+                            .labelStyle(.iconOnly)
+                    }
+
+                    shareLink
+                }
+            }
+        #endif
     }
 
     @ViewBuilder
@@ -1044,30 +1081,32 @@ struct macOSToolbarView: View {
             ? URL(string: "https://gopher.navan.dev/\(url)")!
             : URL(string: "gopher://\(url)")!
 
-        if #available(macOS 26.0, visionOS 26.0, *) {
+        #if os(visionOS)
             ShareLink(item: shareURL) {
                 Label("Share", systemImage: "square.and.arrow.up")
                     .labelStyle(.iconOnly)
             }
-            .glassEffect(.regular.interactive())
-        } else {
-            ShareLink(item: shareURL) {
-                Label("Share", systemImage: "square.and.arrow.up")
-                    .labelStyle(.iconOnly)
+        #else
+            if #available(macOS 26.0, *) {
+                ShareLink(item: shareURL) {
+                    Label("Share", systemImage: "square.and.arrow.up")
+                        .labelStyle(.iconOnly)
+                }
+                .glassEffect(.regular.interactive())
+            } else {
+                ShareLink(item: shareURL) {
+                    Label("Share", systemImage: "square.and.arrow.up")
+                        .labelStyle(.iconOnly)
+                }
             }
-        }
+        #endif
     }
 
     @ViewBuilder
     private var goButton: some View {
-        if #available(macOS 26.0, visionOS 26.0, *) {
-            Button("Go", action: onGo)
-                .buttonStyle(.glass)
-                .keyboardShortcut(.defaultAction)
-        } else {
-            Button("Go", action: onGo)
-                .keyboardShortcut(.defaultAction)
-        }
+        Button("Go", action: onGo)
+            .buttonStyle(.liquidGlass)
+            .keyboardShortcut(.defaultAction)
     }
 }
 #endif
