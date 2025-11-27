@@ -33,6 +33,11 @@ struct ContentView: View {
     @AppStorage("crtMode") var crtMode: Bool = false
     @AppStorage("crtScanlines") var crtScanlines: Bool = true
     @AppStorage("crtVignette") var crtVignette: Bool = true
+    @AppStorage("hasFinishedFirstRunTips") private var hasFinishedFirstRunTips: Bool = false
+    @AppStorage("lastSeenWhatsNewVersion") private var lastSeenWhatsNewVersion: String = ""
+
+    @State private var showWhatsNew = false
+    @State private var pendingWhatsNewFeatures: [WhatsNewFeature] = []
 
     var body: some View {
         ZStack {
@@ -76,6 +81,49 @@ struct ContentView: View {
             }
         }
         .preferredColorScheme(crtMode ? .dark : nil)
+        .sheet(isPresented: $showWhatsNew) {
+            WhatsNewView(
+                features: pendingWhatsNewFeatures,
+                dismissTitle: "Continue",
+                onDismiss: {
+                    lastSeenWhatsNewVersion = WhatsNewConfig.currentVersion
+                    showWhatsNew = false
+                }
+            )
+            #if os(macOS)
+                .frame(width: 420, height: 520)
+            #endif
+        }
+        .onAppear {
+            evaluateWhatsNewPresentation()
+        }
+        .onChange(of: hasFinishedFirstRunTips) { _, _ in
+            evaluateWhatsNewPresentation()
+        }
+    }
+
+    private func evaluateWhatsNewPresentation() {
+        guard hasFinishedFirstRunTips else {
+            showWhatsNew = false
+            return
+        }
+
+        if lastSeenWhatsNewVersion != WhatsNewConfig.currentVersion {
+            pendingWhatsNewFeatures = [
+                WhatsNewFeature(
+                    id: "crt-mode",
+                    title: "CRT Display Mode",
+                    message:
+                        "Immerse yourself in phosphor glow, scanlines, and subtle vignette effects for every Gopherhole.",
+                    iconSystemName: "display",
+                    accessory: AnyView(
+                        Toggle("Enable CRT Display Mode", isOn: $crtMode)
+                            .toggleStyle(SwitchToggleStyle())
+                    )
+                )
+            ]
+            showWhatsNew = true
+        }
     }
 
 }

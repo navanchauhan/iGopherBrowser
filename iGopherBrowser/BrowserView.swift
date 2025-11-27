@@ -10,6 +10,9 @@ import SwiftData
 import SwiftGopherClient
 import SwiftUI
 import TelemetryDeck
+#if os(macOS)
+import AppKit
+#endif
 
 func openURL(url: URL) {
     #if os(OSX)
@@ -37,6 +40,8 @@ struct BrowserView: View {
     @AppStorage("shareThroughProxy", store: .standard) var shareThroughProxy: Bool = true
     @AppStorage("crtMode") var crtMode: Bool = false
     @AppStorage("crtPhosphorColor") var crtPhosphorColorRaw: String = CRTPhosphorColor.green.rawValue
+    @AppStorage("hasFinishedFirstRunTips") var hasFinishedFirstRunTips: Bool = false
+    @AppStorage("lastSeenWhatsNewVersion") var lastSeenWhatsNewVersion: String = ""
 
     // CRT-aware colors
     private var crtPhosphorColor: Color {
@@ -79,6 +84,7 @@ struct BrowserView: View {
     @State private var scrollToTop: Bool = false
 
     @State var currentTask: Task<Void, Never>?
+    @State private var showHomeTooltip: Bool = false
 
     @FocusState private var isURLFocused: Bool
 
@@ -87,6 +93,8 @@ struct BrowserView: View {
     @State private var findText: String = ""
     @State private var currentFindIndex: Int = 0
     @FocusState private var isFindFocused: Bool
+
+    private let homeTooltipMessage = "Tap Home to visit your first Gopherhole."
 
     private var findMatches: [Int] {
         guard !findText.isEmpty else { return [] }
@@ -336,15 +344,13 @@ struct BrowserView: View {
                             performGopherRequest(clearForward: false)
                         },
                         onHome: {
-                            TelemetryDeck.signal(
-                                "applicationClickedHome", parameters: ["gopherURL": "\(self.url)"])
-                            performGopherRequest(
-                                host: homeURL.host ?? "gopher.navan.dev",
-                                port: homeURL.port ?? 70,
-                                selector: homeURL.path)
+                            handleHomeTap()
                         },
                         onBack: { goBack() },
-                        onForward: { goForward() }
+                        onForward: { goForward() },
+                        showHomeTooltip: $showHomeTooltip,
+                        homeTooltipMessage: homeTooltipMessage,
+                        onHomeTooltipAutoDismiss: { dismissHomeTooltip() }
                     )
                 #else
                     macOSToolbarView(
@@ -364,15 +370,13 @@ struct BrowserView: View {
                             performGopherRequest(clearForward: false)
                         },
                         onHome: {
-                            TelemetryDeck.signal(
-                                "applicationClickedHome", parameters: ["gopherURL": "\(self.url)"])
-                            performGopherRequest(
-                                host: homeURL.host ?? "gopher.navan.dev",
-                                port: homeURL.port ?? 70,
-                                selector: homeURL.path)
+                            handleHomeTap()
                         },
                         onBack: { goBack() },
-                        onForward: { goForward() }
+                        onForward: { goForward() },
+                        showHomeTooltip: $showHomeTooltip,
+                        homeTooltipMessage: homeTooltipMessage,
+                        onHomeTooltipAutoDismiss: { dismissHomeTooltip() }
                     )
                 #endif
             }
@@ -424,6 +428,11 @@ struct BrowserView: View {
         .accentColor(accentColour)
         
         .onAppear {
+            if !hasFinishedFirstRunTips && !showHomeTooltip {
+                withAnimation(.spring()) {
+                    showHomeTooltip = true
+                }
+            }
             #if os(OSX)
             NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
                 // Command+F for Find in Page
@@ -498,6 +507,36 @@ struct BrowserView: View {
                     clearForward: false)
             }
         }
+    }
+
+    private func handleHomeTap() {
+        if showHomeTooltip {
+            withAnimation(.spring()) {
+                showHomeTooltip = false
+            }
+        }
+        completeFirstRunExperience()
+        TelemetryDeck.signal(
+            "applicationClickedHome", parameters: ["gopherURL": "\(self.url)"])
+        performGopherRequest(
+            host: homeURL.host ?? "gopher.navan.dev",
+            port: homeURL.port ?? 70,
+            selector: homeURL.path)
+    }
+
+    private func dismissHomeTooltip() {
+        if showHomeTooltip {
+            withAnimation(.spring()) {
+                showHomeTooltip = false
+            }
+        }
+        completeFirstRunExperience()
+    }
+
+    private func completeFirstRunExperience() {
+        guard !hasFinishedFirstRunTips else { return }
+        hasFinishedFirstRunTips = true
+        lastSeenWhatsNewVersion = WhatsNewConfig.currentVersion
     }
 
     private func performGopherRequest(
@@ -674,6 +713,9 @@ struct iOSToolbarView: View {
     let onHome: () -> Void
     let onBack: () -> Void
     let onForward: () -> Void
+    @Binding var showHomeTooltip: Bool
+    let homeTooltipMessage: String
+    let onHomeTooltipAutoDismiss: () -> Void
 
     private var shareURL: URL {
         shareThroughProxy
@@ -729,7 +771,13 @@ struct iOSToolbarView: View {
 
                 // Center actions - Home & Bookmark
                 HStack(spacing: 4) {
-                    navButton(icon: "house", action: onHome)
+                    HomeButtonTooltipWrapper(
+                        isVisible: $showHomeTooltip,
+                        message: homeTooltipMessage,
+                        onAutoDismiss: onHomeTooltipAutoDismiss
+                    ) {
+                        navButton(icon: "house", action: onHome)
+                    }
 
                     Button(action: { showAddBookmark = true }) {
                         Image(systemName: currentHost.isEmpty ? "bookmark" : "bookmark.fill")
@@ -833,6 +881,9 @@ struct macOSToolbarView: View {
     let onHome: () -> Void
     let onBack: () -> Void
     let onForward: () -> Void
+    @Binding var showHomeTooltip: Bool
+    let homeTooltipMessage: String
+    let onHomeTooltipAutoDismiss: () -> Void
 
     var body: some View {
         HStack(spacing: 8) {
@@ -850,12 +901,18 @@ struct macOSToolbarView: View {
         if #available(macOS 26.0, visionOS 26.0, *) {
             GlassEffectContainer(spacing: 8) {
                 HStack(spacing: 8) {
-                    Button(action: onHome) {
-                        Label("Home", systemImage: "house")
-                            .labelStyle(.iconOnly)
+                    HomeButtonTooltipWrapper(
+                        isVisible: $showHomeTooltip,
+                        message: homeTooltipMessage,
+                        onAutoDismiss: onHomeTooltipAutoDismiss
+                    ) {
+                        Button(action: onHome) {
+                            Label("Home", systemImage: "house")
+                                .labelStyle(.iconOnly)
+                        }
+                        .glassEffect(.regular.interactive())
+                        .keyboardShortcut("r", modifiers: [.command])
                     }
-                    .glassEffect(.regular.interactive())
-                    .keyboardShortcut("r", modifiers: [.command])
 
                     #if os(visionOS)
                     Button(action: { showPreferences = true }) {
@@ -884,11 +941,17 @@ struct macOSToolbarView: View {
             }
         } else {
             HStack(spacing: 4) {
-                Button(action: onHome) {
-                    Label("Home", systemImage: "house")
-                        .labelStyle(.iconOnly)
+                HomeButtonTooltipWrapper(
+                    isVisible: $showHomeTooltip,
+                    message: homeTooltipMessage,
+                    onAutoDismiss: onHomeTooltipAutoDismiss
+                ) {
+                    Button(action: onHome) {
+                        Label("Home", systemImage: "house")
+                            .labelStyle(.iconOnly)
+                    }
+                    .keyboardShortcut("r", modifiers: [.command])
                 }
-                .keyboardShortcut("r", modifiers: [.command])
 
                 #if os(visionOS)
                 Button(action: { showPreferences = true }) {
@@ -1008,6 +1071,85 @@ struct macOSToolbarView: View {
     }
 }
 #endif
+
+struct HomeButtonTooltipWrapper<Content: View>: View {
+    @Binding var isVisible: Bool
+    let message: String
+    let onAutoDismiss: () -> Void
+    private let content: () -> Content
+    @State private var didScheduleDismiss = false
+
+    init(
+        isVisible: Binding<Bool>,
+        message: String,
+        onAutoDismiss: @escaping () -> Void,
+        @ViewBuilder content: @escaping () -> Content
+    ) {
+        self._isVisible = isVisible
+        self.message = message
+        self.onAutoDismiss = onAutoDismiss
+        self.content = content
+    }
+
+    var body: some View {
+        ZStack(alignment: .top) {
+            content()
+
+            if isVisible {
+                HomeTooltipCard(message: message)
+                    .offset(y: -72)
+                    .transition(.move(edge: .top).combined(with: .opacity))
+                    .onAppear {
+                        scheduleAutoDismiss()
+                    }
+            }
+        }
+    }
+
+    private func scheduleAutoDismiss() {
+        guard !didScheduleDismiss else { return }
+        didScheduleDismiss = true
+        DispatchQueue.main.asyncAfter(deadline: .now() + 6) {
+            if isVisible {
+                withAnimation(.spring()) {
+                    isVisible = false
+                }
+                onAutoDismiss()
+            }
+        }
+    }
+}
+
+private struct HomeTooltipCard: View {
+    let message: String
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text("Tip")
+                .font(.caption.bold())
+                .foregroundStyle(.secondary)
+
+            Text(message)
+                .font(.caption)
+                .multilineTextAlignment(.leading)
+        }
+        .padding(12)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(tooltipBackground)
+                .shadow(color: .black.opacity(0.1), radius: 6, x: 0, y: 4)
+        )
+        .frame(maxWidth: 220)
+    }
+
+    private var tooltipBackground: Color {
+        #if os(macOS)
+            Color(nsColor: NSColor.windowBackgroundColor)
+        #else
+            Color(uiColor: .systemBackground)
+        #endif
+    }
+}
 
 // MARK: - Find in Page Bar
 
