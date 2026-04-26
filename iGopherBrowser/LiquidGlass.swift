@@ -8,24 +8,45 @@
 import SwiftUI
 
 extension View {
+    @ViewBuilder
     func liquidGlass() -> some View {
-        glassEffect()
+        #if os(visionOS)
+            self
+        #else
+            glassEffect()
+        #endif
     }
 
+    @ViewBuilder
     func liquidGlassInteractive() -> some View {
-        glassEffect(.regular.interactive())
+        #if os(visionOS)
+            self
+        #else
+            glassEffect(.regular.interactive())
+        #endif
     }
 
+    @ViewBuilder
     func liquidGlassBar() -> some View {
-        glassEffect(in: .rect(cornerRadius: 12))
+        #if os(visionOS)
+            self
+        #else
+            glassEffect(in: .rect(cornerRadius: 12))
+        #endif
     }
 }
 
 struct LiquidGlassButtonStyle: ButtonStyle {
+    @ViewBuilder
     func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .glassEffect(.regular.interactive())
-            .opacity(configuration.isPressed ? 0.8 : 1.0)
+        #if os(visionOS)
+            configuration.label
+                .opacity(configuration.isPressed ? 0.8 : 1.0)
+        #else
+            configuration.label
+                .glassEffect(.regular.interactive())
+                .opacity(configuration.isPressed ? 0.8 : 1.0)
+        #endif
     }
 }
 
@@ -42,9 +63,14 @@ struct LiquidGlassToolbar<Content: View>: View {
         self.content = content()
     }
 
+    @ViewBuilder
     var body: some View {
-        GlassEffectContainer(spacing: 8) {
+        #if os(visionOS)
             content
-        }
+        #else
+            GlassEffectContainer(spacing: 8) {
+                content
+            }
+        #endif
     }
 }

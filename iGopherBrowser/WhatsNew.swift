@@ -87,11 +87,11 @@ struct WhatsNewView: View {
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, continueButtonVerticalPadding)
             }
-            #if os(macOS)
+            #if os(iOS)
+                .buttonStyle(.glassProminent)
+            #else
                 .buttonStyle(.borderedProminent)
                 .controlSize(.large)
-            #else
-                .buttonStyle(.glassProminent)
             #endif
         }
             .padding(containerInnerPadding)

@@ -750,7 +750,7 @@ struct macOSToolbarView: View {
 
     @ViewBuilder
     private var navigationButtons: some View {
-        GlassEffectContainer(spacing: 8) {
+        LiquidGlassToolbar {
             HStack(spacing: 8) {
                 HomeButtonTooltipWrapper(
                     isVisible: $showHomeTooltip,
@@ -761,7 +761,7 @@ struct macOSToolbarView: View {
                         Label("Home", systemImage: "house")
                             .labelStyle(.iconOnly)
                     }
-                    .glassEffect(.regular.interactive())
+                    .liquidGlassInteractive()
                     .keyboardShortcut("r", modifiers: [.command])
                     .accessibilityIdentifier("home-button")
                 }
@@ -770,7 +770,7 @@ struct macOSToolbarView: View {
                     Label("Back", systemImage: "chevron.left")
                         .labelStyle(.iconOnly)
                 }
-                .glassEffect(.regular.interactive())
+                .liquidGlassInteractive()
                 .keyboardShortcut("[", modifiers: [.command])
                 .disabled(backwardStack.count < 2)
                 .accessibilityIdentifier("back-button")
@@ -779,7 +779,7 @@ struct macOSToolbarView: View {
                     Label("Forward", systemImage: "chevron.right")
                         .labelStyle(.iconOnly)
                 }
-                .glassEffect(.regular.interactive())
+                .liquidGlassInteractive()
                 .keyboardShortcut("]", modifiers: [.command])
                 .disabled(forwardStack.isEmpty)
                 .accessibilityIdentifier("forward-button")
@@ -792,19 +792,19 @@ struct macOSToolbarView: View {
         TextField("Enter a URL", text: $url)
             .focused(isURLFocused)
             .padding(10)
-            .glassEffect(in: .rect(cornerRadius: 8))
+            .liquidGlassBar()
             .accessibilityIdentifier("url-field")
     }
 
     @ViewBuilder
     private var actionButtons: some View {
-        GlassEffectContainer(spacing: 8) {
+        LiquidGlassToolbar {
             HStack(spacing: 8) {
                 Button(action: { showAddBookmark = true }) {
                     Label("Add Bookmark", systemImage: "bookmark.fill")
                         .labelStyle(.iconOnly)
                 }
-                .glassEffect(.regular.interactive())
+                .liquidGlassInteractive()
                 .disabled(currentHost.isEmpty)
                 .accessibilityIdentifier("add-bookmark-button")
 
@@ -812,7 +812,7 @@ struct macOSToolbarView: View {
                     Label("Bookmarks", systemImage: "book")
                         .labelStyle(.iconOnly)
                 }
-                .glassEffect(.regular.interactive())
+                .liquidGlassInteractive()
                 .accessibilityIdentifier("bookmarks-history-button")
 
                 shareLink
@@ -830,7 +830,7 @@ struct macOSToolbarView: View {
             Label("Share", systemImage: "square.and.arrow.up")
                 .labelStyle(.iconOnly)
         }
-        .glassEffect(.regular.interactive())
+        .liquidGlassInteractive()
     }
 
     @ViewBuilder
