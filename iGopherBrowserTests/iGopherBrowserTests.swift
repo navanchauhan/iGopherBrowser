@@ -1,6 +1,7 @@
 import XCTest
 @testable import iGopherBrowser
 import SwiftUI
+import SwiftData
 
 final class iGopherBrowserTests: XCTestCase {
 
@@ -103,11 +104,13 @@ final class iGopherBrowserTests: XCTestCase {
         XCTAssertEqual(view.selector, "/")
     }
 
-    func testBookmarksView_buildsBody() {
-        let view = BookmarksView()
-        _ = view.body
-        // No runtime crash indicates layout builds successfully
-        XCTAssertTrue(true)
+    func testBookmarkAndHistoryURLStrings() {
+        let bookmark = Bookmark(title: "Example", host: "example.com", port: 70, selector: "/about")
+        XCTAssertEqual(bookmark.urlString, "example.com:70/about")
+        XCTAssertEqual(bookmark.gopherURL, "gopher://example.com:70/about")
+
+        let historyItem = HistoryItem(title: "Example", host: "example.com", port: 71, selector: "/docs")
+        XCTAssertEqual(historyItem.urlString, "example.com:71/docs")
     }
 
     func testSidebarView_buildsBody_andOnSelect() {

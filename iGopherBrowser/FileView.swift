@@ -45,13 +45,15 @@ func determineFileType(data: Data) -> String? {
 
 struct FileView: View {
     var item: gopherItem
-    let client = GopherClient()
+    private let loader = GopherFileLoader()
     @State private var fileContent: [String] = []
     @State private var fileURL: URL?
     @State private var QLURL: URL?
     @State private var isSaving: Bool = false
     @State private var downloadedData: Data?
     @State private var showRawUnknown: Bool = false
+    @State private var loadedFile: LoadedGopherFile?
+    @State private var loadError: String?
 
     // CRT Mode
     @AppStorage("crtMode") var crtMode: Bool = false
@@ -59,6 +61,10 @@ struct FileView: View {
 
     private var textColor: Color {
         crtMode ? (CRTPhosphorColor(rawValue: crtPhosphorColorRaw) ?? .green).color : .primary
+    }
+
+    private var loadID: String {
+        "\(item.host):\(item.port)\(item.selector)"
     }
 
     var body: some View {
@@ -88,7 +94,7 @@ struct FileView: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding()
-            .task { readFile(item) }
+            .task(id: loadID) { await loadFile() }
             .listStyle(PlainListStyle())
         } else if [.doc, .image, .gif, .movie, .sound, .bitmap].contains(item.parsedItemType) {  // Preview Document: .pdf, .docx, e.t.c
             // QuickLook + Download
@@ -98,12 +104,14 @@ struct FileView: View {
                     Button("Preview Document") {
                         print(url)
                         QLURL = url
-                    }.quickLookPreview($QLURL)
+                    }
+                    .accessibilityIdentifier("preview-document-button")
+                    .quickLookPreview($QLURL)
                     downloadControl()
                 }
             } else {
-                Text("Loading Document...")
-                    .onAppear { readFile(item) }
+                Text(loadError ?? "Loading Document...")
+                    .task(id: loadID) { await loadFile() }
             }
         } else {
             // Unknown type: offer two options — Show Raw and Save As
@@ -114,6 +122,7 @@ struct FileView: View {
                         Button(showRawUnknown ? "Hide Raw" : "Show Raw") {
                             showRawUnknown.toggle()
                         }
+                        .accessibilityIdentifier("show-raw-button")
                         downloadControl()
                     }
                     if showRawUnknown, let data = downloadedData {
@@ -130,71 +139,32 @@ struct FileView: View {
                 }
                 .padding()
             } else {
-                Text("Loading...")
-                    .onAppear { readFile(item) }
+                Text(loadError ?? "Loading...")
+                    .task(id: loadID) { await loadFile() }
             }
         }
     }
 
-    private func readFile(_ item: gopherItem) {
-        self.client.sendRequest(to: item.host, port: item.port, message: "\(item.selector)\r\n") {
-            result in
-            // Dispatch the result handling back to the main thread
-            switch result {
-            case .success(let resp):
-                if var data = resp.first?.rawData {
-                    let tempDirURL = FileManager.default.temporaryDirectory
+    private func loadFile() async {
+        do {
+            let loaded = try await loader.load(item)
+            loadedFile = loaded
+            fileURL = loaded.fileURL
+            downloadedData = loaded.data
+            fileContent = loaded.textChunks
+            loadError = nil
 
-                    do {
-                        var fileData = Data()
-                        print("Readable byees", data.readableBytes)
-                        while data.readableBytes > 0 {
-                            if let bytes = data.readBytes(length: data.readableBytes) {
-                                fileData.append(contentsOf: bytes)
-                            }
-                        }
-                        print("Read entire file")
-                        if item.parsedItemType == .text {
-                            if let string = String(data: fileData, encoding: .utf8) {
-                                let lines = string.components(separatedBy: .newlines)
-                                let chunkSize = 100
-                                self.fileContent = stride(from: 0, to: lines.count, by: chunkSize)
-                                    .map {
-                                        lines[$0..<min($0 + chunkSize, lines.count)].joined(
-                                            separator: "\n")
-                                    }
-                                // Also persist a temporary text file to enable Save/Share
-                                let textURL = tempDirURL.appendingPathComponent(
-                                    UUID().uuidString + ".txt")
-                                try fileData.write(to: textURL)
-                                self.fileURL = textURL
-                                self.downloadedData = fileData
-                                return
-                            }
-                            // fall through to binary flow if decoding fails
-                        }
-                        let fileURL = tempDirURL.appendingPathComponent(
-                            UUID().uuidString + ".\(determineFileType(data: fileData) ?? "unknown")")
-                        print(fileURL)
-
-                        if determineFileType(data: fileData) == nil {
-                            TelemetryDeck.signal(
-                                "applicationUnableToDetectFiletype",
-                                parameters: ["gopherURL": "\(item.host):\(item.port)\(item.selector)"])
-                        }
-
-                        try fileData.write(to: fileURL)
-                        self.fileURL = fileURL
-                        self.downloadedData = fileData
-                    } catch {
-                        print("Error writing file to temp directory: \(error)")
-                    }
-                }
-            case .failure(_):
-                self.fileContent = ["Unable to fetch file due to network error."]
+            if item.parsedItemType != .text && determineFileType(data: loaded.data) == nil {
+                TelemetryDeck.signal(
+                    "applicationUnableToDetectFiletype",
+                    parameters: ["gopherURL": "\(item.host):\(item.port)\(item.selector)"])
             }
+        } catch is CancellationError {
+            return
+        } catch {
+            loadError = "Unable to fetch file due to network error."
+            fileContent = [loadError ?? ""]
         }
-
     }
 
     // MARK: - Download / Save helpers

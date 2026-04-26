@@ -23,6 +23,10 @@ final class iGopherBrowserUITests: XCTestCase {
   }
 
   func testExample() throws {
+    guard ProcessInfo.processInfo.environment["RUN_LIVE_GOPHER_UI_TESTS"] == "1" else {
+      throw XCTSkip("Live gopher UI smoke test is opt-in; fixture-backed tests cover CI.")
+    }
+
     let app = XCUIApplication()
     app.launch()
 

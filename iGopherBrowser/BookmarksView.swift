@@ -53,6 +53,7 @@ struct BookmarksHistoryView: View {
                     Button("Done") {
                         dismiss()
                     }
+                    .accessibilityIdentifier("bookmarks-history-done-button")
                 }
                 ToolbarItem(placement: .topBarTrailing) {
                     if selectedSection == .bookmarks {
@@ -62,6 +63,7 @@ struct BookmarksHistoryView: View {
                             clearHistory()
                         }
                         .disabled(historyItems.isEmpty)
+                        .accessibilityIdentifier("clear-history-button")
                     }
                 }
             }
@@ -109,6 +111,7 @@ struct BookmarksHistoryView: View {
                         .padding(.vertical, 2)
                     }
                     .buttonStyle(.plain)
+                    .accessibilityIdentifier("bookmark-row")
                 }
                 .onDelete(perform: deleteBookmarks)
             }
@@ -153,6 +156,7 @@ struct BookmarksHistoryView: View {
                                 .padding(.vertical, 2)
                             }
                             .buttonStyle(.plain)
+                            .accessibilityIdentifier("history-row")
                         }
                         .onDelete { indexSet in
                             deleteHistoryItems(items: items, at: indexSet)
@@ -225,6 +229,7 @@ struct AddBookmarkView: View {
             Form {
                 SwiftUI.Section {
                     TextField("Title", text: $title)
+                        .accessibilityIdentifier("bookmark-title-field")
                 } header: {
                     Text("Bookmark Name")
                 }
@@ -252,6 +257,7 @@ struct AddBookmarkView: View {
                         saveBookmark()
                     }
                     .disabled(title.isEmpty)
+                    .accessibilityIdentifier("bookmark-save-button")
                 }
             }
         }

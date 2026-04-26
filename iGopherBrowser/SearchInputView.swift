@@ -15,13 +15,14 @@ struct SearchInputView: View {
     @Binding var searchText: String
     var onSearch: (String) -> Void
 
-    @Environment(\.presentationMode) var presentationMode
+    @Environment(\.dismiss) private var dismiss
 
     var body: some View {
         VStack {
             Text("Enter your query")
             TextField("Search", text: $searchText)
                 .textFieldStyle(RoundedBorderTextFieldStyle())
+                .accessibilityIdentifier("search-query-field")
                 .padding()
                 .onSubmit {
                     onSearch(searchText)
@@ -29,25 +30,27 @@ struct SearchInputView: View {
             HStack {
 
                 Button("Cancel") {
-                    presentationMode.wrappedValue.dismiss()
+                    dismiss()
                 }
                 .keyboardShortcut(.cancelAction)
                 .padding()
+                .accessibilityIdentifier("search-cancel-button")
 
                 Button("Search") {
                     onSearch(searchText)
                 }
                 .keyboardShortcut(.return, modifiers: [])
                 .padding()
+                .accessibilityIdentifier("search-submit-button")
             }
         }
         .padding()
         #if os(macOS)
         .background(EscapeKeyCapture {
-            presentationMode.wrappedValue.dismiss()
+            dismiss()
         })
         .onExitCommand {
-            presentationMode.wrappedValue.dismiss()
+            dismiss()
         }
         #endif
     }

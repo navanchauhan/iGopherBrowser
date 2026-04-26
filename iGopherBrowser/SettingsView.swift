@@ -96,11 +96,12 @@ struct SettingsView: View {
                     VStack(alignment: .leading, spacing: 12) {
                         Text("Home URL")
                             .font(.subheadline)
-                            .foregroundColor(.secondary)
+                            .foregroundStyle(.secondary)
 
                         TextField("Enter home URL", text: $homeURLString)
                             .textFieldStyle(.roundedBorder)
-                            .disableAutocorrection(true)
+                            .autocorrectionDisabled(true)
+                            .accessibilityIdentifier("settings-home-url-field")
                             .onSubmit {
                                 if let url = URL(string: homeURLString) {
                                     self.homeURL = url
@@ -118,6 +119,7 @@ struct SettingsView: View {
                                 }
                             }
                             .buttonStyle(.bordered)
+                            .accessibilityIdentifier("settings-save-button")
 
                             Button("Reset to Default") {
                                 self.homeURL = URL(string: "gopher://gopher.navan.dev:70/")!
@@ -160,7 +162,7 @@ struct SettingsView: View {
                         if crtMode {
                             Text("Link and accent colours have no visible effect while CRT Mode is enabled.")
                                 .font(.caption)
-                                .foregroundColor(.secondary)
+                                .foregroundStyle(.secondary)
                         }
                     }
                     .padding(.vertical, 4)
@@ -201,7 +203,7 @@ struct SettingsView: View {
 
                         Text("Enable CRT display mode with phosphor glow, scanlines, and vignette effects.")
                             .font(.caption)
-                            .foregroundColor(.secondary)
+                            .foregroundStyle(.secondary)
                     }
                     .padding(.vertical, 4)
                 } label: {
@@ -221,7 +223,7 @@ struct SettingsView: View {
 
                         Text("Opt out of anonymous telemetry that tracks crashes and random errors.")
                             .font(.caption)
-                            .foregroundColor(.secondary)
+                            .foregroundStyle(.secondary)
                     }
                     .padding(.vertical, 4)
                 } label: {
@@ -235,7 +237,7 @@ struct SettingsView: View {
 
                         Text("Enabling this option shares Gopher URLs through an HTTP proxy, allowing people to view the page without needing a Gopher client.")
                             .font(.caption)
-                            .foregroundColor(.secondary)
+                            .foregroundStyle(.secondary)
                     }
                     .padding(.vertical, 4)
                 } label: {
@@ -252,7 +254,8 @@ struct SettingsView: View {
                 VStack {
                     TextField("Home URL", text: $homeURLString)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .disableAutocorrection(true)
+                        .autocorrectionDisabled(true)
+                        .accessibilityIdentifier("settings-home-url-field")
                         .onSubmit {
                             if let url = URL(string: homeURLString) {
                                 self.homeURL = url
@@ -274,6 +277,7 @@ struct SettingsView: View {
                                     self.showAlert = true
                                 }
                             })
+                        .accessibilityIdentifier("settings-save-button")
                         Button(
                             "Reset Preferences",
                             action: {
@@ -299,7 +303,7 @@ struct SettingsView: View {
             } footer: {
                 Text("Opt out of anonymous telemetry that tracks crashes and random errors.")
                     .font(.caption)
-                    .foregroundColor(.gray)
+                    .foregroundStyle(.secondary)
             }
             Section(header: Text("UI Settings")) {
                 ColorPicker("Link Colour", selection: $linkColour)
@@ -315,7 +319,7 @@ struct SettingsView: View {
                 if crtMode {
                     Text("Link and accent colours have no visible effect while CRT Mode is enabled.")
                         .font(.caption)
-                        .foregroundColor(.gray)
+                        .foregroundStyle(.secondary)
                 }
             }
 
@@ -349,7 +353,7 @@ struct SettingsView: View {
             } footer: {
                 Text("Enable CRT display mode with phosphor glow, scanlines, and vignette effects.")
                     .font(.caption)
-                    .foregroundColor(.gray)
+                    .foregroundStyle(.secondary)
             }
 
             Section {
@@ -362,7 +366,7 @@ struct SettingsView: View {
                     "Enabling this option shares Gopher URLs through an HTTP proxy, allowing people to view the page without needing a Gopher client"
                 )
                 .font(.caption)
-                .foregroundColor(.gray)
+                .foregroundStyle(.secondary)
             }
             #if os(visionOS)
                 Button("Done") {
@@ -375,12 +379,10 @@ struct SettingsView: View {
         .onAppear {
             self.homeURLString = homeURL.absoluteString
         }
-        .alert(isPresented: $showAlert) {
-            Alert(
-                title: Text("Error Saving"),
-                message: Text(alertMessage),
-                dismissButton: .default(Text("Got it!"))
-            )
+        .alert("Error Saving", isPresented: $showAlert) {
+            Button("Got it") {}
+        } message: {
+            Text(alertMessage)
         }
     }
 

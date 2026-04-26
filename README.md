@@ -22,3 +22,7 @@ Lynx is an amazing gopher client for macOS, but when you are already using tryin
 - [x] Download files* (I haven't tested all file formats)
 
 Uses [swift-gopher](https://github.com/navanchauhan/swift-gopher) for gopher protocol support.
+
+## Development
+
+See [docs/testing.md](docs/testing.md) for unit, fixture UI, and opt-in live UI test commands.

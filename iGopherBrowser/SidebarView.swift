@@ -26,12 +26,15 @@ struct SidebarView: View {
     var body: some View {
         VStack {
             List(hosts, children: \.children) { node in
-                Text(node.message ?? node.host)
-                    .foregroundStyle(textColor)
-                    .shadow(color: crtMode ? textColor.opacity(0.5) : .clear, radius: crtMode ? 2 : 0)
-                    .onTapGesture {
-                        onSelect(node)
-                    }
+                Button {
+                    onSelect(node)
+                } label: {
+                    Text(node.message ?? node.host)
+                        .foregroundStyle(textColor)
+                        .shadow(color: crtMode ? textColor.opacity(0.5) : .clear, radius: crtMode ? 2 : 0)
+                }
+                .buttonStyle(.plain)
+                .accessibilityIdentifier("sidebar-node-row")
             }
             .scrollContentBackground(crtMode ? .hidden : .automatic)
         }

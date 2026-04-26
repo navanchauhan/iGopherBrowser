@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		2A6DB3D1A38FF4F24B6E8A60 /* GopherLocationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A4FB9FB5683A11CA2C89198 /* GopherLocationTests.swift */; };
+		2BAC236C122BB7A79E46C342 /* GopherFixtureServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D94530C5C52394AA25F5D3C /* GopherFixtureServer.swift */; };
 		3E1BCC562B297E9B00A4CB69 /* iGopherBrowserApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E1BCC552B297E9B00A4CB69 /* iGopherBrowserApp.swift */; };
 		3E1BCC582B297E9B00A4CB69 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E1BCC572B297E9B00A4CB69 /* ContentView.swift */; };
 		3E1BCC5C2B297E9C00A4CB69 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3E1BCC5B2B297E9C00A4CB69 /* Assets.xcassets */; };
@@ -22,6 +24,10 @@
 		3EFB9C0F2B2E6325005EAD7C /* FileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EFB9C0E2B2E6325005EAD7C /* FileView.swift */; };
 		3EFB9C112B2E869C005EAD7C /* BrowserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EFB9C102B2E869C005EAD7C /* BrowserView.swift */; };
 		3EFB9C132B2E872A005EAD7C /* Helpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EFB9C122B2E872A005EAD7C /* Helpers.swift */; };
+		49173089E975D13A273B7800 /* BrowserSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 194BBA5DD232C298588A8928 /* BrowserSession.swift */; };
+		54BCB4C65C1A8FD49170767A /* GopherFetching.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9491AF24CDF07814A453D5BA /* GopherFetching.swift */; };
+		80742303E73A82D3177E35C5 /* NIOCore in Frameworks */ = {isa = PBXBuildFile; productRef = AA570D33573527C25D1F4939 /* NIOCore */; };
+		9E4CABF30CB01E102C1640D8 /* LaunchConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BAFC091B44D2BF1C28D61E3 /* LaunchConfiguration.swift */; };
 		A3C7E11A2D9D6D3B00A7C1F1 /* iGopherBrowserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3C7E1192D9D6D3B00A7C1F1 /* iGopherBrowserTests.swift */; };
 		A3C7E1242D9D6E1500A7C1F1 /* TelemetryDeck in Frameworks */ = {isa = PBXBuildFile; productRef = 3ECFE7422B4493F300AEBAE0 /* TelemetryDeck */; };
 		A3C7E1252D9D6E1500A7C1F1 /* SwiftGopherClient in Frameworks */ = {isa = PBXBuildFile; productRef = 3ECC94062C56F1BC0028D64D /* SwiftGopherClient */; };
@@ -30,6 +36,14 @@
 		A3C7E12A2DAA234500A7C1F1 /* History.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3C7E12B2DAA234500A7C1F1 /* History.swift */; };
 		A3C7E12C2DAA345600A7C1F1 /* CRTEffect.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3C7E12D2DAA345600A7C1F1 /* CRTEffect.swift */; };
 		AC17612674E44063856BB112C68D41C1 /* WhatsNew.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC17612574E44063856BB112C68D41C1 /* WhatsNew.swift */; };
+		B9EB1702180E85F220BB0EBE /* GopherItemRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EDD1F6FF5865A9F9B265545 /* GopherItemRow.swift */; };
+		C3B658ABB377C2523A3076D5 /* GopherFileLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FDB4628E8FFE01FEB8C2C78 /* GopherFileLoader.swift */; };
+		CE162C0F7F1BC0083204EA47 /* NIOCore in Frameworks */ = {isa = PBXBuildFile; productRef = AB2D008418E64DBA2E94D67A /* NIOCore */; };
+		D3FD963650515D3494DD3672 /* GopherFileLoaderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5529CC53BE7F7968DEFCDFC8 /* GopherFileLoaderTests.swift */; };
+		D9DF50FFA89EE4C6C9615254 /* GopherLocation.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBA6DEA4B82BB66D0F23EC81 /* GopherLocation.swift */; };
+		DFF290DEB854E17F60A84259 /* BrowserSessionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81B01D6EA5D20F4D7D180D9E /* BrowserSessionTests.swift */; };
+		E17A5F4B01D84B30A24F91B5 /* ViewSurfaceRenderingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E17A5F4A01D84B30A24F91B5 /* ViewSurfaceRenderingTests.swift */; };
+		F5685ACB96F6436C529DAE35 /* BrowserEndToEndTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13F068560AA83E202D6C6D60 /* BrowserEndToEndTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -50,6 +64,11 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		0D94530C5C52394AA25F5D3C /* GopherFixtureServer.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = GopherFixtureServer.swift; sourceTree = "<group>"; };
+		13F068560AA83E202D6C6D60 /* BrowserEndToEndTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BrowserEndToEndTests.swift; sourceTree = "<group>"; };
+		194BBA5DD232C298588A8928 /* BrowserSession.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BrowserSession.swift; sourceTree = "<group>"; };
+		1A4FB9FB5683A11CA2C89198 /* GopherLocationTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = GopherLocationTests.swift; sourceTree = "<group>"; };
+		2BAFC091B44D2BF1C28D61E3 /* LaunchConfiguration.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = LaunchConfiguration.swift; sourceTree = "<group>"; };
 		3E1BCC522B297E9B00A4CB69 /* iGopherBrowser.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = iGopherBrowser.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		3E1BCC552B297E9B00A4CB69 /* iGopherBrowserApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iGopherBrowserApp.swift; sourceTree = "<group>"; };
 		3E1BCC572B297E9B00A4CB69 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -68,6 +87,11 @@
 		3EFB9C0E2B2E6325005EAD7C /* FileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileView.swift; sourceTree = "<group>"; };
 		3EFB9C102B2E869C005EAD7C /* BrowserView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserView.swift; sourceTree = "<group>"; };
 		3EFB9C122B2E872A005EAD7C /* Helpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Helpers.swift; sourceTree = "<group>"; };
+		4FDB4628E8FFE01FEB8C2C78 /* GopherFileLoader.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = GopherFileLoader.swift; sourceTree = "<group>"; };
+		5529CC53BE7F7968DEFCDFC8 /* GopherFileLoaderTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = GopherFileLoaderTests.swift; sourceTree = "<group>"; };
+		81B01D6EA5D20F4D7D180D9E /* BrowserSessionTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BrowserSessionTests.swift; sourceTree = "<group>"; };
+		9491AF24CDF07814A453D5BA /* GopherFetching.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = GopherFetching.swift; sourceTree = "<group>"; };
+		9EDD1F6FF5865A9F9B265545 /* GopherItemRow.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = GopherItemRow.swift; sourceTree = "<group>"; };
 		A3C7E1192D9D6D3B00A7C1F1 /* iGopherBrowserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iGopherBrowserTests.swift; sourceTree = "<group>"; };
 		A3C7E11D2D9D6D6500A7C1F1 /* iGopherBrowserTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = iGopherBrowserTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		A3C7E1272DAA123400A7C1F1 /* Bookmark.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Bookmark.swift; sourceTree = "<group>"; };
@@ -75,6 +99,8 @@
 		A3C7E12B2DAA234500A7C1F1 /* History.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = History.swift; sourceTree = "<group>"; };
 		A3C7E12D2DAA345600A7C1F1 /* CRTEffect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CRTEffect.swift; sourceTree = "<group>"; };
 		AC17612574E44063856BB112C68D41C1 /* WhatsNew.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WhatsNew.swift; sourceTree = "<group>"; };
+		BBA6DEA4B82BB66D0F23EC81 /* GopherLocation.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = GopherLocation.swift; sourceTree = "<group>"; };
+		E17A5F4A01D84B30A24F91B5 /* ViewSurfaceRenderingTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ViewSurfaceRenderingTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -84,6 +110,7 @@
 			files = (
 				3ECC94072C56F1BC0028D64D /* SwiftGopherClient in Frameworks */,
 				3ECFE7432B4493F300AEBAE0 /* TelemetryDeck in Frameworks */,
+				80742303E73A82D3177E35C5 /* NIOCore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -100,6 +127,7 @@
 			files = (
 				A3C7E1242D9D6E1500A7C1F1 /* TelemetryDeck in Frameworks */,
 				A3C7E1252D9D6E1500A7C1F1 /* SwiftGopherClient in Frameworks */,
+				CE162C0F7F1BC0083204EA47 /* NIOCore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -149,6 +177,12 @@
 				A3C7E1292DAA123400A7C1F1 /* LiquidGlass.swift */,
 				A3C7E12B2DAA234500A7C1F1 /* History.swift */,
 				A3C7E12D2DAA345600A7C1F1 /* CRTEffect.swift */,
+				BBA6DEA4B82BB66D0F23EC81 /* GopherLocation.swift */,
+				9491AF24CDF07814A453D5BA /* GopherFetching.swift */,
+				194BBA5DD232C298588A8928 /* BrowserSession.swift */,
+				9EDD1F6FF5865A9F9B265545 /* GopherItemRow.swift */,
+				4FDB4628E8FFE01FEB8C2C78 /* GopherFileLoader.swift */,
+				2BAFC091B44D2BF1C28D61E3 /* LaunchConfiguration.swift */,
 			);
 			path = iGopherBrowser;
 			sourceTree = "<group>";
@@ -173,6 +207,8 @@
 			children = (
 				3E76CF852B36AC2900979E1A /* iGopherBrowserUITests.swift */,
 				3E76CF872B36AC2900979E1A /* iGopherBrowserUITestsLaunchTests.swift */,
+				0D94530C5C52394AA25F5D3C /* GopherFixtureServer.swift */,
+				13F068560AA83E202D6C6D60 /* BrowserEndToEndTests.swift */,
 			);
 			path = iGopherBrowserUITests;
 			sourceTree = "<group>";
@@ -181,6 +217,10 @@
 			isa = PBXGroup;
 			children = (
 				A3C7E1192D9D6D3B00A7C1F1 /* iGopherBrowserTests.swift */,
+				1A4FB9FB5683A11CA2C89198 /* GopherLocationTests.swift */,
+				81B01D6EA5D20F4D7D180D9E /* BrowserSessionTests.swift */,
+				5529CC53BE7F7968DEFCDFC8 /* GopherFileLoaderTests.swift */,
+				E17A5F4A01D84B30A24F91B5 /* ViewSurfaceRenderingTests.swift */,
 			);
 			path = iGopherBrowserTests;
 			sourceTree = "<group>";
@@ -204,6 +244,7 @@
 			packageProductDependencies = (
 				3ECFE7422B4493F300AEBAE0 /* TelemetryDeck */,
 				3ECC94062C56F1BC0028D64D /* SwiftGopherClient */,
+				AA570D33573527C25D1F4939 /* NIOCore */,
 			);
 			productName = iGopherBrowser;
 			productReference = 3E1BCC522B297E9B00A4CB69 /* iGopherBrowser.app */;
@@ -244,6 +285,7 @@
 			packageProductDependencies = (
 				3ECFE7422B4493F300AEBAE0 /* TelemetryDeck */,
 				3ECC94062C56F1BC0028D64D /* SwiftGopherClient */,
+				AB2D008418E64DBA2E94D67A /* NIOCore */,
 			);
 			productName = iGopherBrowserTests;
 			productReference = A3C7E11D2D9D6D6500A7C1F1 /* iGopherBrowserTests.xctest */;
@@ -279,7 +321,8 @@
 			mainGroup = 3E1BCC492B297E9B00A4CB69;
 			packageReferences = (
 				3ECFE7412B4493F300AEBAE0 /* XCRemoteSwiftPackageReference "SwiftSDK" */,
-				3ECC94052C56F1BC0028D64D /* XCRemoteSwiftPackageReference "swift-gopher" */,
+				3ECC94052C56F1BC0028D64D /* XCRemoteSwiftPackageReference "swift-gopher.git" */,
+				F3A60A14FF7F2C26831C1473 /* XCRemoteSwiftPackageReference "swift-nio.git" */,
 			);
 			productRefGroup = 3E1BCC532B297E9B00A4CB69 /* Products */;
 			projectDirPath = "";
@@ -337,6 +380,12 @@
 				A3C7E1282DAA123400A7C1F1 /* LiquidGlass.swift in Sources */,
 				A3C7E12A2DAA234500A7C1F1 /* History.swift in Sources */,
 				A3C7E12C2DAA345600A7C1F1 /* CRTEffect.swift in Sources */,
+				D9DF50FFA89EE4C6C9615254 /* GopherLocation.swift in Sources */,
+				54BCB4C65C1A8FD49170767A /* GopherFetching.swift in Sources */,
+				49173089E975D13A273B7800 /* BrowserSession.swift in Sources */,
+				B9EB1702180E85F220BB0EBE /* GopherItemRow.swift in Sources */,
+				C3B658ABB377C2523A3076D5 /* GopherFileLoader.swift in Sources */,
+				9E4CABF30CB01E102C1640D8 /* LaunchConfiguration.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -346,6 +395,8 @@
 			files = (
 				3E76CF882B36AC2900979E1A /* iGopherBrowserUITestsLaunchTests.swift in Sources */,
 				3E76CF862B36AC2900979E1A /* iGopherBrowserUITests.swift in Sources */,
+				2BAC236C122BB7A79E46C342 /* GopherFixtureServer.swift in Sources */,
+				F5685ACB96F6436C529DAE35 /* BrowserEndToEndTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -354,6 +405,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				A3C7E11A2D9D6D3B00A7C1F1 /* iGopherBrowserTests.swift in Sources */,
+				2A6DB3D1A38FF4F24B6E8A60 /* GopherLocationTests.swift in Sources */,
+				DFF290DEB854E17F60A84259 /* BrowserSessionTests.swift in Sources */,
+				D3FD963650515D3494DD3672 /* GopherFileLoaderTests.swift in Sources */,
+				E17A5F4B01D84B30A24F91B5 /* ViewSurfaceRenderingTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -645,7 +700,9 @@
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/iGopherBrowser.app/Contents/MacOS/iGopherBrowser";
+				"TEST_HOST[sdk=iphoneos*]" = "$(BUILT_PRODUCTS_DIR)/iGopherBrowser.app/iGopherBrowser";
+				"TEST_HOST[sdk=iphonesimulator*]" = "$(BUILT_PRODUCTS_DIR)/iGopherBrowser.app/iGopherBrowser";
+				"TEST_HOST[sdk=macosx*]" = "$(BUILT_PRODUCTS_DIR)/iGopherBrowser.app/Contents/MacOS/iGopherBrowser";
 				TEST_TARGET_NAME = iGopherBrowser;
 			};
 			name = Debug;
@@ -672,7 +729,9 @@
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/iGopherBrowser.app/Contents/MacOS/iGopherBrowser";
+				"TEST_HOST[sdk=iphoneos*]" = "$(BUILT_PRODUCTS_DIR)/iGopherBrowser.app/iGopherBrowser";
+				"TEST_HOST[sdk=iphonesimulator*]" = "$(BUILT_PRODUCTS_DIR)/iGopherBrowser.app/iGopherBrowser";
+				"TEST_HOST[sdk=macosx*]" = "$(BUILT_PRODUCTS_DIR)/iGopherBrowser.app/Contents/MacOS/iGopherBrowser";
 				TEST_TARGET_NAME = iGopherBrowser;
 			};
 			name = Release;
@@ -719,7 +778,7 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		3ECC94052C56F1BC0028D64D /* XCRemoteSwiftPackageReference "swift-gopher" */ = {
+		3ECC94052C56F1BC0028D64D /* XCRemoteSwiftPackageReference "swift-gopher.git" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/navanchauhan/swift-gopher.git";
 			requirement = {
@@ -735,18 +794,36 @@
 				minimumVersion = 2.0.0;
 			};
 		};
+		F3A60A14FF7F2C26831C1473 /* XCRemoteSwiftPackageReference "swift-nio.git" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/apple/swift-nio.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.69.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
 		3ECC94062C56F1BC0028D64D /* SwiftGopherClient */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 3ECC94052C56F1BC0028D64D /* XCRemoteSwiftPackageReference "swift-gopher" */;
+			package = 3ECC94052C56F1BC0028D64D /* XCRemoteSwiftPackageReference "swift-gopher.git" */;
 			productName = SwiftGopherClient;
 		};
 		3ECFE7422B4493F300AEBAE0 /* TelemetryDeck */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 3ECFE7412B4493F300AEBAE0 /* XCRemoteSwiftPackageReference "SwiftSDK" */;
 			productName = TelemetryDeck;
+		};
+		AA570D33573527C25D1F4939 /* NIOCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = F3A60A14FF7F2C26831C1473 /* XCRemoteSwiftPackageReference "swift-nio.git" */;
+			productName = NIOCore;
+		};
+		AB2D008418E64DBA2E94D67A /* NIOCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = F3A60A14FF7F2C26831C1473 /* XCRemoteSwiftPackageReference "swift-nio.git" */;
+			productName = NIOCore;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

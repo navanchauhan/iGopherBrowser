@@ -17,7 +17,8 @@ import TelemetryDeck
 struct iGopherBrowserApp: App {
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([Bookmark.self, HistoryItem.self])
-        let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
+        let isUITesting = ProcessInfo.processInfo.arguments.contains("-uiTesting")
+        let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: isUITesting)
         do {
             return try ModelContainer(for: schema, configurations: [modelConfiguration])
         } catch {
@@ -43,6 +44,8 @@ struct iGopherBrowserApp: App {
     }
 
     init() {
+        LaunchConfiguration.apply()
+
         let configuration = TelemetryDeck.Config(
             appID: "400187ED-ADA9-4AB4-91F8-8825AD8FC67C")
         configuration.analyticsDisabled = UserDefaults.standard.bool(forKey: "telemetryOptOut")
