@@ -368,11 +368,6 @@ struct SettingsView: View {
                 .font(.caption)
                 .foregroundStyle(.secondary)
             }
-            #if os(visionOS)
-                Button("Done") {
-                    dismiss()
-                }
-            #endif
         }
         #endif
         }

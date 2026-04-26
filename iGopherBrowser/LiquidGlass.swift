@@ -8,63 +8,24 @@
 import SwiftUI
 
 extension View {
-    @ViewBuilder
     func liquidGlass() -> some View {
-        #if os(visionOS)
-            self
-        #else
-            if #available(iOS 26.0, macOS 26.0, *) {
-                self.glassEffect()
-            } else {
-                self
-            }
-        #endif
+        glassEffect()
     }
 
-    @ViewBuilder
     func liquidGlassInteractive() -> some View {
-        #if os(visionOS)
-            self
-        #else
-            if #available(iOS 26.0, macOS 26.0, *) {
-                self.glassEffect(.regular.interactive())
-            } else {
-                self
-            }
-        #endif
+        glassEffect(.regular.interactive())
     }
 
-    @ViewBuilder
     func liquidGlassBar() -> some View {
-        #if os(visionOS)
-            self.background(Color.gray.opacity(0.2))
-                .cornerRadius(12)
-        #else
-            if #available(iOS 26.0, macOS 26.0, *) {
-                self.glassEffect(in: .rect(cornerRadius: 12))
-            } else {
-                self.background(Color.gray.opacity(0.2))
-                    .cornerRadius(12)
-            }
-        #endif
+        glassEffect(in: .rect(cornerRadius: 12))
     }
 }
 
 struct LiquidGlassButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
-        #if os(visionOS)
-            configuration.label
-                .opacity(configuration.isPressed ? 0.7 : 1.0)
-        #else
-            if #available(iOS 26.0, macOS 26.0, *) {
-                configuration.label
-                    .glassEffect(.regular.interactive())
-                    .opacity(configuration.isPressed ? 0.8 : 1.0)
-            } else {
-                configuration.label
-                    .opacity(configuration.isPressed ? 0.7 : 1.0)
-            }
-        #endif
+        configuration.label
+            .glassEffect(.regular.interactive())
+            .opacity(configuration.isPressed ? 0.8 : 1.0)
     }
 }
 
@@ -82,16 +43,8 @@ struct LiquidGlassToolbar<Content: View>: View {
     }
 
     var body: some View {
-        #if os(visionOS)
+        GlassEffectContainer(spacing: 8) {
             content
-        #else
-            if #available(iOS 26.0, macOS 26.0, *) {
-                GlassEffectContainer(spacing: 8) {
-                    content
-                }
-            } else {
-                content
-            }
-        #endif
+        }
     }
 }

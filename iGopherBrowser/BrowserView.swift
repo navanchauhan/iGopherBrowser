@@ -591,14 +591,9 @@ struct iOSToolbarView: View {
                     .padding(.horizontal, 12)
                     .padding(.vertical, 10)
                     .background {
-                        if #available(iOS 26.0, *) {
-                            RoundedRectangle(cornerRadius: 10)
-                                .fill(.ultraThinMaterial)
-                                .glassEffect(in: .rect(cornerRadius: 10))
-                        } else {
-                            RoundedRectangle(cornerRadius: 10)
-                                .fill(Color(.systemGray6))
-                        }
+                        RoundedRectangle(cornerRadius: 10)
+                            .fill(.ultraThinMaterial)
+                            .glassEffect(in: .rect(cornerRadius: 10))
                     }
 
                 Button(action: onGo) {
@@ -705,37 +700,21 @@ struct iOSToolbarView: View {
 
 private struct GoButtonStyle: ViewModifier {
     func body(content: Content) -> some View {
-        if #available(iOS 26.0, *) {
-            content
-                .buttonStyle(.liquidGlass)
-        } else {
-            content
-                .padding(.horizontal, 16)
-                .padding(.vertical, 8)
-                .background(Color.accentColor)
-                .foregroundStyle(.white)
-                .clipShape(.rect(cornerRadius: 8))
-        }
+        content
+            .buttonStyle(.liquidGlass)
     }
 }
 
 private struct ToolbarGroupStyle: ViewModifier {
     func body(content: Content) -> some View {
-        if #available(iOS 26.0, *) {
-            content
-                .glassEffect(in: .capsule)
-        } else {
-            content
-                .padding(.horizontal, 4)
-                .background(Color(.systemGray6))
-                .clipShape(.rect(cornerRadius: 10))
-        }
+        content
+            .glassEffect(in: .capsule)
     }
 }
 
 #endif
 
-#if os(macOS) || os(visionOS)
+#if os(macOS)
 struct macOSToolbarView: View {
     @Binding var url: String
     var isURLFocused: FocusState<Bool>.Binding
@@ -768,148 +747,61 @@ struct macOSToolbarView: View {
 
     @ViewBuilder
     private var navigationButtons: some View {
-        #if os(visionOS)
+        GlassEffectContainer(spacing: 8) {
             HStack(spacing: 8) {
                 HomeButtonTooltipWrapper(
                     isVisible: $showHomeTooltip,
                     message: homeTooltipMessage,
                     onAutoDismiss: onHomeTooltipAutoDismiss
                 ) {
-                            Button(action: onHome) {
-                                Label("Home", systemImage: "house")
-                                    .labelStyle(.iconOnly)
-                            }
-                            .keyboardShortcut("r", modifiers: [.command])
-                            .accessibilityIdentifier("home-button")
-                        }
-
-                        Button(action: { showPreferences = true }) {
-                            Label("Settings", systemImage: "gear")
-                                .labelStyle(.iconOnly)
-                        }
-                        .accessibilityIdentifier("settings-button")
-
-                        Button(action: onBack) {
-                            Label("Back", systemImage: "chevron.left")
-                                .labelStyle(.iconOnly)
-                        }
-                        .keyboardShortcut("[", modifiers: [.command])
-                        .disabled(backwardStack.count < 2)
-                        .accessibilityIdentifier("back-button")
-
-                        Button(action: onForward) {
-                            Label("Forward", systemImage: "chevron.right")
-                                .labelStyle(.iconOnly)
-                        }
-                        .keyboardShortcut("]", modifiers: [.command])
-                        .disabled(forwardStack.isEmpty)
-                        .accessibilityIdentifier("forward-button")
-            }
-        #else
-            if #available(macOS 26.0, *) {
-                GlassEffectContainer(spacing: 8) {
-                    HStack(spacing: 8) {
-                        HomeButtonTooltipWrapper(
-                            isVisible: $showHomeTooltip,
-                            message: homeTooltipMessage,
-                            onAutoDismiss: onHomeTooltipAutoDismiss
-                        ) {
-                            Button(action: onHome) {
-                                Label("Home", systemImage: "house")
-                                    .labelStyle(.iconOnly)
-                            }
-                            .glassEffect(.regular.interactive())
-                            .keyboardShortcut("r", modifiers: [.command])
-                            .accessibilityIdentifier("home-button")
-                        }
-
-                        Button(action: onBack) {
-                            Label("Back", systemImage: "chevron.left")
-                                .labelStyle(.iconOnly)
-                        }
-                        .glassEffect(.regular.interactive())
-                        .keyboardShortcut("[", modifiers: [.command])
-                        .disabled(backwardStack.count < 2)
-                        .accessibilityIdentifier("back-button")
-
-                        Button(action: onForward) {
-                            Label("Forward", systemImage: "chevron.right")
-                                .labelStyle(.iconOnly)
-                        }
-                        .glassEffect(.regular.interactive())
-                        .keyboardShortcut("]", modifiers: [.command])
-                        .disabled(forwardStack.isEmpty)
-                        .accessibilityIdentifier("forward-button")
-                    }
-                }
-            } else {
-                HStack(spacing: 4) {
-                    HomeButtonTooltipWrapper(
-                        isVisible: $showHomeTooltip,
-                        message: homeTooltipMessage,
-                        onAutoDismiss: onHomeTooltipAutoDismiss
-                    ) {
-                        Button(action: onHome) {
-                            Label("Home", systemImage: "house")
-                                .labelStyle(.iconOnly)
-                        }
-                        .keyboardShortcut("r", modifiers: [.command])
-                        .accessibilityIdentifier("home-button")
-                    }
-
-                    Button(action: onBack) {
-                        Label("Back", systemImage: "chevron.left")
+                    Button(action: onHome) {
+                        Label("Home", systemImage: "house")
                             .labelStyle(.iconOnly)
                     }
-                    .keyboardShortcut("[", modifiers: [.command])
-                    .disabled(backwardStack.count < 2)
-                    .accessibilityIdentifier("back-button")
-
-                    Button(action: onForward) {
-                        Label("Forward", systemImage: "chevron.right")
-                            .labelStyle(.iconOnly)
-                    }
-                    .keyboardShortcut("]", modifiers: [.command])
-                    .disabled(forwardStack.isEmpty)
-                    .accessibilityIdentifier("forward-button")
+                    .glassEffect(.regular.interactive())
+                    .keyboardShortcut("r", modifiers: [.command])
+                    .accessibilityIdentifier("home-button")
                 }
+
+                Button(action: onBack) {
+                    Label("Back", systemImage: "chevron.left")
+                        .labelStyle(.iconOnly)
+                }
+                .glassEffect(.regular.interactive())
+                .keyboardShortcut("[", modifiers: [.command])
+                .disabled(backwardStack.count < 2)
+                .accessibilityIdentifier("back-button")
+
+                Button(action: onForward) {
+                    Label("Forward", systemImage: "chevron.right")
+                        .labelStyle(.iconOnly)
+                }
+                .glassEffect(.regular.interactive())
+                .keyboardShortcut("]", modifiers: [.command])
+                .disabled(forwardStack.isEmpty)
+                .accessibilityIdentifier("forward-button")
             }
-        #endif
+        }
     }
 
     @ViewBuilder
     private var urlField: some View {
-        #if os(visionOS)
-            TextField("Enter a URL", text: $url)
-                .keyboardType(.URL)
-                .textInputAutocapitalization(.never)
-                .focused(isURLFocused)
-                .padding(10)
-                .accessibilityIdentifier("url-field")
-        #else
-            if #available(macOS 26.0, *) {
-                TextField("Enter a URL", text: $url)
-                    .focused(isURLFocused)
-                    .padding(10)
-                    .glassEffect(in: .rect(cornerRadius: 8))
-                    .accessibilityIdentifier("url-field")
-            } else {
-                TextField("Enter a URL", text: $url)
-                    .focused(isURLFocused)
-                    .padding(10)
-                    .accessibilityIdentifier("url-field")
-            }
-        #endif
+        TextField("Enter a URL", text: $url)
+            .focused(isURLFocused)
+            .padding(10)
+            .glassEffect(in: .rect(cornerRadius: 8))
+            .accessibilityIdentifier("url-field")
     }
 
     @ViewBuilder
     private var actionButtons: some View {
-        #if os(visionOS)
+        GlassEffectContainer(spacing: 8) {
             HStack(spacing: 8) {
                 Button(action: { showAddBookmark = true }) {
                     Label("Add Bookmark", systemImage: "bookmark.fill")
                         .labelStyle(.iconOnly)
                 }
+                .glassEffect(.regular.interactive())
                 .disabled(currentHost.isEmpty)
                 .accessibilityIdentifier("add-bookmark-button")
 
@@ -917,51 +809,12 @@ struct macOSToolbarView: View {
                     Label("Bookmarks", systemImage: "book")
                         .labelStyle(.iconOnly)
                 }
+                .glassEffect(.regular.interactive())
                 .accessibilityIdentifier("bookmarks-history-button")
 
                 shareLink
             }
-        #else
-            if #available(macOS 26.0, *) {
-                GlassEffectContainer(spacing: 8) {
-                    HStack(spacing: 8) {
-                        Button(action: { showAddBookmark = true }) {
-                            Label("Add Bookmark", systemImage: "bookmark.fill")
-                                .labelStyle(.iconOnly)
-                        }
-                        .glassEffect(.regular.interactive())
-                        .disabled(currentHost.isEmpty)
-                        .accessibilityIdentifier("add-bookmark-button")
-
-                        Button(action: { showBookmarks = true }) {
-                            Label("Bookmarks", systemImage: "book")
-                                .labelStyle(.iconOnly)
-                        }
-                        .glassEffect(.regular.interactive())
-                        .accessibilityIdentifier("bookmarks-history-button")
-
-                        shareLink
-                    }
-                }
-            } else {
-                HStack {
-                    Button(action: { showAddBookmark = true }) {
-                        Label("Add Bookmark", systemImage: "bookmark.fill")
-                            .labelStyle(.iconOnly)
-                    }
-                    .disabled(currentHost.isEmpty)
-                    .accessibilityIdentifier("add-bookmark-button")
-
-                    Button(action: { showBookmarks = true }) {
-                        Label("Bookmarks", systemImage: "book")
-                            .labelStyle(.iconOnly)
-                    }
-                    .accessibilityIdentifier("bookmarks-history-button")
-
-                    shareLink
-                }
-            }
-        #endif
+        }
     }
 
     @ViewBuilder
@@ -970,25 +823,11 @@ struct macOSToolbarView: View {
             ? URL(string: "https://gopher.navan.dev/\(url)")!
             : URL(string: "gopher://\(url)")!
 
-        #if os(visionOS)
-            ShareLink(item: shareURL) {
-                Label("Share", systemImage: "square.and.arrow.up")
-                    .labelStyle(.iconOnly)
-            }
-        #else
-            if #available(macOS 26.0, *) {
-                ShareLink(item: shareURL) {
-                    Label("Share", systemImage: "square.and.arrow.up")
-                        .labelStyle(.iconOnly)
-                }
-                .glassEffect(.regular.interactive())
-            } else {
-                ShareLink(item: shareURL) {
-                    Label("Share", systemImage: "square.and.arrow.up")
-                        .labelStyle(.iconOnly)
-                }
-            }
-        #endif
+        ShareLink(item: shareURL) {
+            Label("Share", systemImage: "square.and.arrow.up")
+                .labelStyle(.iconOnly)
+        }
+        .glassEffect(.regular.interactive())
     }
 
     @ViewBuilder

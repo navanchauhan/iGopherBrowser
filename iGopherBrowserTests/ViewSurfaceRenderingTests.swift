@@ -131,7 +131,12 @@ struct ViewSurfaceRenderingTests {
         size: CGSize = CGSize(width: 390, height: 844),
         wait: Duration = .milliseconds(25)
     ) async throws {
-        let window = UIWindow(frame: CGRect(origin: .zero, size: size))
+        guard let windowScene = UIApplication.shared.connectedScenes.compactMap({ $0 as? UIWindowScene }).first else {
+            throw RenderingError.missingWindowScene
+        }
+
+        let window = UIWindow(windowScene: windowScene)
+        window.frame = CGRect(origin: .zero, size: size)
         let controller = UIHostingController(rootView: view)
         window.rootViewController = controller
         window.makeKeyAndVisible()
@@ -161,6 +166,10 @@ struct ViewSurfaceRenderingTests {
             }
         }
         try await operation()
+    }
+
+    private enum RenderingError: Error {
+        case missingWindowScene
     }
 }
 

@@ -62,8 +62,9 @@ struct iGopherBrowserApp: App {
 #if os(iOS)
         // Set default link colour if none saved yet: light mode = system blue, dark mode = white
         if UserDefaults.standard.object(forKey: "linkColour") == nil {
-            let isDark = UIScreen.main.traitCollection.userInterfaceStyle == .dark
-            let uiColor: UIColor = isDark ? .white : .systemBlue
+            let uiColor = UIColor { traits in
+                traits.userInterfaceStyle == .dark ? .white : .systemBlue
+            }
             let defaultColor = Color(uiColor)
             UserDefaults.standard.set(defaultColor.rawValue, forKey: "linkColour")
         }

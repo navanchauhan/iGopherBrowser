@@ -54,7 +54,7 @@ struct WhatsNewView: View {
             content
                 .padding(containerOuterPadding)
         }
-        #if os(iOS) || os(visionOS)
+        #if os(iOS)
             .presentationDetents([.medium, .large])
         #endif
     }
@@ -91,7 +91,7 @@ struct WhatsNewView: View {
                 .buttonStyle(.borderedProminent)
                 .controlSize(.large)
             #else
-                .buttonStyle(PrimaryFillButtonStyle())
+                .buttonStyle(.glassProminent)
             #endif
         }
             .padding(containerInnerPadding)
@@ -212,15 +212,3 @@ struct WhatsNewView: View {
     }
 
 }
-
-#if os(iOS) || os(visionOS)
-private struct PrimaryFillButtonStyle: ButtonStyle {
-    func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .background(Color.accentColor)
-            .foregroundStyle(Color.white)
-            .cornerRadius(12)
-            .opacity(configuration.isPressed ? 0.8 : 1)
-    }
-}
-#endif
