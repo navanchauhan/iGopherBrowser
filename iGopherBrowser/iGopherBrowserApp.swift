@@ -8,7 +8,7 @@
 import SwiftUI
 import SwiftData
 import AppIntents
-#if os(iOS)
+#if canImport(UIKit)
 import UIKit
 #endif
 import TelemetryDeck
@@ -59,7 +59,7 @@ struct iGopherBrowserApp: App {
                 forKey: "crtPhosphorColor")
         }
 
-#if os(iOS)
+#if canImport(UIKit)
         // Set default link colour if none saved yet: light mode = system blue, dark mode = white
         if UserDefaults.standard.object(forKey: "linkColour") == nil {
             let uiColor = UIColor { traits in

@@ -12,11 +12,14 @@ import TelemetryDeck
 #if os(macOS)
 import AppKit
 #endif
+#if canImport(UIKit)
+import UIKit
+#endif
 
 func openURL(url: URL) {
-    #if os(OSX)
+    #if os(macOS)
         NSWorkspace.shared.open(url)
-    #else
+    #elseif canImport(UIKit)
         UIApplication.shared.open(url)
     #endif
 }
@@ -714,7 +717,7 @@ private struct ToolbarGroupStyle: ViewModifier {
 
 #endif
 
-#if os(macOS)
+#if os(macOS) || os(visionOS)
 struct macOSToolbarView: View {
     @Binding var url: String
     var isURLFocused: FocusState<Bool>.Binding
