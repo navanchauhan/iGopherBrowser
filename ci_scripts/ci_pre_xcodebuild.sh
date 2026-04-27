@@ -1,6 +1,10 @@
 #!/bin/sh
 set -eu
 
+SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+REPOSITORY_ROOT=$(dirname "$SCRIPT_DIR")
+cd "$REPOSITORY_ROOT"
+
 echo "Xcode Cloud pre-xcodebuild checks"
 echo "Action: ${CI_XCODEBUILD_ACTION:-unknown}"
 
@@ -16,4 +20,3 @@ xcodebuild \
   -showBuildSettings \
   | grep -E "MARKETING_VERSION|CURRENT_PROJECT_VERSION|IPHONEOS_DEPLOYMENT_TARGET|MACOSX_DEPLOYMENT_TARGET|XROS_DEPLOYMENT_TARGET" \
   | sort -u
-

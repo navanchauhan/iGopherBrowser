@@ -1,8 +1,12 @@
 #!/bin/sh
 set -eu
 
+SCRIPT_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+REPOSITORY_ROOT=$(dirname "$SCRIPT_DIR")
+cd "$REPOSITORY_ROOT"
+
 echo "Xcode Cloud post-clone setup"
-echo "Repository: ${CI_WORKSPACE:-$(pwd)}"
+echo "Repository root: $(pwd)"
 echo "Branch: ${CI_BRANCH:-unknown}"
 echo "Workflow: ${CI_WORKFLOW:-unknown}"
 echo "Build number: ${CI_BUILD_NUMBER:-unknown}"
@@ -20,4 +24,3 @@ xcodebuild \
   -resolvePackageDependencies \
   -project iGopherBrowser.xcodeproj \
   -scheme iGopherBrowser
-
