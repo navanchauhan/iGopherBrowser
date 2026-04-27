@@ -8,6 +8,7 @@ final class BrowserEndToEndTests: XCTestCase {
         continueAfterFailure = false
         server = try GopherFixtureServer()
         app = XCUIApplication()
+        app.terminate()
         app.launchArguments = [
             "-uiTesting",
             "-uiTestHomeURL",
@@ -17,6 +18,7 @@ final class BrowserEndToEndTests: XCTestCase {
     }
 
     override func tearDown() {
+        app?.terminate()
         app = nil
         server = nil
         super.tearDown()
