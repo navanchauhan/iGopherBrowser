@@ -6,6 +6,9 @@ final class BrowserEndToEndTests: XCTestCase {
 
     override func setUpWithError() throws {
         continueAfterFailure = false
+        #if os(macOS)
+        throw XCTSkip("BrowserEndToEndTests exercise the iOS toolbar; macOS coverage lives in iGopherBrowserMacUITests.")
+        #else
         server = try GopherFixtureServer()
         app = XCUIApplication()
         app.terminate()
@@ -15,6 +18,7 @@ final class BrowserEndToEndTests: XCTestCase {
             "gopher://127.0.0.1:\(server.port)/"
         ]
         app.launch()
+        #endif
     }
 
     override func tearDown() {
