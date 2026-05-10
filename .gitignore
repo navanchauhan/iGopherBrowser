@@ -63,3 +63,13 @@ fastlane/test_output
 
 # Local tooling / temp
 .tc/
+.DS_Store
+.asc/
+screenshots/.DS_Store
+screenshots/_rejects/
+screenshots/ios/
+screenshots/ipad/
+screenshots/macos/
+screenshots/visionos/
+app-store-assets/screenshots/
+app-store-assets/previews/

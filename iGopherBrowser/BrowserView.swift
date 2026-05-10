@@ -93,6 +93,7 @@ struct BrowserView: View {
     @State private var scrollToTop: Bool = false
 
     @State private var showHomeTooltip: Bool = false
+    @State private var didApplyScreenshotLaunchState = false
 
     @FocusState private var isURLFocused: Bool
 
@@ -371,6 +372,7 @@ struct BrowserView: View {
         
         .onAppear {
             session.hosts = hosts
+            applyScreenshotLaunchStateIfNeeded()
             if !hasFinishedFirstRunTips && !showHomeTooltip {
                 withAnimation(.spring()) {
                     showHomeTooltip = true
@@ -523,6 +525,41 @@ struct BrowserView: View {
             selector: location.selector
         )
         modelContext.insert(historyItem)
+    }
+
+    private func applyScreenshotLaunchStateIfNeeded() {
+        guard LaunchConfiguration.isUITesting, !didApplyScreenshotLaunchState else { return }
+        didApplyScreenshotLaunchState = true
+
+        if LaunchConfiguration.shouldSeedDemoData {
+            seedScreenshotData()
+        }
+
+        if LaunchConfiguration.shouldAutoLoadHome {
+            session.urlText = homeURL.absoluteString
+            performGopherRequest(clearForward: false)
+        }
+    }
+
+    private func seedScreenshotData() {
+        let demoBookmarks = [
+            Bookmark(title: "Floodgap Gopher Guide", host: "gopher.floodgap.com", port: 70, selector: "/gopher"),
+            Bookmark(title: "ASCII Art and Fun", host: "gopher.floodgap.com", port: 70, selector: "/fun"),
+            Bookmark(title: "Veronica-2 Search", host: "gopher.floodgap.com", port: 70, selector: "/v2")
+        ]
+
+        let demoHistory = [
+            HistoryItem(title: "Floodgap Gopher Guide", host: "gopher.floodgap.com", port: 70, selector: "/gopher"),
+            HistoryItem(title: "Floodgap Fun Directory", host: "gopher.floodgap.com", port: 70, selector: "/fun"),
+            HistoryItem(title: "Latest FloodFeeds", host: "gopher.floodgap.com", port: 70, selector: "/feeds/latest")
+        ]
+
+        for bookmark in demoBookmarks {
+            modelContext.insert(bookmark)
+        }
+        for historyItem in demoHistory {
+            modelContext.insert(historyItem)
+        }
     }
 
 }
