@@ -14,13 +14,20 @@ struct GopherNode: Identifiable, Equatable {
         return lhs.host == rhs.host && lhs.port == rhs.port && lhs.selector == rhs.selector
     }
 
-    let id = UUID()
+    var id: String {
+        "\(host):\(port):\(normalizedSelector)"
+    }
+
     var host: String
     let port: Int
     var selector: String
     var message: String?
     let item: gopherItem?
     var children: [GopherNode]?
+
+    private var normalizedSelector: String {
+        selector.isEmpty || selector == "/" ? "/" : selector.hasPrefix("/") ? selector : "/\(selector)"
+    }
 }
 
 struct ContentView: View {
