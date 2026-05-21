@@ -21,6 +21,11 @@ func openURL(url: URL) {
         NSWorkspace.shared.open(url)
     #elseif canImport(UIKit)
         UIApplication.shared.open(url)
+    #elseif os(Linux)
+        let process = Process()
+        process.executableURL = URL(fileURLWithPath: "/usr/bin/xdg-open")
+        process.arguments = [url.absoluteString]
+        try? process.run()
     #endif
 }
 
