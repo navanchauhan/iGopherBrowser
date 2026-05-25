@@ -2,6 +2,21 @@
 
 import PackageDescription
 
+var adwaitaSwiftSettings: [SwiftSetting] = [
+    .swiftLanguageMode(.v5),
+    .enableUpcomingFeature("InferIsolatedConformances"),
+    .unsafeFlags(["-module-alias", "SwiftUI=OmniUIAdwaita"]),
+    .unsafeFlags(["-module-alias", "SwiftData=OmniSwiftData"]),
+    .unsafeFlags(["-Xfrontend", "-solver-expression-time-threshold=120000"]),
+]
+
+#if compiler(>=6.2)
+adwaitaSwiftSettings.insert(
+    .unsafeFlags(["-Xfrontend", "-default-isolation", "-Xfrontend", "MainActor"]),
+    at: 2
+)
+#endif
+
 let package = Package(
     name: "iGopherBrowserAdwaita",
     defaultLocalization: "en",
@@ -47,14 +62,7 @@ let package = Package(
                 "iGopherBrowser.entitlements",
                 "Preview Content",
             ],
-            swiftSettings: [
-                .swiftLanguageMode(.v5),
-                .enableUpcomingFeature("InferIsolatedConformances"),
-                .unsafeFlags(["-Xfrontend", "-default-isolation", "-Xfrontend", "MainActor"]),
-                .unsafeFlags(["-module-alias", "SwiftUI=OmniUIAdwaita"]),
-                .unsafeFlags(["-module-alias", "SwiftData=OmniSwiftData"]),
-                .unsafeFlags(["-Xfrontend", "-solver-expression-time-threshold=120000"]),
-            ]
+            swiftSettings: adwaitaSwiftSettings
         ),
     ]
 )
