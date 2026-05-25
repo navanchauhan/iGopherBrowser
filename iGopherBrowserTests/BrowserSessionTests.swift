@@ -79,6 +79,23 @@ struct BrowserSessionTests {
         #expect(session.errorMessage?.isEmpty == false)
         #expect(session.isLoading == false)
     }
+
+    @Test("Reloading host root replaces sidebar children instead of duplicating")
+    func rootReloadReplacesSidebarChildren() async {
+        let fetcher = MockGopherFetcher(itemsBySelector: [
+            "/": [
+                FixtureItems.directory("Posts", selector: "/posts"),
+                FixtureItems.search("Search Server", selector: "/search")
+            ]
+        ])
+        let session = BrowserSession(fetcher: fetcher)
+
+        await session.load(GopherLocation(host: "example.com", selector: "/"))
+        await session.load(GopherLocation(host: "example.com", selector: "/"))
+
+        #expect(session.hosts.count == 1)
+        #expect(session.hosts.first?.children?.map(\.message) == ["Posts", "Search Server"])
+    }
 }
 
 private enum FixtureItems {
@@ -90,6 +107,15 @@ private enum FixtureItems {
 
     static func directory(_ message: String, selector: String) -> gopherItem {
         var item = gopherItem(rawLine: "1\(message)\t\(selector)\texample.com\t70")
+        item.message = message
+        item.host = "example.com"
+        item.port = 70
+        item.selector = selector
+        return item
+    }
+
+    static func search(_ message: String, selector: String) -> gopherItem {
+        var item = gopherItem(rawLine: "7\(message)\t\(selector)\texample.com\t70")
         item.message = message
         item.host = "example.com"
         item.port = 70

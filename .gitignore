@@ -65,6 +65,10 @@ fastlane/test_output
 .tc/
 .DS_Store
 .asc/
+.artifacts/
+.swiftpm/
+dist/
+/Package.resolved
 screenshots/.DS_Store
 screenshots/_rejects/
 screenshots/ios/

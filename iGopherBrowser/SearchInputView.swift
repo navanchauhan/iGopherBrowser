@@ -45,7 +45,7 @@ struct SearchInputView: View {
             }
         }
         .padding()
-        #if os(macOS)
+        #if os(macOS) && !canImport(CAdwaita)
         .background(EscapeKeyCapture {
             dismiss()
         })

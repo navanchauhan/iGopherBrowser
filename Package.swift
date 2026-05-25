@@ -50,9 +50,9 @@ let package = Package(
             swiftSettings: [
                 .swiftLanguageMode(.v5),
                 .enableUpcomingFeature("InferIsolatedConformances"),
+                .unsafeFlags(["-Xfrontend", "-default-isolation", "-Xfrontend", "MainActor"]),
                 .unsafeFlags(["-module-alias", "SwiftUI=OmniUIAdwaita"]),
                 .unsafeFlags(["-module-alias", "SwiftData=OmniSwiftData"]),
-                .unsafeFlags(["-Xfrontend", "-import-module", "-Xfrontend", "FoundationNetworking"]),
                 .unsafeFlags(["-Xfrontend", "-solver-expression-time-threshold=120000"]),
             ]
         ),
