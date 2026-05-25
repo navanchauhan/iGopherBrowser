@@ -7,7 +7,8 @@ iGopherBrowser has an App Store Connect Xcode Cloud workflow:
 - Workflow ID: `9732C072-1CF1-44CF-9A13-19F9CA3FF9BA`
 - Workflow name: `Release`
 - Repository: `https://github.com/navanchauhan/iGopherBrowser.git`
-- Start condition: pushes to `main`
+- Start condition: pushes to `main` that change `iGopherBrowser.xcodeproj/project.pbxproj`
+  - The release workflow is file-filtered because `MARKETING_VERSION` currently lives in the Xcode project file. Bump the version before expecting Xcode Cloud to archive for App Store Connect.
 
 The repository includes Xcode Cloud custom scripts in `ci_scripts/`:
 
@@ -32,4 +33,3 @@ asc xcode-cloud run \
   --branch main \
   --wait
 ```
-
