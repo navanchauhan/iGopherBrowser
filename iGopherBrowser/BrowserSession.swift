@@ -5,10 +5,10 @@
 
 import Foundation
 import GopherHelpers
-import Observation
+import OmniUICore
 
 @MainActor
-@Observable
+@OmniUICore.Observable
 final class BrowserSession {
     private static let sidebarChildLimit = 200
 
@@ -24,10 +24,10 @@ final class BrowserSession {
     var isLoading = false
     var errorMessage: String?
 
-    @ObservationIgnored private let fetcher: any GopherFetching
-    @ObservationIgnored private let cache: any GopherResponseCaching
-    @ObservationIgnored private var currentTask: Task<Void, Never>?
-    @ObservationIgnored private var requestID = UUID()
+    @OmniUICore.ObservationIgnored private let fetcher: any GopherFetching
+    @OmniUICore.ObservationIgnored private let cache: any GopherResponseCaching
+    @OmniUICore.ObservationIgnored private var currentTask: Task<Void, Never>?
+    @OmniUICore.ObservationIgnored private var requestID = UUID()
 
     var findMatches: [Int] {
         guard findText.isEmpty == false else { return [] }

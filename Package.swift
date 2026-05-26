@@ -29,7 +29,8 @@ let package = Package(
     dependencies: [
         .package(path: "../../GitHub-Repos/swift-omnikit"),
         .package(url: "https://github.com/navanchauhan/swift-gopher.git", branch: "master"),
-        .package(url: "https://github.com/apple/swift-nio.git", from: "2.69.0"),
+        .package(url: "https://github.com/apple/swift-nio.git", "2.69.0"..<"2.84.0"),
+        .package(url: "https://github.com/apple/swift-collections.git", "1.0.0"..<"1.3.0"),
     ],
     targets: [
         .target(
@@ -49,6 +50,7 @@ let package = Package(
             dependencies: [
                 "AppIntents",
                 "QuickLook",
+                .product(name: "OmniUICore", package: "swift-omnikit"),
                 .product(name: "OmniUIAdwaita", package: "swift-omnikit"),
                 .product(name: "SwiftData", package: "swift-omnikit"),
                 .product(name: "SwiftGopherClient", package: "swift-gopher"),
