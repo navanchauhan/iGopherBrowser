@@ -5,7 +5,7 @@
 
 import Foundation
 import GopherHelpers
-import OmniUICore
+import Observation
 
 @MainActor
 @Observable

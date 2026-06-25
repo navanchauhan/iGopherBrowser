@@ -50,7 +50,6 @@ let package = Package(
             dependencies: [
                 "AppIntents",
                 "QuickLook",
-                .product(name: "OmniUICore", package: "swift-omnikit"),
                 .product(name: "OmniUIAdwaita", package: "swift-omnikit"),
                 .product(name: "SwiftData", package: "swift-omnikit"),
                 .product(name: "SwiftGopherClient", package: "swift-gopher"),
