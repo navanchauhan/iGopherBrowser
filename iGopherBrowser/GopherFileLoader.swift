@@ -5,7 +5,6 @@
 
 import Foundation
 import GopherHelpers
-import NIOCore
 import SwiftGopherClient
 
 struct LoadedGopherFile {
@@ -17,22 +16,14 @@ struct LoadedGopherFile {
 struct GopherFileLoader {
     private let client = GopherClient()
 
-    func load(_ item: gopherItem) async throws -> LoadedGopherFile {
+    func load(_ item: GopherItem) async throws -> LoadedGopherFile {
         let response = try await client.sendRequest(
             to: item.host,
             port: item.port,
             message: "\(item.selector)\r\n"
         )
-        guard var buffer = response.first?.rawData else {
+        guard let data = response.first?.rawData else {
             throw CocoaError(.fileReadUnknown)
-        }
-
-        var data = Data()
-        while buffer.readableBytes > 0 {
-            try Task.checkCancellation()
-            if let bytes = buffer.readBytes(length: buffer.readableBytes) {
-                data.append(contentsOf: bytes)
-            }
         }
 
         return try Self.loadedFile(

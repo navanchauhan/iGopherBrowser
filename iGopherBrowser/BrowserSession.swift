@@ -13,7 +13,7 @@ final class BrowserSession {
     private static let sidebarChildLimit = 200
 
     var urlText = ""
-    var items: [gopherItem] = []
+    var items: [GopherItem] = []
     var hosts: [GopherNode] = []
     var currentLocation: GopherLocation?
     var backwardStack: [GopherLocation] = []
@@ -126,7 +126,7 @@ final class BrowserSession {
         return GopherLocation(host: location.host, port: location.port, selector: selector)
     }
 
-    private func apply(_ response: [gopherItem], for location: GopherLocation, clearForward: Bool) {
+    private func apply(_ response: [GopherItem], for location: GopherLocation, clearForward: Bool) {
         items = response
         errorMessage = nil
         currentLocation = location
@@ -141,7 +141,7 @@ final class BrowserSession {
         mergeSidebarItems(response, for: location)
     }
 
-    private func mergeSidebarItems(_ response: [gopherItem], for location: GopherLocation) {
+    private func mergeSidebarItems(_ response: [GopherItem], for location: GopherLocation) {
         let childNodes = sidebarChildren(from: response)
         let rootSelector = "/"
 
@@ -193,7 +193,7 @@ final class BrowserSession {
         )
     }
 
-    private func sidebarChildren(from response: [gopherItem]) -> [GopherNode] {
+    private func sidebarChildren(from response: [GopherItem]) -> [GopherNode] {
         let nodes = response.compactMap { item -> GopherNode? in
             guard item.parsedItemType != .info else { return nil }
             return GopherNode(

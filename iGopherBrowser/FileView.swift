@@ -44,7 +44,7 @@ func determineFileType(data: Data) -> String? {
 }
 
 struct FileView: View {
-    var item: gopherItem
+    var item: GopherItem
     private let loader = GopherFileLoader()
     @State private var fileContent: [String] = []
     @State private var fileURL: URL?

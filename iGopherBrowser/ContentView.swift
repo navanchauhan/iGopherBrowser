@@ -22,7 +22,7 @@ struct GopherNode: Identifiable, Equatable {
     let port: Int
     var selector: String
     var message: String?
-    let item: gopherItem?
+    let item: GopherItem?
     var children: [GopherNode]?
 
     private var normalizedSelector: String {

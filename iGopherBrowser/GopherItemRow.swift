@@ -7,14 +7,14 @@ import GopherHelpers
 import SwiftUI
 
 struct GopherItemRow: View {
-    let item: gopherItem
+    let item: GopherItem
     let linkColor: Color
     let textColor: Color
     let crtMode: Bool
-    let openDirectory: (gopherItem) -> Void
-    let openSearch: (gopherItem) -> Void
+    let openDirectory: (GopherItem) -> Void
+    let openSearch: (GopherItem) -> Void
     let openExternalURL: (URL) -> Void
-    let openUnknown: (gopherItem) -> Void
+    let openUnknown: (GopherItem) -> Void
 
     var body: some View {
         switch item.parsedItemType {
