@@ -1,5 +1,5 @@
 {
-  "originHash" : "56c8501113dc3988ff26a73d0f37f6285ebe551a14563d31aca1e5b96fb22408",
+  "originHash" : "0262c1e55c7ae15ef5b73c6125e0a5f03baf55140cb8e6257887bede2fb73985",
   "pins" : [
     {
       "identity" : "swift-atomics",
@@ -22,10 +22,19 @@
     {
       "identity" : "swift-gopher",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/navanchauhan/swift-gopher",
+      "location" : "https://github.com/navanchauhan/swift-gopher.git",
       "state" : {
         "branch" : "master",
         "revision" : "485cd6647452de227beb052b20a62b0e603636a9"
+      }
+    },
+    {
+      "identity" : "swift-log",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-log.git",
+      "state" : {
+        "revision" : "a878e7f8f46cfc0e1125e565b5c08e7d5272dc9a",
+        "version" : "1.14.0"
       }
     },
     {
