@@ -42,8 +42,8 @@ struct BrowserView: View {
     @Environment(\.modelContext) private var modelContext
 
     @AppStorage("homeURL") var homeURL: URL = URL(string: "gopher://gopher.navan.dev:70/")!
-    @AppStorage("accentColour", store: .standard) var accentColour: Color = Color(.blue)
-    @AppStorage("linkColour", store: .standard) var linkColour: Color = Color(.white)
+    @AppStorage("accentColour", store: .standard) var accentColour: Color = .blue
+    @AppStorage("linkColour", store: .standard) var linkColour: Color = .white
     @AppStorage("shareThroughProxy", store: .standard) var shareThroughProxy: Bool = true
     @AppStorage("crtMode") var crtMode: Bool = false
     @AppStorage("crtPhosphorColor") var crtPhosphorColorRaw: String = CRTPhosphorColor.green.rawValue
@@ -997,7 +997,7 @@ struct FindInPageBar: View {
             }
             .padding(.horizontal, 8)
             .padding(.vertical, 6)
-            .background(Color(.systemGray).opacity(0.2))
+            .background(Color.gray.opacity(0.2))
             .clipShape(.rect(cornerRadius: 8))
 
             if !findText.isEmpty {

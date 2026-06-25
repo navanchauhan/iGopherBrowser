@@ -64,8 +64,8 @@ extension Color: @retroactive RawRepresentable {
 struct SettingsView: View {
     @Environment(\.colorScheme) var colorScheme
 
-    @AppStorage("accentColour", store: .standard) var accentColour: Color = Color(.blue)
-    @AppStorage("linkColour", store: .standard) var linkColour: Color = Color(.white)
+    @AppStorage("accentColour", store: .standard) var accentColour: Color = .blue
+    @AppStorage("linkColour", store: .standard) var linkColour: Color = .white
     @AppStorage("shareThroughProxy", store: .standard) var shareThroughProxy: Bool = true
     @AppStorage("telemetryOptOut", store: .standard) var telemetryOptOut: Bool = false
 
@@ -154,7 +154,7 @@ struct SettingsView: View {
 
                         Button("Reset Colors") {
                             self.linkColour = smartDefaultLinkColor
-                            self.accentColour = Color(.blue)
+                            self.accentColour = .blue
                         }
                         .buttonStyle(.bordered)
                         .disabled(crtMode)
@@ -312,7 +312,7 @@ struct SettingsView: View {
                     .disabled(crtMode)
                 Button("Reset Colours") {
                     self.linkColour = smartDefaultLinkColor
-                    self.accentColour = Color(.blue)
+                    self.accentColour = .blue
                 }
                 .disabled(crtMode)
 
@@ -385,7 +385,7 @@ struct SettingsView: View {
         #if os(macOS)
             colorScheme == .dark ? Color.white : Color(nsColor: .controlAccentColor)
         #else
-            colorScheme == .dark ? Color(.white) : Color(.systemBlue)
+            colorScheme == .dark ? Color.white : Color.blue
         #endif
     }
 }
