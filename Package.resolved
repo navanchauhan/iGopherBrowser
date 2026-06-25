@@ -1,5 +1,5 @@
 {
-  "originHash" : "a12956f5f885b9e035e7cf14a0b5d8c3b8e9885795f8edd0af018152c7c205a7",
+  "originHash" : "c32cee2f2e4170ccd9eab0be299f93868ba82b9ccf8b22ebb4fbba4b6f67210f",
   "pins" : [
     {
       "identity" : "async-http-client",
@@ -97,7 +97,7 @@
       "location" : "https://github.com/navanchauhan/swift-gopher.git",
       "state" : {
         "branch" : "master",
-        "revision" : "485cd6647452de227beb052b20a62b0e603636a9"
+        "revision" : "6026f224b3e371042daae64ffcf45a3edd11e39b"
       }
     },
     {
