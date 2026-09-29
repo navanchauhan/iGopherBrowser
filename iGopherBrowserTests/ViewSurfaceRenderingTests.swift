@@ -208,9 +208,10 @@ private struct GopherItemRowHarness: View {
         }
     }
 
-    private func item(type: String, message: String, selector: String) -> gopherItem {
-        var item = gopherItem(rawLine: "\(type)\(message)\t\(selector)\texample.com\t70")
+    private func item(type: String, message: String, selector: String) -> GopherItem {
+        var item = GopherItem(rawLine: "\(type)\(message)\t\(selector)\texample.com\t70")
         item.message = message
+        item.parsedItemType = getGopherFileType(item: type)
         item.selector = selector
         item.host = "example.com"
         item.port = 70
@@ -306,9 +307,10 @@ private struct BrowserViewHarness: View {
         BrowserView(hosts: $hosts, selectedNode: $selectedNode, session: session)
     }
 
-    private static func item(type: String, message: String, selector: String) -> gopherItem {
-        var item = gopherItem(rawLine: "\(type)\(message)\t\(selector)\texample.com\t70")
+    private static func item(type: String, message: String, selector: String) -> GopherItem {
+        var item = GopherItem(rawLine: "\(type)\(message)\t\(selector)\texample.com\t70")
         item.message = message
+        item.parsedItemType = getGopherFileType(item: type)
         item.selector = selector
         item.host = "example.com"
         item.port = 70

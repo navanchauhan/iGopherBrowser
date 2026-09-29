@@ -128,8 +128,8 @@ struct CRTTextStyle: ViewModifier {
 // MARK: - Full CRT Effect Modifier
 
 struct CRTEffectModifier: ViewModifier {
-    @AppStorage("crtScanlines") var showScanlines: Bool = true
-    @AppStorage("crtVignette") var showVignette: Bool = true
+    @AppStorage(SettingsKey.crtScanlines) var showScanlines: Bool = SettingsDefault.crtScanlines
+    @AppStorage(SettingsKey.crtVignette) var showVignette: Bool = SettingsDefault.crtVignette
 
     func body(content: Content) -> some View {
         content
@@ -150,7 +150,7 @@ struct CRTEffectModifier: ViewModifier {
 // MARK: - CRT Container View
 
 struct CRTContainer<Content: View>: View {
-    @AppStorage("crtMode") var crtMode: Bool = false
+    @AppStorage(SettingsKey.crtMode) var crtMode: Bool = SettingsDefault.crtMode
     let content: Content
 
     init(@ViewBuilder content: () -> Content) {

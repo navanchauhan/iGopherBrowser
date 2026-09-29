@@ -10,11 +10,9 @@ import Observation
 @MainActor
 @Observable
 final class BrowserSession {
-    private static let sidebarChildLimit = 200
-
     var urlText = ""
     var items: [GopherItem] = []
-    var hosts: [GopherNode] = []
+    var tree = GopherTree()
     var currentLocation: GopherLocation?
     var backwardStack: [GopherLocation] = []
     var forwardStack: [GopherLocation] = []
@@ -23,6 +21,11 @@ final class BrowserSession {
     var currentFindIndex = 0
     var isLoading = false
     var errorMessage: String?
+
+    var hosts: [GopherNode] {
+        get { tree.hosts }
+        set { tree = GopherTree(hosts: newValue) }
+    }
 
     @ObservationIgnored private let fetcher: any GopherFetching
     @ObservationIgnored private let cache: any GopherResponseCaching
@@ -138,125 +141,7 @@ final class BrowserSession {
         if clearForward {
             forwardStack.removeAll()
         }
-        mergeSidebarItems(response, for: location)
-    }
-
-    private func mergeSidebarItems(_ response: [GopherItem], for location: GopherLocation) {
-        let childNodes = sidebarChildren(from: response)
-        let rootSelector = "/"
-
-        if let index = hosts.firstIndex(where: { $0.host == location.host && $0.port == location.port }) {
-            if isRootLocation(location) {
-                hosts[index].selector = rootSelector
-                hosts[index].message = location.host
-                hosts[index].children = childNodes
-            } else {
-                let title = existingTitle(for: location, in: hosts[index]) ?? sidebarTitle(for: location)
-                let page = GopherNode(
-                    host: location.host,
-                    port: location.port,
-                    selector: location.selector,
-                    message: title,
-                    item: nil,
-                    children: childNodes
-                )
-                hosts[index].children = upserting(page, into: hosts[index].children ?? [])
-            }
-            return
-        }
-
-        let rootChildren: [GopherNode]
-        if isRootLocation(location) {
-            rootChildren = childNodes
-        } else {
-            rootChildren = [
-                GopherNode(
-                    host: location.host,
-                    port: location.port,
-                    selector: location.selector,
-                    message: sidebarTitle(for: location),
-                    item: nil,
-                    children: childNodes
-                )
-            ]
-        }
-
-        hosts.append(
-            GopherNode(
-                host: location.host,
-                port: location.port,
-                selector: rootSelector,
-                message: location.host,
-                item: nil,
-                children: rootChildren
-            )
-        )
-    }
-
-    private func sidebarChildren(from response: [GopherItem]) -> [GopherNode] {
-        let nodes = response.compactMap { item -> GopherNode? in
-            guard item.parsedItemType != .info else { return nil }
-            return GopherNode(
-                host: item.host,
-                port: item.port,
-                selector: item.selector,
-                message: item.message,
-                item: item,
-                children: nil
-            )
-        }
-
-        guard nodes.count <= Self.sidebarChildLimit else {
-            return []
-        }
-
-        var seen = Set<String>()
-        return nodes.filter { node in
-            let key = "\(node.host):\(node.port):\(normalizedSelector(node.selector))"
-            return seen.insert(key).inserted
-        }
-    }
-
-    private func upserting(_ node: GopherNode, into children: [GopherNode]) -> [GopherNode] {
-        var result = children
-        if let index = result.firstIndex(where: { matches($0, node) }) {
-            result[index] = node
-        } else {
-            result.append(node)
-        }
-        return result
-    }
-
-    private func existingTitle(for location: GopherLocation, in root: GopherNode) -> String? {
-        root.children?.first(where: { child in
-            child.host == location.host &&
-                child.port == location.port &&
-                normalizedSelector(child.selector) == normalizedSelector(location.selector)
-        })?.message
-    }
-
-    private func isRootLocation(_ location: GopherLocation) -> Bool {
-        let selector = normalizedSelector(location.selector)
-        return selector == "/" || selector.isEmpty
-    }
-
-    private func sidebarTitle(for location: GopherLocation) -> String {
-        let selector = normalizedSelector(location.selector)
-        if selector == "/" || selector.isEmpty {
-            return location.host
-        }
-        return selector
-    }
-
-    private func normalizedSelector(_ selector: String) -> String {
-        if selector.isEmpty { return "/" }
-        return selector.hasPrefix("/") ? selector : "/\(selector)"
-    }
-
-    private func matches(_ lhs: GopherNode, _ rhs: GopherNode) -> Bool {
-        lhs.host == rhs.host &&
-            lhs.port == rhs.port &&
-            normalizedSelector(lhs.selector) == normalizedSelector(rhs.selector)
+        tree.merge(response, for: location)
     }
 }
 

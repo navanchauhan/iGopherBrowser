@@ -99,24 +99,26 @@ struct BrowserSessionTests {
 }
 
 private enum FixtureItems {
-    static func info(_ message: String) -> gopherItem {
-        var item = gopherItem(rawLine: "i\(message)\tfake\tlocalhost\t70")
+    static func info(_ message: String) -> GopherItem {
+        var item = GopherItem(rawLine: "i\(message)\tfake\tlocalhost\t70")
         item.message = message
         return item
     }
 
-    static func directory(_ message: String, selector: String) -> gopherItem {
-        var item = gopherItem(rawLine: "1\(message)\t\(selector)\texample.com\t70")
+    static func directory(_ message: String, selector: String) -> GopherItem {
+        var item = GopherItem(rawLine: "1\(message)\t\(selector)\texample.com\t70")
         item.message = message
+        item.parsedItemType = .directory
         item.host = "example.com"
         item.port = 70
         item.selector = selector
         return item
     }
 
-    static func search(_ message: String, selector: String) -> gopherItem {
-        var item = gopherItem(rawLine: "7\(message)\t\(selector)\texample.com\t70")
+    static func search(_ message: String, selector: String) -> GopherItem {
+        var item = GopherItem(rawLine: "7\(message)\t\(selector)\texample.com\t70")
         item.message = message
+        item.parsedItemType = .search
         item.host = "example.com"
         item.port = 70
         item.selector = selector
@@ -125,13 +127,13 @@ private enum FixtureItems {
 }
 
 private final class MockGopherFetcher: GopherFetching {
-    var itemsBySelector: [String: [gopherItem]]
+    var itemsBySelector: [String: [GopherItem]]
     var delayedSelectors: Set<String>
     var throwingSelectors: Set<String>
     private(set) var requestedSelectors: [String] = []
 
     init(
-        itemsBySelector: [String: [gopherItem]],
+        itemsBySelector: [String: [GopherItem]],
         delayedSelectors: Set<String> = [],
         throwingSelectors: Set<String> = []
     ) {
@@ -140,7 +142,7 @@ private final class MockGopherFetcher: GopherFetching {
         self.throwingSelectors = throwingSelectors
     }
 
-    func fetch(_ location: GopherLocation) async throws -> [gopherItem] {
+    func fetch(_ location: GopherLocation) async throws -> [GopherItem] {
         requestedSelectors.append(location.selector)
         if throwingSelectors.contains(location.selector) {
             throw URLError(.cannotConnectToHost)

@@ -64,19 +64,22 @@ extension Color: @retroactive RawRepresentable {
 struct SettingsView: View {
     @Environment(\.colorScheme) var colorScheme
 
-    @AppStorage("accentColour", store: .standard) var accentColour: Color = .blue
-    @AppStorage("linkColour", store: .standard) var linkColour: Color = .white
-    @AppStorage("shareThroughProxy", store: .standard) var shareThroughProxy: Bool = true
-    @AppStorage("telemetryOptOut", store: .standard) var telemetryOptOut: Bool = false
+    @AppStorage(SettingsKey.accentColour, store: .standard) var accentColour: Color =
+        SettingsDefault.accentColour
+    @AppStorage(SettingsKey.linkColour, store: .standard) var linkColour: Color = SettingsDefault.linkColour
+    @AppStorage(SettingsKey.shareThroughProxy, store: .standard) var shareThroughProxy: Bool =
+        SettingsDefault.shareThroughProxy
+    @AppStorage(SettingsKey.telemetryOptOut, store: .standard) var telemetryOptOut: Bool = false
 
     // CRT Mode settings
-    @AppStorage("crtMode") var crtMode: Bool = false
-    @AppStorage("crtScanlines") var crtScanlines: Bool = true
-    @AppStorage("crtVignette") var crtVignette: Bool = true
-    @AppStorage("crtPhosphorColor") var crtPhosphorColor: String = CRTPhosphorColor.green.rawValue
+    @AppStorage(SettingsKey.crtMode) var crtMode: Bool = SettingsDefault.crtMode
+    @AppStorage(SettingsKey.crtScanlines) var crtScanlines: Bool = SettingsDefault.crtScanlines
+    @AppStorage(SettingsKey.crtVignette) var crtVignette: Bool = SettingsDefault.crtVignette
+    @AppStorage(SettingsKey.crtPhosphorColor) var crtPhosphorColor: String =
+        SettingsDefault.crtPhosphorColor.rawValue
 
     #if os(macOS)
-        @AppStorage("homeURL") var homeURL: URL = URL(string: "gopher://gopher.navan.dev:70/")!
+        @AppStorage(SettingsKey.homeURL) var homeURL: URL = SettingsDefault.homeURL
         @State var homeURLString: String = ""
     #else
         @Binding var homeURL: URL
@@ -112,7 +115,6 @@ struct SettingsView: View {
                             Button("Save") {
                                 if let url = URL(string: homeURLString) {
                                     homeURL = url
-                                    print("Saved \(self.homeURL)")
                                 } else {
                                     self.alertMessage = "Unable to convert \(homeURLString) to a URL"
                                     self.showAlert = true
@@ -122,8 +124,8 @@ struct SettingsView: View {
                             .accessibilityIdentifier("settings-save-button")
 
                             Button("Reset to Default") {
-                                self.homeURL = URL(string: "gopher://gopher.navan.dev:70/")!
-                                self.homeURLString = "gopher://gopher.navan.dev:70/"
+                                self.homeURL = SettingsDefault.homeURL
+                                self.homeURLString = SettingsDefault.homeURLString
                             }
                             .buttonStyle(.bordered)
 
@@ -154,7 +156,7 @@ struct SettingsView: View {
 
                         Button("Reset Colors") {
                             self.linkColour = smartDefaultLinkColor
-                            self.accentColour = .blue
+                            self.accentColour = SettingsDefault.accentColour
                         }
                         .buttonStyle(.bordered)
                         .disabled(crtMode)
@@ -215,10 +217,7 @@ struct SettingsView: View {
                     VStack(alignment: .leading, spacing: 8) {
                         Toggle("Opt out of anonymous telemetry", isOn: $telemetryOptOut)
                             .onChange(of: telemetryOptOut) { _, newValue in
-                                TelemetryDeck.terminate()
-                                let cfg = TelemetryDeck.Config(appID: "400187ED-ADA9-4AB4-91F8-8825AD8FC67C")
-                                cfg.analyticsDisabled = newValue
-                                TelemetryDeck.initialize(config: cfg)
+                                Telemetry.restart(optOut: newValue)
                             }
 
                         Text("Opt out of anonymous telemetry that tracks crashes and random errors.")
@@ -267,7 +266,6 @@ struct SettingsView: View {
                             action: {
                                 if let url = URL(string: homeURLString) {
                                     homeURL = url
-                                    print("Saved \(self.homeURL)")
                                     #if os(iOS)
                                         dismiss()
                                     #endif
@@ -281,7 +279,7 @@ struct SettingsView: View {
                         Button(
                             "Reset Preferences",
                             action: {
-                                self.homeURL = URL(string: "gopher://gopher.navan.dev:70/")!
+                                self.homeURL = SettingsDefault.homeURL
                                 #if os(iOS)
                                     dismiss()
                                 #endif
@@ -293,10 +291,7 @@ struct SettingsView: View {
                 Toggle("Opt out of anonymous telemetry", isOn: $telemetryOptOut)
                     .toggleStyle(.switch)
                     .onChange(of: telemetryOptOut) { _, newValue in
-                        TelemetryDeck.terminate()
-                        let cfg = TelemetryDeck.Config(appID: "400187ED-ADA9-4AB4-91F8-8825AD8FC67C")
-                        cfg.analyticsDisabled = newValue
-                        TelemetryDeck.initialize(config: cfg)
+                        Telemetry.restart(optOut: newValue)
                     }
             } header: {
                 Text("Privacy")
@@ -312,7 +307,7 @@ struct SettingsView: View {
                     .disabled(crtMode)
                 Button("Reset Colours") {
                     self.linkColour = smartDefaultLinkColor
-                    self.accentColour = .blue
+                    self.accentColour = SettingsDefault.accentColour
                 }
                 .disabled(crtMode)
 
