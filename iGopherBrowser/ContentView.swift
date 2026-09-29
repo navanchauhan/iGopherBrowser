@@ -9,27 +9,6 @@ import GopherHelpers
 import SwiftGopherClient
 import SwiftUI
 
-struct GopherNode: Identifiable, Equatable {
-    static func == (lhs: GopherNode, rhs: GopherNode) -> Bool {
-        return lhs.host == rhs.host && lhs.port == rhs.port && lhs.selector == rhs.selector
-    }
-
-    var id: String {
-        "\(host):\(port):\(normalizedSelector)"
-    }
-
-    var host: String
-    let port: Int
-    var selector: String
-    var message: String?
-    let item: GopherItem?
-    var children: [GopherNode]?
-
-    private var normalizedSelector: String {
-        selector.isEmpty || selector == "/" ? "/" : selector.hasPrefix("/") ? selector : "/\(selector)"
-    }
-}
-
 struct ContentView: View {
 
     @State public var hosts: [GopherNode] = []
@@ -37,12 +16,13 @@ struct ContentView: View {
 
     @State private var columnVisibility = NavigationSplitViewVisibility.automatic
 
-    @AppStorage("crtMode") var crtMode: Bool = false
-    @AppStorage("crtScanlines") var crtScanlines: Bool = true
-    @AppStorage("crtVignette") var crtVignette: Bool = true
-    @AppStorage("crtPhosphorColor") private var crtPhosphorColor: String = CRTPhosphorColor.green.rawValue
-    @AppStorage("hasFinishedFirstRunTips") private var hasFinishedFirstRunTips: Bool = false
-    @AppStorage("lastSeenWhatsNewVersion") private var lastSeenWhatsNewVersion: String = ""
+    @AppStorage(SettingsKey.crtMode) var crtMode: Bool = SettingsDefault.crtMode
+    @AppStorage(SettingsKey.crtScanlines) var crtScanlines: Bool = SettingsDefault.crtScanlines
+    @AppStorage(SettingsKey.crtVignette) var crtVignette: Bool = SettingsDefault.crtVignette
+    @AppStorage(SettingsKey.crtPhosphorColor) private var crtPhosphorColor: String =
+        SettingsDefault.crtPhosphorColor.rawValue
+    @AppStorage(SettingsKey.hasFinishedFirstRunTips) private var hasFinishedFirstRunTips: Bool = false
+    @AppStorage(SettingsKey.lastSeenWhatsNewVersion) private var lastSeenWhatsNewVersion: String = ""
 
     @State private var showWhatsNew = false
     @State private var pendingWhatsNewFeatures: [WhatsNewFeature] = []
@@ -137,10 +117,4 @@ struct ContentView: View {
         crtMode = true
         crtPhosphorColor = CRTPhosphorColor.amber.rawValue
     }
-
 }
-
-//#Preview {
-//  ContentView()
-//  //.modelContainer(for: Item.self, inMemory: true)
-//}

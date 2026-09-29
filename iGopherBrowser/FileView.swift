@@ -52,15 +52,12 @@ struct FileView: View {
     @State private var isSaving: Bool = false
     @State private var downloadedData: Data?
     @State private var showRawUnknown: Bool = false
-    @State private var loadedFile: LoadedGopherFile?
     @State private var loadError: String?
 
-    // CRT Mode
-    @AppStorage("crtMode") var crtMode: Bool = false
-    @AppStorage("crtPhosphorColor") var crtPhosphorColorRaw: String = CRTPhosphorColor.green.rawValue
+    @CRTAppearance private var crt
 
     private var textColor: Color {
-        crtMode ? (CRTPhosphorColor(rawValue: crtPhosphorColorRaw) ?? .green).color : .primary
+        crt.text()
     }
 
     private var loadID: String {
@@ -84,7 +81,7 @@ struct FileView: View {
                                 Text(fileContent[index])
                                     .font(.system(.body, design: .monospaced))
                                     .foregroundStyle(textColor)
-                                    .shadow(color: crtMode ? textColor.opacity(0.5) : .clear, radius: crtMode ? 2 : 0)
+                                    .crtGlow(crt, color: textColor)
                                     .textSelection(.enabled)
                                     .padding(.vertical, 2)
                             }
@@ -102,7 +99,6 @@ struct FileView: View {
                 VStack(spacing: 12) {
                     filenameLabel()
                     Button("Preview Document") {
-                        print(url)
                         QLURL = url
                     }
                     .accessibilityIdentifier("preview-document-button")
@@ -130,7 +126,7 @@ struct FileView: View {
                             Text(rawText(from: data))
                                 .font(.system(.caption, design: .monospaced))
                                 .foregroundStyle(textColor)
-                                .shadow(color: crtMode ? textColor.opacity(0.5) : .clear, radius: crtMode ? 2 : 0)
+                                .crtGlow(crt, color: textColor)
                                 .textSelection(.enabled)
                                 .frame(maxWidth: .infinity, alignment: .leading)
                         }
@@ -148,7 +144,6 @@ struct FileView: View {
     private func loadFile() async {
         do {
             let loaded = try await loader.load(item)
-            loadedFile = loaded
             fileURL = loaded.fileURL
             downloadedData = loaded.data
             fileContent = loaded.textChunks
@@ -204,7 +199,9 @@ struct FileView: View {
                     "file": destURL.lastPathComponent
                 ])
             } catch {
-                print("Failed to save file: \(error)")
+                TelemetryDeck.signal("applicationSaveFileError", parameters: [
+                    "errorMessage": String(describing: error)
+                ])
             }
         }
     }
@@ -231,12 +228,12 @@ struct FileView: View {
         if !name.isEmpty {
             HStack(spacing: 8) {
                 Image(systemName: "doc")
-                    .foregroundStyle(crtMode ? textColor : .secondary)
+                    .foregroundStyle(crt.isEnabled ? textColor : .secondary)
                 Text(name)
                     .font(.subheadline)
-                    .foregroundStyle(crtMode ? textColor : .secondary)
+                    .foregroundStyle(crt.isEnabled ? textColor : .secondary)
             }
-            .shadow(color: crtMode ? textColor.opacity(0.5) : .clear, radius: crtMode ? 2 : 0)
+            .crtGlow(crt, color: textColor)
         }
     }
 

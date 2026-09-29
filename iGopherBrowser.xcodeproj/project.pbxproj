@@ -41,6 +41,12 @@
 		CE162C0F7F1BC0083204EA47 /* NIOCore in Frameworks */ = {isa = PBXBuildFile; productRef = AB2D008418E64DBA2E94D67A /* NIOCore */; };
 		D3FD963650515D3494DD3672 /* GopherFileLoaderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5529CC53BE7F7968DEFCDFC8 /* GopherFileLoaderTests.swift */; };
 		D9DF50FFA89EE4C6C9615254 /* GopherLocation.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBA6DEA4B82BB66D0F23EC81 /* GopherLocation.swift */; };
+		20658242B27C08562CF6D929 /* AppSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70B895FB463A0D6F857AB415 /* AppSettings.swift */; };
+		12634D06DF164D1B3EF9BD40 /* GopherNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1568139BF2DD01FCAE4DF17 /* GopherNode.swift */; };
+		E7975727AC150D2A30E32FF4 /* GopherTree.swift in Sources */ = {isa = PBXBuildFile; fileRef = F78010F2AE2402262B73D1CF /* GopherTree.swift */; };
+		129EDE3603E8CDE26E79AB85 /* BrowserToolbar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7AD6CFBEB56795D6B36377D0 /* BrowserToolbar.swift */; };
+		B6615DC02061CDAC9DEB8B10 /* FindInPageBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43C29BC4C6C2597FD61739EE /* FindInPageBar.swift */; };
+		144001F000B5F2634A3A2E21 /* Telemetry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D9D5F4D4E934ABB50FF0DE7 /* Telemetry.swift */; };
 		DFF290DEB854E17F60A84259 /* BrowserSessionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81B01D6EA5D20F4D7D180D9E /* BrowserSessionTests.swift */; };
 		E17A5F4B01D84B30A24F91B5 /* ViewSurfaceRenderingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E17A5F4A01D84B30A24F91B5 /* ViewSurfaceRenderingTests.swift */; };
 		F5685ACB96F6436C529DAE35 /* BrowserEndToEndTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13F068560AA83E202D6C6D60 /* BrowserEndToEndTests.swift */; };
@@ -100,6 +106,12 @@
 		A3C7E12D2DAA345600A7C1F1 /* CRTEffect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CRTEffect.swift; sourceTree = "<group>"; };
 		AC17612574E44063856BB112C68D41C1 /* WhatsNew.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WhatsNew.swift; sourceTree = "<group>"; };
 		BBA6DEA4B82BB66D0F23EC81 /* GopherLocation.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = GopherLocation.swift; sourceTree = "<group>"; };
+		70B895FB463A0D6F857AB415 /* AppSettings.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AppSettings.swift; sourceTree = "<group>"; };
+		E1568139BF2DD01FCAE4DF17 /* GopherNode.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = GopherNode.swift; sourceTree = "<group>"; };
+		F78010F2AE2402262B73D1CF /* GopherTree.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = GopherTree.swift; sourceTree = "<group>"; };
+		7AD6CFBEB56795D6B36377D0 /* BrowserToolbar.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BrowserToolbar.swift; sourceTree = "<group>"; };
+		43C29BC4C6C2597FD61739EE /* FindInPageBar.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FindInPageBar.swift; sourceTree = "<group>"; };
+		1D9D5F4D4E934ABB50FF0DE7 /* Telemetry.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Telemetry.swift; sourceTree = "<group>"; };
 		E17A5F4A01D84B30A24F91B5 /* ViewSurfaceRenderingTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ViewSurfaceRenderingTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -178,6 +190,12 @@
 				A3C7E12B2DAA234500A7C1F1 /* History.swift */,
 				A3C7E12D2DAA345600A7C1F1 /* CRTEffect.swift */,
 				BBA6DEA4B82BB66D0F23EC81 /* GopherLocation.swift */,
+				70B895FB463A0D6F857AB415 /* AppSettings.swift */,
+				E1568139BF2DD01FCAE4DF17 /* GopherNode.swift */,
+				F78010F2AE2402262B73D1CF /* GopherTree.swift */,
+				7AD6CFBEB56795D6B36377D0 /* BrowserToolbar.swift */,
+				43C29BC4C6C2597FD61739EE /* FindInPageBar.swift */,
+				1D9D5F4D4E934ABB50FF0DE7 /* Telemetry.swift */,
 				9491AF24CDF07814A453D5BA /* GopherFetching.swift */,
 				194BBA5DD232C298588A8928 /* BrowserSession.swift */,
 				9EDD1F6FF5865A9F9B265545 /* GopherItemRow.swift */,
@@ -381,6 +399,12 @@
 				A3C7E12A2DAA234500A7C1F1 /* History.swift in Sources */,
 				A3C7E12C2DAA345600A7C1F1 /* CRTEffect.swift in Sources */,
 				D9DF50FFA89EE4C6C9615254 /* GopherLocation.swift in Sources */,
+				20658242B27C08562CF6D929 /* AppSettings.swift in Sources */,
+				12634D06DF164D1B3EF9BD40 /* GopherNode.swift in Sources */,
+				E7975727AC150D2A30E32FF4 /* GopherTree.swift in Sources */,
+				129EDE3603E8CDE26E79AB85 /* BrowserToolbar.swift in Sources */,
+				B6615DC02061CDAC9DEB8B10 /* FindInPageBar.swift in Sources */,
+				144001F000B5F2634A3A2E21 /* Telemetry.swift in Sources */,
 				54BCB4C65C1A8FD49170767A /* GopherFetching.swift in Sources */,
 				49173089E975D13A273B7800 /* BrowserSession.swift in Sources */,
 				B9EB1702180E85F220BB0EBE /* GopherItemRow.swift in Sources */,

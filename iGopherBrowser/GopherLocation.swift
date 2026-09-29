@@ -16,19 +16,37 @@ struct GopherLocation: Hashable, Identifiable, Sendable {
         "\(host):\(port)\(selector.normalizedGopherSelector)"
     }
 
-    var gopherURL: URL {
-        URL(string: "gopher://\(displayString)")!
+    /// Percent encoded form, safe to feed to `URL(string:)`.
+    private var encodedDisplayString: String {
+        let encodedSelector = selector.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed)
+            ?? selector.normalizedGopherSelector
+        return "\(host):\(port)\(encodedSelector)"
     }
 
-    init(host: String, port: Int = 70, selector: String = "/") {
-        self.host = host.isEmpty ? "gopher.navan.dev" : host
+    var gopherURL: URL {
+        URL(string: "gopher://\(encodedDisplayString)") ?? SettingsDefault.homeURL
+    }
+
+    /// URL handed to the share sheet, optionally routed through the HTTP proxy so that
+    /// recipients without a Gopher client can still open it.
+    func shareURL(throughProxy: Bool) -> URL {
+        guard throughProxy else { return gopherURL }
+        return URL(string: "https://\(SettingsDefault.host)/\(encodedDisplayString)") ?? gopherURL
+    }
+
+    static func normalizedSelector(_ selector: String) -> String {
+        selector.normalizedGopherSelector
+    }
+
+    init(host: String, port: Int = SettingsDefault.port, selector: String = "/") {
+        self.host = host.isEmpty ? SettingsDefault.host : host
         self.port = port
 
         let normalizedSelector = selector.normalizedGopherSelector
         self.selector = normalizedSelector.removingPercentEncoding ?? normalizedSelector
     }
 
-    init(_ input: String, defaultPort: Int = 70, defaultHost: String = "gopher.navan.dev") {
+    init(_ input: String, defaultPort: Int = SettingsDefault.port, defaultHost: String = SettingsDefault.host) {
         let raw = input.trimmingCharacters(in: .whitespacesAndNewlines)
         guard raw.isEmpty == false else {
             self.init(host: defaultHost, port: defaultPort, selector: "/")
@@ -61,7 +79,7 @@ struct GopherLocation: Hashable, Identifiable, Sendable {
     }
 }
 
-private extension String {
+extension String {
     var normalizedGopherSelector: String {
         if isEmpty { return "/" }
         return hasPrefix("/") ? self : "/\(self)"

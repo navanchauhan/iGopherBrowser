@@ -12,15 +12,10 @@ struct SidebarView: View {
     let hosts: [GopherNode]
     var onSelect: (GopherNode) -> Void
 
-    @AppStorage("crtMode") var crtMode: Bool = false
-    @AppStorage("crtPhosphorColor") var crtPhosphorColorRaw: String = CRTPhosphorColor.green.rawValue
-
-    private var phosphorColor: Color {
-        (CRTPhosphorColor(rawValue: crtPhosphorColorRaw) ?? .green).color
-    }
+    @CRTAppearance private var crt
 
     private var textColor: Color {
-        crtMode ? phosphorColor : .primary
+        crt.text()
     }
 
     var body: some View {
@@ -31,12 +26,12 @@ struct SidebarView: View {
                 } label: {
                     Text(node.message ?? node.host)
                         .foregroundStyle(textColor)
-                        .shadow(color: crtMode ? textColor.opacity(0.5) : .clear, radius: crtMode ? 2 : 0)
+                        .crtGlow(crt, color: textColor)
                 }
                 .buttonStyle(.plain)
                 .accessibilityIdentifier("sidebar-node-row")
             }
-            .scrollContentBackground(crtMode ? .hidden : .automatic)
+            .scrollContentBackground(crt.isEnabled ? .hidden : .automatic)
         }
         .navigationTitle("Your Gophertree")
     }
