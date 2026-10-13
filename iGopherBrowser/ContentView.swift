@@ -34,12 +34,14 @@ struct ContentView: View {
 
     @State public var hosts: [GopherNode] = []
     @State private var selectedNode: GopherNode?
+    @State private var browserSession = BrowserSession()
+    #if os(iOS)
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+    #endif
 
-    @State private var columnVisibility = NavigationSplitViewVisibility.automatic
+    @State private var columnVisibility = NavigationSplitViewVisibility.all
 
     @AppStorage("crtMode") var crtMode: Bool = false
-    @AppStorage("crtScanlines") var crtScanlines: Bool = true
-    @AppStorage("crtVignette") var crtVignette: Bool = true
     @AppStorage("crtPhosphorColor") private var crtPhosphorColor: String = CRTPhosphorColor.green.rawValue
     @AppStorage("hasFinishedFirstRunTips") private var hasFinishedFirstRunTips: Bool = false
     @AppStorage("lastSeenWhatsNewVersion") private var lastSeenWhatsNewVersion: String = ""
@@ -58,7 +60,18 @@ struct ContentView: View {
             // Main content
             Group {
                 #if os(iOS)
-                    BrowserView(hosts: $hosts, selectedNode: $selectedNode)
+                    if horizontalSizeClass == .regular {
+                        NavigationSplitView(columnVisibility: $columnVisibility) {
+                            BrowserLibrarySidebar { node in
+                                selectedNode = node
+                            }
+                        } detail: {
+                            BrowserView(hosts: $hosts, selectedNode: $selectedNode, session: browserSession)
+                        }
+                        .navigationSplitViewStyle(.balanced)
+                    } else {
+                        BrowserView(hosts: $hosts, selectedNode: $selectedNode, session: browserSession)
+                    }
                 #else
                     NavigationSplitView(columnVisibility: $columnVisibility) {
                         SidebarView(
@@ -74,19 +87,6 @@ struct ContentView: View {
                 #endif
             }
 
-            // CRT overlay effects
-            if crtMode {
-                if crtScanlines {
-                    ScanlineOverlay()
-                        .ignoresSafeArea()
-                        .allowsHitTesting(false)
-                }
-                if crtVignette {
-                    CRTVignette()
-                        .ignoresSafeArea()
-                        .allowsHitTesting(false)
-                }
-            }
         }
         .preferredColorScheme(crtMode ? .dark : nil)
         .sheet(isPresented: $showWhatsNew) {

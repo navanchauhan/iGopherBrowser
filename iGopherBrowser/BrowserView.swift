@@ -46,6 +46,8 @@ struct BrowserView: View {
     @AppStorage("linkColour", store: .standard) var linkColour: Color = .white
     @AppStorage("shareThroughProxy", store: .standard) var shareThroughProxy: Bool = true
     @AppStorage("crtMode") var crtMode: Bool = false
+    @AppStorage("crtScanlines") private var crtScanlines = true
+    @AppStorage("crtVignette") private var crtVignette = true
     @AppStorage("crtPhosphorColor") var crtPhosphorColorRaw: String = CRTPhosphorColor.green.rawValue
     @AppStorage("hasFinishedFirstRunTips") var hasFinishedFirstRunTips: Bool = false
     @AppStorage("lastSeenWhatsNewVersion") var lastSeenWhatsNewVersion: String = ""
@@ -99,6 +101,7 @@ struct BrowserView: View {
 
     @State private var showHomeTooltip: Bool = false
     @State private var didApplyScreenshotLaunchState = false
+    @State private var didLoadInitialHome = false
 
     @FocusState private var isURLFocused: Bool
 
@@ -125,146 +128,165 @@ struct BrowserView: View {
 
         NavigationStack {
             VStack(spacing: 0) {
-                if session.isLoading && session.items.isEmpty {
-                    BrowserLoadingState()
-                } else if let errorMessage = session.errorMessage, session.items.isEmpty {
-                    BrowserErrorState(message: errorMessage) {
-                        performGopherRequest(clearForward: false)
-                    }
-                } else if session.items.count >= 1 {
-                    ScrollViewReader { proxy in
-                        List {
-                            ForEach(Array(session.items.enumerated()), id: \.offset) { idx, item in
-                                GopherItemRow(
-                                    item: item,
-                                    linkColor: effectiveLinkColor,
-                                    textColor: effectiveTextColor,
-                                    crtMode: crtMode,
-                                    openDirectory: { item in
-                                        performGopherRequest(
-                                            host: item.host, port: item.port,
-                                            selector: item.selector)
-                                        #if canImport(UIKit)
-                                            hideKeyboard()
-                                        #endif
-                                    },
-                                    openSearch: { _ in
-                                        #if canImport(UIKit)
-                                            hideKeyboard()
-                                        #endif
-                                        self.selectedSearchItem = idx
-                                        self.showSearchInput = true
-                                    },
-                                    openExternalURL: { url in
-                                        openURL(url: url)
-                                    },
-                                    openUnknown: { item in
-                                        TelemetryDeck.signal(
-                                            "applicationBrowsedUnknown",
-                                            parameters: [
-                                                "gopherURL":
-                                                    "\(item.host):\(item.port)\(item.selector)"
-                                            ])
-                                        performGopherRequest(
-                                            host: item.host, port: item.port,
-                                            selector: item.selector)
+                VStack(spacing: 0) {
+                    if session.isLoading && session.items.isEmpty {
+                        BrowserLoadingState()
+                    } else if let errorMessage = session.errorMessage, session.items.isEmpty {
+                        BrowserErrorState(message: errorMessage) {
+                            performGopherRequest(clearForward: false)
+                        }
+                    } else if session.items.count >= 1 {
+                        ScrollViewReader { proxy in
+                            List {
+                                ForEach(Array(session.items.enumerated()), id: \.offset) { idx, item in
+                                    GopherItemRow(
+                                        item: item,
+                                        linkColor: effectiveLinkColor,
+                                        textColor: effectiveTextColor,
+                                        crtMode: crtMode,
+                                        openDirectory: { item in
+                                            performGopherRequest(
+                                                host: item.host, port: item.port,
+                                                selector: item.selector)
+                                            #if canImport(UIKit)
+                                                hideKeyboard()
+                                            #endif
+                                        },
+                                        openSearch: { _ in
+                                            #if canImport(UIKit)
+                                                hideKeyboard()
+                                            #endif
+                                            self.selectedSearchItem = idx
+                                            self.showSearchInput = true
+                                        },
+                                        openExternalURL: { url in
+                                            openURL(url: url)
+                                        },
+                                        openUnknown: { item in
+                                            TelemetryDeck.signal(
+                                                "applicationBrowsedUnknown",
+                                                parameters: [
+                                                    "gopherURL":
+                                                        "\(item.host):\(item.port)\(item.selector)"
+                                                ])
+                                            performGopherRequest(
+                                                host: item.host, port: item.port,
+                                                selector: item.selector)
+                                        }
+                                    )
+                                    .id(idx)
+                                    .listRowBackground(rowBackgroundColor(for: idx))
+                                }
+                            }
+                            .listStyle(.plain)
+                            .environment(\.defaultMinListRowHeight, 0)
+                            .scrollContentBackground(crtMode ? .hidden : .automatic)
+                            .background(crtMode ? Color.clear : Color.clear)
+                            .clipShape(.rect(cornerRadius: 10))
+                            .onChange(of: scrollToTop) { _, _ in
+                                // TODO: Cleanup
+                                proxy.scrollTo(0, anchor: .top)
+                            }
+                            .onChange(of: selectedSearchItem) { _, newValue in
+                                if newValue != nil {
+                                    self.showSearchInput = true
+                                }
+                            }
+                            .onChange(of: session.currentFindIndex) { _, newIndex in
+                                if !session.findMatches.isEmpty && newIndex < session.findMatches.count {
+                                    withAnimation {
+                                        proxy.scrollTo(session.findMatches[newIndex], anchor: .center)
                                     }
-                                )
-                                .id(idx)
-                                .listRowBackground(rowBackgroundColor(for: idx))
-                            }
-                        }
-                        .scrollContentBackground(crtMode ? .hidden : .automatic)
-                        .background(crtMode ? Color.clear : Color.clear)
-                        .clipShape(.rect(cornerRadius: 10))
-                        .onChange(of: scrollToTop) { _, _ in
-                            // TODO: Cleanup
-                            proxy.scrollTo(0, anchor: .top)
-                        }
-                        .onChange(of: selectedSearchItem) { _, newValue in
-                            if newValue != nil {
-                                self.showSearchInput = true
-                            }
-                        }
-                        .onChange(of: session.currentFindIndex) { _, newIndex in
-                            if !session.findMatches.isEmpty && newIndex < session.findMatches.count {
-                                withAnimation {
-                                    proxy.scrollTo(session.findMatches[newIndex], anchor: .center)
                                 }
                             }
-                        }
-                        .onChange(of: session.findText) { _, _ in
-                            session.currentFindIndex = 0
-                            if !session.findMatches.isEmpty {
-                                withAnimation {
-                                    proxy.scrollTo(session.findMatches[0], anchor: .center)
-                                }
-                            }
-                        }
-                        .safeAreaInset(edge: .top) {
-                            if showFindInPage {
-                                FindInPageBar(
-                                    findText: $session.findText,
-                                    currentIndex: $session.currentFindIndex,
-                                    totalMatches: session.findMatches.count,
-                                    isFocused: $isFindFocused,
-                                    onDismiss: {
-                                        showFindInPage = false
-                                        session.findText = ""
+                            .onChange(of: session.findText) { _, _ in
+                                session.currentFindIndex = 0
+                                if !session.findMatches.isEmpty {
+                                    withAnimation {
+                                        proxy.scrollTo(session.findMatches[0], anchor: .center)
                                     }
-                                )
+                                }
                             }
-                        }
-                    }
-                    .sheet(isPresented: $showSearchInput, onDismiss: {
-                        // Reset contexts so tapping the same item or deep-link works again
-                        self.selectedSearchItem = nil
-                        self.session.searchContext = nil
-                    }) {
-                        if let index = selectedSearchItem, session.items.indices.contains(index) {
-                            let searchItem = session.items[index]
-                            SearchInputView(
-                                host: searchItem.host,
-                                port: searchItem.port,
-                                selector: searchItem.selector,
-                                searchText: $searchText,
-                                onSearch: { query in
-                                    performGopherRequest(
-                                        host: searchItem.host, port: searchItem.port,
-                                        selector: "\(searchItem.selector)\t\(query)")
-                                    showSearchInput = false
-                                }
-                            )
-                        } else if let ctx = session.searchContext {
-                            SearchInputView(
-                                host: ctx.host,
-                                port: ctx.port,
-                                selector: ctx.selector,
-                                searchText: $searchText,
-                                onSearch: { query in
-                                    performGopherRequest(
-                                        host: ctx.host, port: ctx.port,
-                                        selector: "\(ctx.selector)\t\(query)")
-                                    showSearchInput = false
-                                }
-                            )
-                        } else {
-                            VStack {
-                                Text("Weird bug. Please Dismiss -> Press Go -> Try Again")
-                                Button("Dismiss") {
-                                    self.showSearchInput = false
-                                }.onAppear {
-                                    TelemetryDeck.signal(
-                                        "applicationSearchError", parameters: ["gopherURL": "\(session.urlText)"]
+                            .safeAreaInset(edge: .top) {
+                                if showFindInPage {
+                                    FindInPageBar(
+                                        findText: $session.findText,
+                                        currentIndex: $session.currentFindIndex,
+                                        totalMatches: session.findMatches.count,
+                                        isFocused: $isFindFocused,
+                                        onDismiss: {
+                                            showFindInPage = false
+                                            session.findText = ""
+                                        }
                                     )
                                 }
                             }
                         }
+                        .sheet(isPresented: $showSearchInput, onDismiss: {
+                            // Reset contexts so tapping the same item or deep-link works again
+                            self.selectedSearchItem = nil
+                            self.session.searchContext = nil
+                        }) {
+                            if let index = selectedSearchItem, session.items.indices.contains(index) {
+                                let searchItem = session.items[index]
+                                SearchInputView(
+                                    host: searchItem.host,
+                                    port: searchItem.port,
+                                    selector: searchItem.selector,
+                                    searchText: $searchText,
+                                    onSearch: { query in
+                                        performGopherRequest(
+                                            host: searchItem.host, port: searchItem.port,
+                                            selector: "\(searchItem.selector)\t\(query)")
+                                        showSearchInput = false
+                                    }
+                                )
+                            } else if let ctx = session.searchContext {
+                                SearchInputView(
+                                    host: ctx.host,
+                                    port: ctx.port,
+                                    selector: ctx.selector,
+                                    searchText: $searchText,
+                                    onSearch: { query in
+                                        performGopherRequest(
+                                            host: ctx.host, port: ctx.port,
+                                            selector: "\(ctx.selector)\t\(query)")
+                                        showSearchInput = false
+                                    }
+                                )
+                            } else {
+                                VStack {
+                                    Text("Weird bug. Please Dismiss -> Press Go -> Try Again")
+                                    Button("Dismiss") {
+                                        self.showSearchInput = false
+                                    }.onAppear {
+                                        TelemetryDeck.signal(
+                                            "applicationSearchError", parameters: ["gopherURL": "\(session.urlText)"]
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    } else {
+                        ContentUnavailableView {
+                            Label("Your Gopher Home", systemImage: "house")
+                        } description: {
+                            Text("Open your homepage or enter a Gopher address below.")
+                        } actions: {
+                            Button("Open Home", action: handleHomeTap)
+                                .buttonStyle(.borderedProminent)
+                        }
                     }
-                } else {
-                    Spacer()
-                    Text("Welcome to iGopher Browser")
-                    Spacer()
+                }
+                .overlay {
+                    if crtMode {
+                        if crtScanlines {
+                            ScanlineOverlay().allowsHitTesting(false)
+                        }
+                        if crtVignette {
+                            CRTVignette().allowsHitTesting(false)
+                        }
+                    }
                 }
                 #if os(iOS)
                     iOSToolbarView(
@@ -282,7 +304,8 @@ struct BrowserView: View {
                         onGo: {
                             TelemetryDeck.signal(
                                 "applicationClickedGo", parameters: ["gopherURL": "\(session.urlText)"])
-                            performGopherRequest(clearForward: false)
+                            hideKeyboard()
+                            performGopherRequest()
                         },
                         onHome: {
                             handleHomeTap()
@@ -325,6 +348,7 @@ struct BrowserView: View {
         .onChange(of: selectedNode) { _, newValue in
             if let node = newValue {
                 performGopherRequest(host: node.host, port: node.port, selector: node.selector)
+                selectedNode = nil
             }
         }
         .onChange(of: session.searchContext) { _, newValue in
@@ -378,6 +402,14 @@ struct BrowserView: View {
         .onAppear {
             session.hosts = hosts
             applyScreenshotLaunchStateIfNeeded()
+            if !LaunchConfiguration.isUITesting && !didLoadInitialHome {
+                didLoadInitialHome = true
+                if session.currentLocation == nil && !session.isLoading {
+                    completeFirstRunExperience()
+                    session.urlText = homeURL.absoluteString
+                    performGopherRequest(clearForward: false)
+                }
+            }
             if !hasFinishedFirstRunTips && !showHomeTooltip {
                 withAnimation(.spring()) {
                     showHomeTooltip = true
@@ -626,27 +658,34 @@ struct iOSToolbarView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // URL bar with Go button
+            // Address and navigation stay together in a single, quiet surface.
             HStack(spacing: 8) {
-                TextField("Enter URL", text: $url)
+                TextField("Gopher address", text: $url)
                     .keyboardType(.URL)
                     .textInputAutocapitalization(.never)
                     .textContentType(.URL)
+                    .autocorrectionDisabled()
+                    .submitLabel(.go)
+                    .onSubmit(onGo)
+                    .accessibilityLabel("Gopher address")
                     .accessibilityIdentifier("url-field")
                     .padding(.horizontal, 12)
-                    .padding(.vertical, 10)
+                    .frame(minHeight: 48)
                     .background {
                         RoundedRectangle(cornerRadius: 10)
-                            .fill(.ultraThinMaterial)
-                            .glassEffect(in: .rect(cornerRadius: 10))
+                            .fill(Color(uiColor: .secondarySystemBackground))
                     }
 
                 Button(action: onGo) {
-                    Text("Go")
-                        .fontWeight(.medium)
+                    Label("Go", systemImage: "arrow.up")
+                        .labelStyle(.iconOnly)
+                        .font(.body.weight(.semibold))
+                        .frame(width: 48, height: 48)
+                        .background(.tint, in: .rect(cornerRadius: 12))
+                        .foregroundStyle(.white)
                 }
                 .keyboardShortcut(.defaultAction)
-                .modifier(GoButtonStyle())
+                .buttonStyle(.plain)
                 .accessibilityIdentifier("go-button")
             }
             .padding(.horizontal, 12)
@@ -663,7 +702,7 @@ struct iOSToolbarView: View {
                     navButton(icon: "chevron.right", accessibilityLabel: "Forward", identifier: "forward-button", action: onForward)
                         .disabled(forwardStack.isEmpty)
                 }
-                .modifier(ToolbarGroupStyle())
+
 
                 Spacer()
 
@@ -680,19 +719,19 @@ struct iOSToolbarView: View {
                     Button(action: { showAddBookmark = true }) {
                         Image(systemName: currentHost.isEmpty ? "bookmark" : "bookmark.fill")
                             .font(.system(size: 18))
-                            .frame(width: 44, height: 36)
+                            .frame(minWidth: 44, minHeight: 44)
                     }
                     .disabled(currentHost.isEmpty)
                     .accessibilityLabel("Add Bookmark")
                     .accessibilityIdentifier("add-bookmark-button")
                 }
-                .modifier(ToolbarGroupStyle())
+
 
                 Spacer()
 
                 // Right actions group
                 HStack(spacing: 4) {
-                    navButton(icon: "clock.arrow.circlepath", accessibilityLabel: "Bookmarks and History", identifier: "bookmarks-history-button", action: { showBookmarks = true })
+                    navButton(icon: "book", accessibilityLabel: "Bookmarks and History", identifier: "bookmarks-history-button", action: { showBookmarks = true })
 
                     Menu {
                         Button(action: { showFindInPage = true }) {
@@ -712,16 +751,22 @@ struct iOSToolbarView: View {
                         }
                         .accessibilityIdentifier("settings-button")
                     } label: {
-                        Image(systemName: "ellipsis.circle")
+                        Image(systemName: "ellipsis")
                             .font(.system(size: 18))
-                            .frame(width: 44, height: 36)
+                            .frame(minWidth: 44, minHeight: 44)
                     }
+                    .accessibilityLabel("More")
                     .accessibilityIdentifier("browser-menu-button")
                 }
-                .modifier(ToolbarGroupStyle())
+
             }
             .padding(.horizontal, 12)
+            .padding(.bottom, 4)
         }
+        .buttonStyle(.plain)
+        .frame(maxWidth: 720)
+        .frame(maxWidth: .infinity)
+        .background(.regularMaterial)
     }
 
     @ViewBuilder
@@ -734,26 +779,10 @@ struct iOSToolbarView: View {
         Button(action: action) {
             Image(systemName: icon)
                 .font(.system(size: 18))
-                .frame(width: 44, height: 36)
+                .frame(minWidth: 44, minHeight: 44)
         }
         .accessibilityLabel(accessibilityLabel)
         .accessibilityIdentifier(identifier)
-    }
-}
-
-// MARK: - Button Styles for iOS Toolbar
-
-private struct GoButtonStyle: ViewModifier {
-    func body(content: Content) -> some View {
-        content
-            .buttonStyle(.liquidGlass)
-    }
-}
-
-private struct ToolbarGroupStyle: ViewModifier {
-    func body(content: Content) -> some View {
-        content
-            .glassEffect(in: .capsule)
     }
 }
 

@@ -26,6 +26,19 @@ final class HistoryItem {
         self.visitedAt = Date()
     }
 
+    /// Input is ordered newest first; keep the latest visit to each page.
+    static func recentUniqueVisits(from visits: [HistoryItem], limit: Int) -> [HistoryItem] {
+        guard limit > 0 else { return [] }
+        var seen = Set<String>()
+        var result: [HistoryItem] = []
+        for visit in visits {
+            guard seen.insert(visit.urlString).inserted else { continue }
+            result.append(visit)
+            if result.count == limit { break }
+        }
+        return result
+    }
+
     var urlString: String {
         "\(host):\(port)\(selector)"
     }

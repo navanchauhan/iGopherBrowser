@@ -44,6 +44,7 @@
 		DFF290DEB854E17F60A84259 /* BrowserSessionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81B01D6EA5D20F4D7D180D9E /* BrowserSessionTests.swift */; };
 		E17A5F4B01D84B30A24F91B5 /* ViewSurfaceRenderingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E17A5F4A01D84B30A24F91B5 /* ViewSurfaceRenderingTests.swift */; };
 		F5685ACB96F6436C529DAE35 /* BrowserEndToEndTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13F068560AA83E202D6C6D60 /* BrowserEndToEndTests.swift */; };
+		EE34A1D70000000000000001 /* BrowserLibrarySidebar.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE34A1D70000000000000002 /* BrowserLibrarySidebar.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -101,6 +102,7 @@
 		AC17612574E44063856BB112C68D41C1 /* WhatsNew.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WhatsNew.swift; sourceTree = "<group>"; };
 		BBA6DEA4B82BB66D0F23EC81 /* GopherLocation.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = GopherLocation.swift; sourceTree = "<group>"; };
 		E17A5F4A01D84B30A24F91B5 /* ViewSurfaceRenderingTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ViewSurfaceRenderingTests.swift; sourceTree = "<group>"; };
+		EE34A1D70000000000000002 /* BrowserLibrarySidebar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserLibrarySidebar.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -170,6 +172,7 @@
 				3EFB9C0C2B2E4F06005EAD7C /* SearchInputView.swift */,
 				3EFB9C0E2B2E6325005EAD7C /* FileView.swift */,
 				3EFB9C102B2E869C005EAD7C /* BrowserView.swift */,
+				EE34A1D70000000000000002 /* BrowserLibrarySidebar.swift */,
 				3E6584862B7409740078C282 /* BookmarksView.swift */,
 				3EFB9C122B2E872A005EAD7C /* Helpers.swift */,
 				3E52F6412B3697B000F0921C /* SettingsView.swift */,
@@ -370,6 +373,7 @@
 				3E52F6422B3697B000F0921C /* SettingsView.swift in Sources */,
 				3E1BCC582B297E9B00A4CB69 /* ContentView.swift in Sources */,
 				3EFB9C112B2E869C005EAD7C /* BrowserView.swift in Sources */,
+				EE34A1D70000000000000001 /* BrowserLibrarySidebar.swift in Sources */,
 				3E6584872B7409740078C282 /* BookmarksView.swift in Sources */,
 				3EFB9C132B2E872A005EAD7C /* Helpers.swift in Sources */,
 				AC17612674E44063856BB112C68D41C1 /* WhatsNew.swift in Sources */,

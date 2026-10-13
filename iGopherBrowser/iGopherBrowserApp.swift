@@ -31,11 +31,11 @@ struct iGopherBrowserApp: App {
             ContentView()
         }
         .modelContainer(sharedModelContainer)
+        #if os(macOS)
         .commands {
-            #if os(macOS)
-                SidebarCommands()
-            #endif
+            SidebarCommands()
         }
+        #endif
         #if os(macOS)
             Settings {
                 SettingsView()

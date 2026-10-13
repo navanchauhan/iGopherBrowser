@@ -20,12 +20,12 @@ struct GopherItemRow: View {
         switch item.parsedItemType {
         case .info:
             Text(item.message)
-                .font(.system(size: 12, design: .monospaced))
+                .font(.system(.caption, design: .monospaced))
                 .foregroundStyle(textColor)
                 .shadow(color: crtMode ? textColor.opacity(0.5) : .clear, radius: crtMode ? 2 : 0)
-                .frame(height: 20)
+                .frame(maxWidth: .infinity, minHeight: 16, alignment: .leading)
                 .listRowSeparator(.hidden)
-                .padding(.vertical, -8)
+                .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
                 .accessibilityIdentifier("gopher-info-row")
         case .directory:
             rowButton(systemImage: "folder", title: item.message) {
